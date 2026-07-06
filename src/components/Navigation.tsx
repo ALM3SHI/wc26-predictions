@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Trophy, LayoutGrid, Settings, LogOut, LogIn } from "lucide-react";
+import { Trophy, LayoutGrid, Settings, LogOut, LogIn, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
@@ -10,13 +10,30 @@ import { User } from "@supabase/supabase-js";
 export function Navigation() {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      if (data.user) {
+        supabase.from("profiles").select("is_admin").eq("id", data.user.id).single()
+          .then(({ data: profile }) => {
+            setIsAdmin(!!profile?.is_admin);
+          });
+      }
+    });
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        supabase.from("profiles").select("is_admin").eq("id", session.user.id).single()
+          .then(({ data: profile }) => {
+            setIsAdmin(!!profile?.is_admin);
+          });
+      } else {
+        setIsAdmin(false);
+      }
     });
     
     return () => subscription.unsubscribe();
@@ -37,6 +54,10 @@ export function Navigation() {
     { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { label: "Settings", href: "/settings", icon: Settings },
   ];
+
+  if (isAdmin) {
+    navItems.push({ label: "Admin", href: "/admin", icon: ShieldAlert });
+  }
 
   return (
     <>

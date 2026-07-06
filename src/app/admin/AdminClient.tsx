@@ -4,6 +4,18 @@ import React, { useState } from "react";
 import { Match, Profile } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 
+const COUNTRIES = [
+  "TBD", "Argentina", "Brazil", "France", "England", "Spain", "Portugal", "Germany", 
+  "Italy", "Netherlands", "Belgium", "Croatia", "Uruguay", "Colombia", "USA", 
+  "Mexico", "Canada", "Senegal", "Morocco", "Japan", "South Korea", "Saudi Arabia",
+  "Iran", "Australia", "Switzerland", "Denmark", "Serbia", "Ecuador", "Peru",
+  "Chile", "Sweden", "Poland", "Wales", "Ukraine", "Nigeria", "Egypt", "Algeria",
+  "Ivory Coast", "Cameroon", "Ghana", "Mali", "Qatar", "UAE", "Iraq", "Oman",
+  "Uzbekistan", "China", "New Zealand", "Jamaica", "Costa Rica", "Panama",
+  "Honduras", "El Salvador", "Venezuela", "Paraguay", "Bolivia", "Turkey",
+  "Norway", "Scotland", "Ireland", "Greece", "Czech Republic", "Austria", "Hungary"
+].sort();
+
 export default function AdminClient({
   initialMatches,
   initialUsers,
@@ -148,8 +160,22 @@ export default function AdminClient({
                 <tbody className="divide-y divide-white/5">
                   {matches.map((match) => (
                     <tr key={match.id} className="hover:bg-white/5 transition-colors">
-                      <td className="p-4 font-fifa text-xl tracking-wide">
-                        {match.home_team} vs {match.away_team}
+                      <td className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <select
+                          className="bg-black border border-white/20 rounded p-1 max-w-[120px]"
+                          value={match.home_team}
+                          onChange={(e) => handleUpdateMatch(match.id, { home_team: e.target.value })}
+                        >
+                          {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                        <span className="text-white/40 text-xs font-bold">VS</span>
+                        <select
+                          className="bg-black border border-white/20 rounded p-1 max-w-[120px]"
+                          value={match.away_team}
+                          onChange={(e) => handleUpdateMatch(match.id, { away_team: e.target.value })}
+                        >
+                          {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
                       </td>
                       <td className="p-4 text-white/60">
                         {new Date(match.start_time).toLocaleString()}
