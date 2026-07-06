@@ -62,7 +62,7 @@ export function Navigation() {
   return (
     <>
       {/* Mobile Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-wc-surface/90 backdrop-blur-xl border-t border-white/10 pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-gray-200 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-around p-2">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
@@ -71,10 +71,10 @@ export function Navigation() {
                 key={item.href}
                 href={item.href}
                 className={`flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all ${
-                  isActive ? "text-wc-purple-light bg-wc-purple/10" : "text-white/50 hover:text-white"
+                  isActive ? "text-black" : "text-gray-400 hover:text-gray-900"
                 }`}
               >
-                <item.icon className={`w-5 h-5 mb-1 ${isActive ? "neon-text-purple" : ""}`} />
+                <item.icon className={`w-5 h-5 mb-1 ${isActive ? "text-black drop-shadow-md" : ""}`} />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             );
@@ -82,7 +82,7 @@ export function Navigation() {
           {!user && (
             <Link
               href="/login"
-              className="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all text-white/50 hover:text-white"
+              className="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all text-gray-400 hover:text-gray-900"
             >
               <LogIn className="w-5 h-5 mb-1" />
               <span className="text-[10px] font-medium">Login</span>
@@ -91,7 +91,7 @@ export function Navigation() {
           {user && (
             <button
               onClick={handleLogout}
-              className="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all text-white/50 hover:text-wc-red"
+              className="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all text-gray-400 hover:text-red-500"
             >
               <LogOut className="w-5 h-5 mb-1" />
               <span className="text-[10px] font-medium">Logout</span>
@@ -101,7 +101,7 @@ export function Navigation() {
       </nav>
 
       {/* Desktop Top Nav */}
-      <header className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-wc-surface/80 backdrop-blur-xl border-b border-white/10">
+      <header className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200 shadow-sm">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/bracket" className="font-display font-black text-xl tracking-tight text-gradient gradient-purple-cyan">
             WC26
@@ -115,7 +115,7 @@ export function Navigation() {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                    isActive ? "text-wc-purple-light" : "text-white/50 hover:text-white"
+                    isActive ? "text-black" : "text-gray-500 hover:text-black"
                   }`}
                 >
                   <item.icon className="w-4 h-4" />
@@ -125,12 +125,12 @@ export function Navigation() {
             })}
             
             {user ? (
-              <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-medium text-white/50 hover:text-wc-red transition-colors ml-4 pl-4 border-l border-white/10">
+              <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-500 transition-colors ml-4 pl-4 border-l border-gray-200">
                 <LogOut className="w-4 h-4" />
                 Logout
               </button>
             ) : (
-              <Link href="/login" className="flex items-center gap-2 text-sm font-medium text-white/50 hover:text-wc-purple-light transition-colors ml-4 pl-4 border-l border-white/10">
+              <Link href="/login" className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-black transition-colors ml-4 pl-4 border-l border-gray-200">
                 <LogIn className="w-4 h-4" />
                 Login
               </Link>

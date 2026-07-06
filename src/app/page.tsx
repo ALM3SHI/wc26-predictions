@@ -1,71 +1,97 @@
 import Link from "next/link";
-import { ArrowRight, UserPlus, LogIn } from "lucide-react";
+import { User, MessageSquare, Wallet, MapPin, Grid, Ticket, Gamepad2, Coffee, LayoutGrid } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  const quickAccess = [
+    { label: "Stadiums", icon: MapPin, color: "bg-orange-500", href: "#" },
+    { label: "Cities", icon: MapPin, color: "bg-pink-500", href: "#" },
+    { label: "Tournament", icon: LayoutGrid, color: "bg-blue-500", href: "/bracket" },
+    { label: "Tickets", icon: Ticket, color: "bg-indigo-500", href: "#" },
+    { label: "Play Zone", icon: Gamepad2, color: "bg-teal-400", href: "#" },
+    { label: "Hospitality", icon: Coffee, color: "bg-purple-500", href: "#" },
+  ];
+
   return (
-    <div className="min-h-screen bg-wc-black relative overflow-hidden flex flex-col items-center justify-center">
-      {/* Background Shapes mimicking the abstract '26' brand shapes */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-wc-green rounded-full blur-[100px] opacity-20 mix-blend-screen animate-pulse-slow" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-wc-purple rounded-full blur-[100px] opacity-20 mix-blend-screen animate-float" />
-      <div className="absolute top-[20%] right-[10%] w-[30vw] h-[30vw] bg-wc-red rounded-full blur-[120px] opacity-20 mix-blend-screen" />
-      
-      {/* Huge abstract '26' in the background */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] overflow-hidden">
-        <span className="font-display font-black text-[50vw] leading-none tracking-tighter text-white select-none">
+    <div className="min-h-screen bg-gray-50 pb-24">
+      {/* Top Header */}
+      <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
+        <Link href={user ? "/user/" + user.id : "/login"} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200">
+          <User className="w-5 h-5" />
+        </Link>
+        <div className="font-display font-black text-2xl tracking-tighter">
           26
-        </span>
-      </div>
+        </div>
+        <div className="flex gap-3 text-gray-600">
+          <button className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
+            <MessageSquare className="w-5 h-5" />
+          </button>
+          <button className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
+            <Wallet className="w-5 h-5" />
+          </button>
+        </div>
+      </header>
 
-      {/* Main Content */}
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center mt-[-10vh]">
-        <h1 className="font-display font-black text-6xl md:text-8xl lg:text-[140px] tracking-tighter mb-4 uppercase leading-[0.85]">
-          <span className="text-white block">We Are</span>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-wc-purple via-wc-cyan to-wc-green">
-            Predicting
-          </span>
-        </h1>
+      <div className="max-w-4xl mx-auto px-4 mt-4 space-y-6">
         
-        <p className="font-body text-lg md:text-xl text-white/50 mt-8 mb-12 max-w-md font-medium tracking-wide">
-          The ultimate knockout stage prediction experience for the 2026 World Cup.
-        </p>
+        {/* Teams Banner */}
+        <div className="relative w-full h-[250px] md:h-[350px] bg-gray-900 rounded-[2rem] overflow-hidden shadow-md">
+          {/* A gradient placeholder representing the players background */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-gray-900 via-gray-800 to-black opacity-80" />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="text-white/10 font-fifa text-8xl">26</span>
+          </div>
+          <div className="absolute bottom-6 left-6 z-10 text-white">
+            <h2 className="font-bold text-3xl mb-1 drop-shadow-md">Teams</h2>
+            <p className="text-white/80 text-sm font-medium">News, latest scores and more for every team.</p>
+          </div>
+        </div>
 
-        {user ? (
-          <Link
-            href="/bracket"
-            className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 text-lg font-display font-bold text-white bg-white/5 border border-white/10 rounded-full overflow-hidden transition-all hover:scale-105 hover:border-wc-cyan/50 hover:bg-white/10 hover:shadow-[0_0_40px_rgba(6,182,212,0.3)] active:scale-95"
-          >
-            {/* Subtle gradient sweep on hover */}
-            <div className="absolute inset-0 bg-gradient-to-r from-wc-purple/20 to-wc-cyan/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
-            
-            <span className="relative z-10 tracking-widest uppercase">Enter the Bracket</span>
-            <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        ) : (
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <Link
-              href="/signup"
-              className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-lg font-display font-bold text-white bg-gradient-to-r from-wc-purple to-wc-cyan rounded-full overflow-hidden transition-all hover:scale-105 shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] active:scale-95"
-            >
-              <span className="relative z-10 tracking-widest uppercase">Sign Up</span>
-              <UserPlus className="relative z-10 w-5 h-5" />
-            </Link>
-            <Link
-              href="/login"
-              className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-lg font-display font-bold text-white bg-white/5 border border-white/10 rounded-full overflow-hidden transition-all hover:scale-105 hover:bg-white/10 active:scale-95"
-            >
-              <span className="relative z-10 tracking-widest uppercase">Log In</span>
-              <LogIn className="relative z-10 w-5 h-5" />
-            </Link>
+        {/* City Selector */}
+        <button className="w-full bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 text-blue-600 font-bold">
+            <MapPin className="w-5 h-5" />
+            <span className="text-gray-900">Select your city</span>
+          </div>
+          <span className="text-gray-400 font-bold">&gt;</span>
+        </button>
+
+        {/* Quick Access */}
+        <div>
+          <h3 className="font-bold text-gray-900 text-lg mb-4">Quick access</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {quickAccess.map((item) => (
+              <Link key={item.label} href={item.href} className="flex flex-col gap-2">
+                <div className={`aspect-square rounded-2xl ${item.color} flex items-center justify-center text-white shadow-sm hover:scale-105 transition-transform relative overflow-hidden`}>
+                  <item.icon className="w-8 h-8 md:w-12 md:h-12 relative z-10" />
+                  {/* Subtle color bar at bottom matching the screenshot */}
+                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-wc-purple via-wc-red to-wc-green" />
+                </div>
+                <span className="text-xs md:text-sm font-medium text-gray-700">{item.label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Auth CTA if not logged in */}
+        {!user && (
+          <div className="mt-8 bg-white p-6 rounded-[2rem] text-center border border-gray-100 shadow-sm">
+            <h2 className="font-bold text-xl mb-2 text-gray-900">Join the Predictions</h2>
+            <p className="text-gray-500 text-sm mb-4">Log in or create an account to start predicting matches.</p>
+            <div className="flex gap-4 justify-center">
+              <Link href="/login" className="px-6 py-2 bg-gray-100 text-gray-900 font-bold rounded-xl hover:bg-gray-200">
+                Log In
+              </Link>
+              <Link href="/signup" className="px-6 py-2 bg-wc-purple text-white font-bold rounded-xl hover:bg-wc-purple-light">
+                Sign Up
+              </Link>
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Footer minimal text */}
-      <div className="absolute bottom-8 text-white/20 text-xs font-display font-bold uppercase tracking-[0.3em] text-center w-full">
-        North America • 2026
       </div>
     </div>
   );

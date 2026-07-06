@@ -26,26 +26,26 @@ export default async function LeaderboardPage() {
   const entries: LeaderboardEntry[] = leaderboard || [];
 
   return (
-    <div className="min-h-screen bg-wc-black pt-8 pb-24 px-4 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-white pt-8 pb-24 px-4 sm:px-6 relative overflow-hidden">
       {/* Background Decorators */}
       <div className="absolute top-0 right-[20%] w-[500px] h-[500px] bg-wc-gold/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[20%] left-[-10%] w-[600px] h-[600px] bg-wc-purple/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[20%] left-[-10%] w-[600px] h-[600px] bg-wc-purple/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-4xl mx-auto relative z-10">
         <header className="mb-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-wc-gold/20 flex items-center justify-center neon-glow-purple">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-yellow-50 flex items-center justify-center border border-yellow-100">
             <Trophy className="w-8 h-8 text-wc-gold" />
           </div>
-          <h1 className="font-display font-black text-4xl sm:text-5xl tracking-tight mb-4">
+          <h1 className="font-display font-black text-4xl sm:text-5xl tracking-tight mb-4 text-gray-900">
             Global <span className="text-gradient gradient-purple-cyan">Leaderboard</span>
           </h1>
-          <p className="text-white/60">
+          <p className="text-gray-500">
             The best football oracles in the world. Top 100 rankings.
           </p>
         </header>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mb-8 text-sm text-white/50">
+        <div className="flex flex-wrap items-center justify-center gap-6 mb-8 text-sm text-gray-500">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-wc-green" />
             Exact Score (3 pts)
@@ -55,14 +55,14 @@ export default async function LeaderboardPage() {
             Correct Outcome (1 pt)
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-wc-red/50" />
+            <div className="w-3 h-3 rounded-full bg-red-400" />
             Wrong (0 pts)
           </div>
         </div>
 
         <div className="space-y-4">
           {entries.length === 0 ? (
-            <GlassCard className="p-12 text-center text-white/50">
+            <GlassCard className="p-12 text-center text-gray-500 bg-white border border-gray-200">
               No predictions have been scored yet. Check back after the first match!
             </GlassCard>
           ) : (
@@ -70,11 +70,11 @@ export default async function LeaderboardPage() {
               const isCurrentUser = user && user.id === entry.user_id;
 
               // Rank formatting
-              let rankDisplay = <span className="text-white/40 font-bold">{entry.rank}</span>;
+              let rankDisplay = <span className="text-gray-400 font-bold">{entry.rank}</span>;
               if (entry.rank === 1) {
                 rankDisplay = <Medal className="w-6 h-6 text-wc-gold" />;
               } else if (entry.rank === 2) {
-                rankDisplay = <Medal className="w-6 h-6 text-zinc-300" />;
+                rankDisplay = <Medal className="w-6 h-6 text-gray-400" />;
               } else if (entry.rank === 3) {
                 rankDisplay = <Medal className="w-6 h-6 text-amber-700" />;
               }
@@ -85,12 +85,12 @@ export default async function LeaderboardPage() {
                   className={`relative p-[1px] rounded-2xl transition-transform ${
                     isCurrentUser
                       ? "bg-gradient-to-r from-wc-purple to-wc-cyan shadow-[0_0_20px_rgba(139,92,246,0.3)] scale-[1.02] z-10"
-                      : "bg-white/10 hover:bg-white/20"
+                      : "bg-gray-200 hover:bg-gray-300"
                   }`}
                 >
                   <Link 
                     href={`/user/${entry.user_id}`}
-                    className={`block bg-wc-surface-light rounded-2xl p-4 sm:p-6 transition-colors hover:bg-white/10 ${isCurrentUser ? "opacity-95" : ""}`}
+                    className={`block bg-white rounded-2xl p-4 sm:p-6 transition-colors hover:bg-gray-50 border border-gray-200 shadow-sm ${isCurrentUser ? "opacity-95" : ""}`}
                   >
                     <div className="flex items-center gap-4 sm:gap-6">
                       {/* Rank */}
@@ -101,22 +101,22 @@ export default async function LeaderboardPage() {
                       {/* Avatar & Name */}
                       <div className="flex-1 flex items-center gap-4">
                         {entry.avatar_url ? (
-                          <img src={entry.avatar_url} alt={entry.display_name} className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                          <img src={entry.avatar_url} alt={entry.display_name} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-wc-purple/20 border border-wc-purple/30 flex items-center justify-center font-bold text-wc-purple-light">
+                          <div className="w-10 h-10 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center font-bold text-wc-purple">
                             {entry.display_name.charAt(0).toUpperCase()}
                           </div>
                         )}
                         <div>
-                          <div className="font-bold text-lg flex items-center gap-2">
+                          <div className="font-bold text-lg flex items-center gap-2 text-gray-900">
                             {entry.display_name}
                             {isCurrentUser && (
-                              <span className="text-[10px] uppercase tracking-wider bg-wc-purple/20 text-wc-purple-light px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] uppercase tracking-wider bg-purple-100 text-wc-purple px-2 py-0.5 rounded-full">
                                 You
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-white/40">
+                          <div className="text-xs text-gray-500">
                             {entry.total_predictions} match{entry.total_predictions !== 1 && "es"} predicted
                           </div>
                         </div>
@@ -125,22 +125,22 @@ export default async function LeaderboardPage() {
                       {/* Stats */}
                       <div className="hidden md:flex items-center gap-8 mr-8">
                         <div className="text-center">
-                          <div className="text-xs text-white/40 mb-1">Exact</div>
+                          <div className="text-xs text-gray-400 mb-1">Exact</div>
                           <div className="font-bold text-wc-green">{entry.exact_scores}</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-xs text-white/40 mb-1">Outcome</div>
-                          <div className="font-bold text-wc-purple-light">{entry.correct_outcomes}</div>
+                          <div className="text-xs text-gray-400 mb-1">Outcome</div>
+                          <div className="font-bold text-wc-purple">{entry.correct_outcomes}</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-xs text-white/40 mb-1">Wrong</div>
-                          <div className="font-bold text-wc-red/50">{entry.wrong_predictions}</div>
+                          <div className="text-xs text-gray-400 mb-1">Wrong</div>
+                          <div className="font-bold text-red-500">{entry.wrong_predictions}</div>
                         </div>
                       </div>
 
                       {/* Total Points */}
-                      <div className="text-right pl-4 border-l border-white/10">
-                        <div className="text-xs text-white/40 mb-1 uppercase tracking-wider font-semibold">Points</div>
+                      <div className="text-right pl-4 border-l border-gray-200">
+                        <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider font-semibold">Points</div>
                         <div className="font-display font-black text-2xl sm:text-3xl text-gradient gradient-purple-cyan">
                           {entry.total_points}
                         </div>

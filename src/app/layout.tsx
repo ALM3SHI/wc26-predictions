@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "WC26",
   },
   other: {
@@ -47,7 +47,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0A0A0F",
+  themeColor: "#FFFFFF",
 };
 
 /* ── Root Layout ──────────────────────────────────────── */
@@ -58,9 +58,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${outfit.variable} ${inter.variable} ${fifa.variable}`}>
-      <body className="font-body text-white antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0 relative">
+      <body className="font-body text-gray-900 antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0 relative">
         <div className="wc-bg-pattern" />
-        <div className="wc-bg-watermark">26</div>
         <Navigation />
         {children}
         <ServiceWorkerRegistrar />

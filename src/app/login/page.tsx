@@ -42,16 +42,16 @@ function LoginContent() {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-wc-black relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-white relative overflow-hidden">
       {/* Background decorative elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-wc-green/10 rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-wc-purple/10 rounded-full blur-[120px] -translate-x-1/2 translate-y-1/2" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-wc-green/5 rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-wc-purple/5 rounded-full blur-[120px] -translate-x-1/2 translate-y-1/2" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="glass p-8 max-w-md w-full relative z-10"
+        className="bg-white border border-gray-200 shadow-sm rounded-2xl p-8 max-w-md w-full relative z-10"
       >
         {/* Header */}
         <div className="text-center mb-8">
@@ -60,7 +60,7 @@ function LoginContent() {
               WC26
             </span>
           </h1>
-          <p className="text-white/50 mt-2">Sign in to your account</p>
+          <p className="text-gray-500 mt-2">Sign in to your account</p>
         </div>
 
         {/* Callback error */}
@@ -68,10 +68,10 @@ function LoginContent() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center gap-2 p-3 rounded-xl bg-wc-red/10 border border-wc-red/20 mb-6"
+            className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 mb-6"
           >
-            <AlertCircle className="w-5 h-5 text-wc-red shrink-0" />
-            <p className="text-wc-red text-sm">
+            <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+            <p className="text-red-500 text-sm">
               Authentication failed. Please try again.
             </p>
           </motion.div>
@@ -81,7 +81,7 @@ function LoginContent() {
         <form onSubmit={handleLogin} className="space-y-4">
           {/* Email */}
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="email"
               value={email}
@@ -89,13 +89,13 @@ function LoginContent() {
               placeholder="Email address"
               required
               autoComplete="username"
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-wc-surface/50 border border-white/10 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-white/30 transition-colors"
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
             />
           </div>
 
           {/* Password */}
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="password"
               value={password}
@@ -103,7 +103,7 @@ function LoginContent() {
               placeholder="Password"
               required
               autoComplete="current-password"
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-wc-surface/50 border border-white/10 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-white/30 transition-colors"
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
             />
           </div>
 
@@ -136,11 +136,11 @@ function LoginContent() {
         </form>
 
         {/* Signup Link */}
-        <p className="text-center text-white/40 mt-6 text-sm">
+        <p className="text-center text-gray-500 mt-6 text-sm">
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
-            className="text-wc-purple-light hover:text-wc-purple transition-colors font-medium"
+            className="text-wc-purple hover:text-wc-purple-light transition-colors font-medium"
           >
             Sign up
           </Link>
@@ -153,7 +153,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-wc-black">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <Loader2 className="w-8 h-8 animate-spin text-wc-purple" />
       </div>
     }>

@@ -59,11 +59,11 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
       <div className="absolute top-0 right-[-20%] w-[600px] h-[600px] bg-wc-green/5 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 left-[-20%] w-[600px] h-[600px] bg-wc-purple/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto relative z-10 wc-border-gradient p-1 bg-wc-black rounded-[2rem] shadow-2xl">
+      <div className="max-w-4xl mx-auto relative z-10 wc-border-gradient p-1 bg-white rounded-[2rem] shadow-sm">
         <div className="p-6 sm:p-12 relative z-10">
           <Link
             href="/bracket"
-            className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-12"
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-12"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Bracket
@@ -71,7 +71,7 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
 
           {/* Massive MATCH STATS Header */}
           <div className="text-center mb-12">
-            <h1 className="font-fifa text-6xl sm:text-8xl tracking-tighter mb-6 uppercase text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <h1 className="font-fifa text-6xl sm:text-8xl tracking-tighter mb-6 uppercase text-gray-900">
               MATCH STATS
             </h1>
             
@@ -82,7 +82,7 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
             </div>
             
             {match.venue && (
-              <div className="flex items-center justify-center gap-2 text-white/50 text-xs font-semibold tracking-widest uppercase">
+              <div className="flex items-center justify-center gap-2 text-gray-500 text-xs font-semibold tracking-widest uppercase">
                 <MapPin className="w-3.5 h-3.5" />
                 {match.venue}
               </div>
@@ -96,20 +96,20 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
               {isLive ? <span className="animate-pulse">LIVE NOW</span> : isFinished ? "FULL TIME" : "UPCOMING"}
             </div>
 
-            <div className="flex items-center justify-center gap-2 sm:gap-6 bg-white/5 p-4 sm:p-6 rounded-full border border-white/10 shadow-2xl">
+            <div className="flex items-center justify-center gap-2 sm:gap-6 bg-gray-50 p-4 sm:p-6 rounded-full border border-gray-200 shadow-sm">
               
               {/* Home Team */}
               <div className="flex items-center gap-4">
                 {match.home_team_logo ? (
-                  <img src={match.home_team_logo} alt={match.home_team} className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm border-2 border-white/10" />
+                  <img src={match.home_team_logo} alt={match.home_team} className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm border-2 border-gray-100" />
                 ) : (
-                  <div className="w-16 h-12 sm:w-20 sm:h-14 bg-white/10 rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm" />
+                  <div className="w-16 h-12 sm:w-20 sm:h-14 bg-gray-100 rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm" />
                 )}
-                <span className="hidden sm:block font-fifa text-4xl uppercase">{match.home_team.slice(0, 3)}</span>
+                <span className="hidden sm:block font-fifa text-4xl uppercase text-gray-900">{match.home_team.slice(0, 3)}</span>
               </div>
 
               {/* Score Box */}
-              <div className="flex items-center bg-wc-cyan rounded-[1.5rem] px-4 py-2 shadow-[0_0_20px_rgba(6,182,212,0.4)] text-black">
+              <div className="flex items-center bg-wc-cyan rounded-[1.5rem] px-4 py-2 shadow-sm text-white">
                 {isLive || isFinished ? (
                   <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl">
                     <span>{match.home_score}</span>
@@ -119,9 +119,9 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
                     <span>{match.away_score}</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl text-black/40">
+                  <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl text-white/80">
                     <span>-</span>
-                    <div className="flex flex-col items-center justify-center w-8 h-12 bg-black/20 rounded-lg text-black/50">
+                    <div className="flex flex-col items-center justify-center w-8 h-12 bg-black/20 rounded-lg text-white/50">
                       <span className="text-[0.5rem] font-bold tracking-widest mb-1">VS</span>
                     </div>
                     <span>-</span>
@@ -131,17 +131,17 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
 
               {/* Away Team */}
               <div className="flex items-center gap-4">
-                <span className="hidden sm:block font-fifa text-4xl uppercase">{match.away_team.slice(0, 3)}</span>
+                <span className="hidden sm:block font-fifa text-4xl uppercase text-gray-900">{match.away_team.slice(0, 3)}</span>
                 {match.away_team_logo ? (
-                  <img src={match.away_team_logo} alt={match.away_team} className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm border-2 border-white/10" />
+                  <img src={match.away_team_logo} alt={match.away_team} className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm border-2 border-gray-100" />
                 ) : (
-                  <div className="w-16 h-12 sm:w-20 sm:h-14 bg-white/10 rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm" />
+                  <div className="w-16 h-12 sm:w-20 sm:h-14 bg-gray-100 rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm" />
                 )}
               </div>
             </div>
 
             {/* Full Team Names Below */}
-            <div className="flex justify-between w-full max-w-sm mt-6 font-fifa text-2xl text-white/60 uppercase">
+            <div className="flex justify-between w-full max-w-sm mt-6 font-fifa text-2xl text-gray-500 uppercase">
               <span className="flex-1 text-center">{match.home_team}</span>
               <span className="w-20"></span>
               <span className="flex-1 text-center">{match.away_team}</span>

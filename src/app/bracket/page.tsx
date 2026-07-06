@@ -77,7 +77,7 @@ export default async function BracketPage() {
   const dynamicGroups = [
     { title: "Live Now", matches: liveMatches, color: "text-wc-green", line: "from-wc-green/40" },
     { title: "Upcoming (Next 24h)", matches: upcomingMatches, color: "text-wc-cyan", line: "from-wc-cyan/40" },
-    { title: "Previous (Last 24h)", matches: previousMatches, color: "text-white/60", line: "from-white/20" },
+    { title: "Previous (Last 24h)", matches: previousMatches, color: "text-gray-500", line: "from-gray-200" },
   ];
 
   return (
@@ -116,15 +116,14 @@ export default async function BracketPage() {
                         href={`/match/${match.id}`}
                         className="block relative transition-transform hover:scale-[1.02] active:scale-[0.98]"
                       >
-                        <div className="wc-border-gradient h-full">
-                          <div className="bg-wc-black rounded-[1.4rem] p-5 h-full flex flex-col relative z-10 overflow-hidden">
+                        <div className="bg-white rounded-[1.4rem] p-5 h-full flex flex-col relative z-10 overflow-hidden shadow-sm border border-gray-200">
                             
                             {/* Match Header */}
-                            <div className="flex justify-between items-center mb-5 text-xs font-bold uppercase tracking-widest text-white/50">
-                              <span className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-md">
+                            <div className="flex justify-between items-center mb-5 text-xs font-bold uppercase tracking-widest text-gray-500">
+                              <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
                                 <Clock className="w-3.5 h-3.5" />
                                 {isLive ? (
-                                  <span className="text-wc-green animate-pulse drop-shadow-[0_0_8px_rgba(16,185,129,1)]">LIVE NOW</span>
+                                  <span className="text-wc-green animate-pulse">LIVE NOW</span>
                                 ) : isFinished ? (
                                   "FULL TIME"
                                 ) : (
@@ -132,14 +131,14 @@ export default async function BracketPage() {
                                 )}
                               </span>
                               {match.prediction ? (
-                                <span className="text-wc-purple-light flex items-center gap-1 bg-wc-purple/10 px-2 py-1 rounded-md">
+                                <span className="text-wc-purple flex items-center gap-1 bg-purple-50 px-2 py-1 rounded-md">
                                   <Trophy className="w-3.5 h-3.5" />
                                   PICKED
                                 </span>
                               ) : !isLocked ? (
-                                <span className="text-wc-cyan bg-wc-cyan/10 px-2 py-1 rounded-md">PREDICT</span>
+                                <span className="text-wc-cyan bg-cyan-50 px-2 py-1 rounded-md">PREDICT</span>
                               ) : (
-                                <span className="text-white/30 bg-white/5 px-2 py-1 rounded-md">LOCKED</span>
+                                <span className="text-gray-400 bg-gray-100 px-2 py-1 rounded-md">LOCKED</span>
                               )}
                             </div>
 
@@ -149,13 +148,13 @@ export default async function BracketPage() {
                               <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-4">
                                   {match.home_team_logo ? (
-                                    <img src={match.home_team_logo} alt={match.home_team} className="w-12 h-10 object-cover rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm border-2 border-white/10" />
+                                    <img src={match.home_team_logo} alt={match.home_team} className="w-12 h-10 object-cover rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm border-2 border-gray-100" />
                                   ) : (
-                                    <div className="w-12 h-10 bg-white/10 rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm" />
+                                    <div className="w-12 h-10 bg-gray-100 rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm" />
                                   )}
-                                  <span className="font-fifa text-2xl uppercase tracking-wide">{match.home_team}</span>
+                                  <span className="font-fifa text-2xl uppercase tracking-wide text-gray-900">{match.home_team}</span>
                                 </div>
-                                <div className={`w-12 h-12 flex items-center justify-center rounded-xl font-fifa text-3xl ${isLive || isFinished ? 'bg-wc-cyan text-black' : 'bg-white/5 text-white/50'}`}>
+                                <div className={`w-12 h-12 flex items-center justify-center rounded-xl font-fifa text-3xl ${isLive || isFinished ? 'bg-wc-cyan text-white' : 'bg-gray-100 text-gray-400'}`}>
                                   {match.home_score ?? "-"}
                                 </div>
                               </div>
@@ -164,13 +163,13 @@ export default async function BracketPage() {
                               <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-4">
                                   {match.away_team_logo ? (
-                                    <img src={match.away_team_logo} alt={match.away_team} className="w-12 h-10 object-cover rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm border-2 border-white/10" />
+                                    <img src={match.away_team_logo} alt={match.away_team} className="w-12 h-10 object-cover rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm border-2 border-gray-100" />
                                   ) : (
-                                    <div className="w-12 h-10 bg-white/10 rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm" />
+                                    <div className="w-12 h-10 bg-gray-100 rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm" />
                                   )}
-                                  <span className="font-fifa text-2xl uppercase tracking-wide">{match.away_team}</span>
+                                  <span className="font-fifa text-2xl uppercase tracking-wide text-gray-900">{match.away_team}</span>
                                 </div>
-                                <div className={`w-12 h-12 flex items-center justify-center rounded-xl font-fifa text-3xl ${isLive || isFinished ? 'bg-wc-cyan text-black' : 'bg-white/5 text-white/50'}`}>
+                                <div className={`w-12 h-12 flex items-center justify-center rounded-xl font-fifa text-3xl ${isLive || isFinished ? 'bg-wc-cyan text-white' : 'bg-gray-100 text-gray-400'}`}>
                                   {match.away_score ?? "-"}
                                 </div>
                               </div>
@@ -178,15 +177,14 @@ export default async function BracketPage() {
 
                             {/* Prediction Footer */}
                             {match.prediction && (
-                              <div className="mt-5 pt-4 border-t border-white/5 flex justify-between items-center">
-                                <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Your Pick</span>
-                                <span className="font-fifa text-2xl text-wc-purple-light">
+                              <div className="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
+                                <span className="text-gray-400 text-sm font-bold uppercase tracking-wider">Your Pick</span>
+                                <span className="font-fifa text-2xl text-wc-purple">
                                   {match.prediction.home_prediction} - {match.prediction.away_prediction}
                                 </span>
                               </div>
                             )}
                           </div>
-                        </div>
                       </Link>
                     );
                   })}

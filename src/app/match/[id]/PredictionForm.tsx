@@ -96,17 +96,17 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
   };
 
   return (
-    <GlassCard className="mt-8 p-6 md:p-8 max-w-2xl mx-auto text-center relative overflow-hidden" glow="purple">
+    <GlassCard className="mt-8 p-6 md:p-8 max-w-2xl mx-auto text-center relative overflow-hidden shadow-md border border-gray-200 bg-white" glow="purple">
       
       {/* Ticking Timer */}
       <div className="mb-8">
-        <h3 className="font-display font-bold text-lg mb-2 text-white/50 uppercase tracking-widest">Time Until Kickoff</h3>
-        <div className={`font-fifa text-5xl md:text-6xl tracking-widest ${isLocked ? 'text-wc-red' : 'text-wc-cyan drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]'}`}>
+        <h3 className="font-display font-bold text-lg mb-2 text-gray-400 uppercase tracking-widest">Time Until Kickoff</h3>
+        <div className={`font-fifa text-5xl md:text-6xl tracking-widest ${isLocked ? 'text-wc-red' : 'text-wc-cyan'}`}>
           {isLocked ? "MATCH LIVE" : timeLeft}
         </div>
       </div>
 
-      <p className="text-white/50 mb-8 font-semibold">
+      <p className="text-gray-500 mb-8 font-semibold">
         {isLocked
           ? "This match is locked. Predictions can no longer be edited."
           : "Enter your predicted scoreline below before kickoff."}
@@ -119,9 +119,9 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
             {match.home_team_logo ? (
               <img src={match.home_team_logo} alt={match.home_team} className="w-16 h-16 object-contain" />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-white/10" />
+              <div className="w-16 h-16 rounded-full bg-gray-100" />
             )}
-            <span className="font-bold font-display text-lg hidden sm:block">{match.home_team}</span>
+            <span className="font-bold font-display text-lg hidden sm:block text-gray-900">{match.home_team}</span>
             <input
               type="number"
               min="0"
@@ -129,20 +129,20 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
               value={homeScore}
               onChange={(e) => setHomeScore(e.target.value === "" ? "" : parseInt(e.target.value))}
               disabled={isLocked || loading}
-              className="w-20 md:w-24 h-24 text-center font-display font-black text-4xl md:text-5xl rounded-2xl bg-wc-surface border border-wc-purple/30 focus:border-wc-purple focus:outline-none focus:ring-2 focus:ring-wc-purple/50 disabled:opacity-50 transition-all"
+              className="w-20 md:w-24 h-24 text-center font-display font-black text-4xl md:text-5xl rounded-2xl bg-gray-50 border border-gray-200 text-gray-900 focus:border-wc-purple focus:outline-none focus:ring-2 focus:ring-wc-purple/50 disabled:opacity-50 transition-all"
             />
           </div>
 
-          <span className="font-display font-black text-3xl text-white/30">-</span>
+          <span className="font-display font-black text-3xl text-gray-300">-</span>
 
           {/* Away Team Input */}
           <div className="flex flex-col items-center gap-3">
             {match.away_team_logo ? (
               <img src={match.away_team_logo} alt={match.away_team} className="w-16 h-16 object-contain" />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-white/10" />
+              <div className="w-16 h-16 rounded-full bg-gray-100" />
             )}
-            <span className="font-bold font-display text-lg hidden sm:block">{match.away_team}</span>
+            <span className="font-bold font-display text-lg hidden sm:block text-gray-900">{match.away_team}</span>
             <input
               type="number"
               min="0"
@@ -150,7 +150,7 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
               value={awayScore}
               onChange={(e) => setAwayScore(e.target.value === "" ? "" : parseInt(e.target.value))}
               disabled={isLocked || loading}
-              className="w-20 md:w-24 h-24 text-center font-display font-black text-4xl md:text-5xl rounded-2xl bg-wc-surface border border-wc-purple/30 focus:border-wc-purple focus:outline-none focus:ring-2 focus:ring-wc-purple/50 disabled:opacity-50 transition-all"
+              className="w-20 md:w-24 h-24 text-center font-display font-black text-4xl md:text-5xl rounded-2xl bg-gray-50 border border-gray-200 text-gray-900 focus:border-wc-purple focus:outline-none focus:ring-2 focus:ring-wc-purple/50 disabled:opacity-50 transition-all"
             />
           </div>
         </div>

@@ -65,21 +65,21 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 bg-wc-black">
+      <div className="min-h-screen flex items-center justify-center px-4 bg-white">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass p-8 max-w-md w-full text-center"
+          className="bg-white border border-gray-200 shadow-sm rounded-2xl p-8 max-w-md w-full text-center"
         >
-          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-wc-green/20 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-50 flex items-center justify-center">
             <Mail className="w-8 h-8 text-wc-green" />
           </div>
-          <h2 className="text-2xl font-display font-bold mb-3">
+          <h2 className="text-2xl font-display font-bold mb-3 text-gray-900">
             Check your email!
           </h2>
-          <p className="text-white/60">
+          <p className="text-gray-500">
             We&apos;ve sent a confirmation link to{" "}
-            <span className="text-wc-purple-light font-semibold">{email}</span>.
+            <span className="text-wc-purple font-semibold">{email}</span>.
             Click it to activate your account.
           </p>
         </motion.div>
@@ -88,16 +88,16 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-wc-black relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-white relative overflow-hidden">
       {/* Background decorative elements */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-wc-purple/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-wc-cyan/10 rounded-full blur-[120px] translate-x-1/2 translate-y-1/2" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-wc-purple/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-wc-cyan/5 rounded-full blur-[120px] translate-x-1/2 translate-y-1/2" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="glass p-8 max-w-md w-full relative z-10"
+        className="bg-white border border-gray-200 shadow-sm rounded-2xl p-8 max-w-md w-full relative z-10"
       >
         {/* Header */}
         <div className="text-center mb-8">
@@ -106,7 +106,7 @@ export default function SignupPage() {
               JOIN WC26
             </span>
           </h1>
-          <p className="text-white/50 mt-2">
+          <p className="text-gray-500 mt-2">
             Create your account and start predicting
           </p>
         </div>
@@ -115,7 +115,7 @@ export default function SignupPage() {
         <form onSubmit={handleSignup} className="space-y-4">
           {/* Display Name */}
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               value={displayName}
@@ -124,13 +124,13 @@ export default function SignupPage() {
               required
               minLength={2}
               maxLength={30}
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-wc-surface/50 border border-white/10 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-white/30 transition-colors"
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
             />
           </div>
 
           {/* Email */}
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="email"
               value={email}
@@ -138,13 +138,13 @@ export default function SignupPage() {
               placeholder="Email address"
               required
               autoComplete="username"
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-wc-surface/50 border border-white/10 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-white/30 transition-colors"
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
             />
           </div>
 
           {/* Password */}
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="password"
               value={password}
@@ -153,7 +153,7 @@ export default function SignupPage() {
               required
               minLength={6}
               autoComplete="new-password"
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-wc-surface/50 border border-white/10 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-white/30 transition-colors"
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
             />
           </div>
 
@@ -186,11 +186,11 @@ export default function SignupPage() {
         </form>
 
         {/* Login Link */}
-        <p className="text-center text-white/40 mt-6 text-sm">
+        <p className="text-center text-gray-500 mt-6 text-sm">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="text-wc-purple-light hover:text-wc-purple transition-colors font-medium"
+            className="text-wc-purple hover:text-wc-purple-light transition-colors font-medium"
           >
             Sign in
           </Link>

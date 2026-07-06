@@ -4,14 +4,14 @@
    WC26 Predictions — Design System Tokens (Tailwind v4)
    ───────────────────────────────────────────────────────── */
 @theme inline {
-  /* Base dark palette */
-  --color-wc-black: #0A0A0F;
-  --color-wc-dark: #12121A;
-  --color-wc-darker: #0E0E16;
-  --color-wc-surface: #1A1A2E;
-  --color-wc-surface-light: #252542;
-  --color-wc-border: rgba(255, 255, 255, 0.08);
-  --color-wc-border-light: rgba(255, 255, 255, 0.15);
+  /* Base light palette */
+  --color-wc-black: #F9FAFB; /* Gray 50 */
+  --color-wc-dark: #FFFFFF;  /* White */
+  --color-wc-darker: #F3F4F6; /* Gray 100 */
+  --color-wc-surface: #FFFFFF;
+  --color-wc-surface-light: #F9FAFB;
+  --color-wc-border: rgba(0, 0, 0, 0.08);
+  --color-wc-border-light: rgba(0, 0, 0, 0.15);
 
   /* Neon — Purple */
   --color-wc-purple: #8B5CF6;
@@ -59,12 +59,12 @@
 
 html {
   scroll-behavior: smooth;
-  --color-wc-darker: #060913;
+  --color-wc-darker: #F3F4F6;
 }
 
 body {
   background-color: var(--color-wc-black);
-  color: #ffffff;
+  color: #111827; /* Gray 900 */
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -77,33 +77,25 @@ body {
   position: fixed;
   inset: 0;
   z-index: -50;
-  background-color: #0d0914; /* Deep, rich very dark purple/black base */
+  background-color: #F9FAFB;
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(44, 55, 229, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(227, 26, 34, 0.05) 0%, transparent 60%);
-  overflow: hidden;
+    radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.03), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.03), transparent 25%),
+    radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.03), transparent 25%);
+  background-attachment: fixed;
 }
 
-.wc-bg-watermark {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: var(--font-fifa);
-  font-size: 80vh;
-  line-height: 0.8;
-  color: rgba(255, 255, 255, 0.02);
-  z-index: -40;
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
-}
-
-@media (max-width: 768px) {
-  .wc-bg-watermark {
-    font-size: 50vh;
-  }
+.wc-bg-pattern::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+  opacity: 0.5;
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -279,7 +271,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0E0E16;
+  background: #F3F4F6;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -294,7 +286,7 @@ body {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #8B5CF6 #0E0E16;
+  scrollbar-color: #8B5CF6 #F3F4F6;
 }
 
 /* ─────────────────────────────────────────────────────────
