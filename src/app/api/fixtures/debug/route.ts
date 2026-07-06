@@ -1,30 +1,27 @@
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const league = searchParams.get("league") || "1"; // Default to 1 (World Cup)
-  const season = searchParams.get("season") || "2026"; // Default to 2026
-  
-  const API_FOOTBALL_KEY = process.env.API_FOOTBALL_KEY;
-  const API_FOOTBALL_HOST = process.env.API_FOOTBALL_HOST || "v3.football.api-sports.io";
+  // New configuration for football-data.org
+  const API_KEY = process.env.FOOTBALL_DATA_KEY || "a72b258b9b784e0ca8b1d909a0f09af1";
 
-  if (!API_FOOTBALL_KEY) {
-    return NextResponse.json({ error: "Missing API_FOOTBALL_KEY in environment variables." }, { status: 500 });
+  if (!API_KEY) {
+    return NextResponse.json({ error: "Missing API Key for football-data.org." }, { status: 500 });
   }
 
   try {
-    const url = `https://${API_FOOTBALL_HOST}/fixtures?league=${league}&season=${season}`;
+    // Fetch World Cup matches
+    const url = `http://api.football-data.org/v4/competitions/WC/matches`;
     const response = await fetch(url, {
       headers: {
-        "x-apisports-key": API_FOOTBALL_KEY,
+        "X-Auth-Token": API_KEY,
       },
-      next: { revalidate: 0 }, // Ensure it doesn't cache
+      next: { revalidate: 0 },
     });
 
     const data = await response.json();
     return NextResponse.json({
       requestUrl: url,
-      resultsCount: data.results,
+      matchesCount: data.matches?.length || 0,
       data: data
     });
   } catch (error: any) {
