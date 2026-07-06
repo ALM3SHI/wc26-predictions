@@ -87,15 +87,7 @@ export default async function BracketPage() {
       <div className="fixed bottom-[-100px] right-[-100px] w-[400px] h-[400px] bg-wc-cyan/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <header className="mb-12 text-center flex flex-col items-center">
-          <h1 className="font-fifa text-6xl sm:text-7xl tracking-tighter mb-4 uppercase text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-            KNOCKOUT <br />
-            <span className="text-wc-cyan drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">BRACKET</span>
-          </h1>
-          <p className="text-white/60">
-            Predict matches before kickoff. Green glowing matches are live!
-          </p>
-        </header>
+
 
         <div className="space-y-16">
           {dynamicGroups.map((group) => {

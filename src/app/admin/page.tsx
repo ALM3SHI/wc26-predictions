@@ -49,12 +49,7 @@ export default async function AdminPage() {
   return (
     <div className="min-h-screen pt-8 pb-24 px-4 sm:px-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
-        <header className="mb-12 text-center">
-          <h1 className="font-fifa text-5xl sm:text-7xl tracking-tighter mb-4 uppercase text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-            SUPER <span className="text-wc-red">ADMIN</span>
-          </h1>
-          <p className="text-white/60">Manage matches, override scores, create users, and edit predictions.</p>
-        </header>
+
 
         <AdminClient 
           initialMatches={matches || []} 
