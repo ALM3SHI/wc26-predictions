@@ -50,11 +50,32 @@ export default async function BracketPage() {
     prediction: predictions.find((p) => p.match_id === match.id) || null,
   }));
 
-  // Group by round
-  const groupedMatches: Record<string, MatchWithPrediction[]> = {};
-  MATCH_ROUNDS_ORDER.forEach((round) => {
-    groupedMatches[round] = matches.filter((m) => m.round === round);
+  // Filter and Group dynamically by time (-24h to +24h)
+  const now = Date.now();
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  const liveMatches: MatchWithPrediction[] = [];
+  const upcomingMatches: MatchWithPrediction[] = [];
+  const previousMatches: MatchWithPrediction[] = [];
+
+  matches.forEach((m) => {
+    const matchTime = new Date(m.start_time).getTime();
+    const isLive = ["1H", "HT", "2H", "ET", "BT", "P"].includes(m.status);
+
+    if (isLive) {
+      liveMatches.push(m);
+    } else if (matchTime >= now && matchTime <= now + DAY_MS) {
+      upcomingMatches.push(m);
+    } else if (matchTime < now && matchTime >= now - DAY_MS) {
+      previousMatches.push(m);
+    }
   });
+
+  const dynamicGroups = [
+    { title: "Live Now", matches: liveMatches, color: "text-wc-green", line: "from-wc-green/40" },
+    { title: "Upcoming (Next 24h)", matches: upcomingMatches, color: "text-wc-cyan", line: "from-wc-cyan/40" },
+    { title: "Previous (Last 24h)", matches: previousMatches, color: "text-white/60", line: "from-white/20" },
+  ];
 
   return (
     <div className="min-h-screen bg-wc-black pt-8 pb-24 px-4 sm:px-6">
@@ -73,21 +94,20 @@ export default async function BracketPage() {
         </header>
 
         <div className="space-y-16">
-          {MATCH_ROUNDS_ORDER.map((round) => {
-            const roundMatches = groupedMatches[round];
-            if (!roundMatches || roundMatches.length === 0) return null;
+          {dynamicGroups.map((group) => {
+            if (group.matches.length === 0) return null;
 
             return (
-              <section key={round} className="w-full">
+              <section key={group.title} className="w-full">
                 <div className="flex items-center gap-4 mb-6">
-                  <h2 className="font-display font-bold text-2xl text-white">
-                    {round}
+                  <h2 className={`font-display font-bold text-2xl ${group.color}`}>
+                    {group.title}
                   </h2>
-                  <div className="h-px flex-1 bg-gradient-to-r from-wc-purple/40 to-transparent" />
+                  <div className={`h-px flex-1 bg-gradient-to-r ${group.line} to-transparent`} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {roundMatches.map((match) => {
+                  {group.matches.map((match) => {
                     const isLive = ["1H", "HT", "2H", "ET", "BT", "P"].includes(match.status);
                     const isFinished = ["FT", "AET", "PEN"].includes(match.status);
                     
@@ -114,7 +134,7 @@ export default async function BracketPage() {
                               ) : isFinished ? (
                                 "FT"
                               ) : (
-                                formatMatchTime(match.start_time).split(',')[0] // Just show day e.g. "Sun, Jun 28"
+                                formatMatchTime(match.start_time)
                               )}
                             </span>
                             {match.prediction ? (
