@@ -43,6 +43,7 @@ export default function AdminClient({
   const [users, setUsers] = useState<Profile[]>(initialUsers);
   const [predictions, setPredictions] = useState<any[]>(initialPredictions);
   const [loading, setLoading] = useState(false);
+  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
   
   const [newUser, setNewUser] = useState({ email: "", password: "", displayName: "" });
 
@@ -56,6 +57,37 @@ export default function AdminClient({
       setMatches((prev) => prev.map((m) => (m.id === matchId ? { ...m, ...updates } : m)));
     } catch (err: any) {
       alert("Failed to update match: " + err.message);
+    }
+  };
+
+  const handleCreateMatch = async () => {
+    try {
+      setLoading(true);
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      
+      const res = await fetch("/api/admin/matches", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          home_team: "TBD",
+          away_team: "TBD",
+          start_time: new Date().toISOString(),
+          status: "NS",
+          round: "Round of 32"
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to create match");
+      
+      setMatches([data.match, ...matches]);
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,7 +134,12 @@ export default function AdminClient({
   };
 
   // Prediction Functions
-  const handleUpdatePrediction = async (predId: string, updates: any) => {
+  const handleUpdatePrediction = async (
+    predId: string | null,
+    matchId: string,
+    userId: string,
+    updates: any
+  ) => {
     try {
       const session = await supabase.auth.getSession();
       const token = session.data.session?.access_token;
@@ -113,13 +150,17 @@ export default function AdminClient({
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ predictionId: predId, ...updates })
+        body: JSON.stringify({ predictionId: predId, match_id: matchId, user_id: userId, ...updates })
       });
       
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to update prediction");
       
-      setPredictions((prev) => prev.map((p) => (p.id === predId ? { ...p, ...updates } : p)));
+      if (predId) {
+        setPredictions((prev) => prev.map((p) => (p.id === predId ? { ...p, ...updates } : p)));
+      } else {
+        setPredictions((prev) => [...prev, data.updated]);
+      }
     } catch (err: any) {
       alert("Error: " + err.message);
     }
@@ -145,18 +186,27 @@ export default function AdminClient({
       {/* MATCHES TAB */}
       {tab === "matches" && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center bg-white/5 p-6 rounded-[2rem] border border-white/10 wc-border-gradient">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white/5 p-6 rounded-[2rem] border border-white/10 wc-border-gradient gap-4">
             <div>
-              <h2 className="text-xl font-bold">Calculate Points</h2>
-              <p className="text-white/60 text-sm">Distribute points to users for all FINISHED matches.</p>
+              <h2 className="text-xl font-bold">Matches & Scoring</h2>
+              <p className="text-white/60 text-sm">Create matches, edit scores, and calculate points.</p>
             </div>
-            <button
-              onClick={triggerScoring}
-              disabled={loading}
-              className="px-6 py-3 bg-wc-red text-white font-bold rounded-xl hover:bg-wc-red-light disabled:opacity-50"
-            >
-              {loading ? "Calculating..." : "Force Calculate Points"}
-            </button>
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              <button
+                onClick={handleCreateMatch}
+                disabled={loading}
+                className="flex-1 md:flex-none px-6 py-3 bg-wc-cyan/20 text-wc-cyan border border-wc-cyan/50 font-bold rounded-xl hover:bg-wc-cyan hover:text-black transition-colors disabled:opacity-50"
+              >
+                + Add Match
+              </button>
+              <button
+                onClick={triggerScoring}
+                disabled={loading}
+                className="flex-1 md:flex-none px-6 py-3 bg-wc-red text-white font-bold rounded-xl hover:bg-wc-red-light disabled:opacity-50"
+              >
+                {loading ? "Calculating..." : "Force Calculate Points"}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -184,9 +234,12 @@ export default function AdminClient({
 
                 {/* Match Time & Status */}
                 <div className="flex flex-wrap items-center gap-4">
-                  <div className="text-white/60 text-xs text-center md:text-left min-w-[100px]">
-                    {new Date(match.start_time).toLocaleString()}
-                  </div>
+                  <input
+                    type="datetime-local"
+                    className="bg-black border border-white/20 rounded-lg p-2 text-white/60 text-xs min-w-[150px] outline-none focus:border-wc-cyan"
+                    value={new Date(new Date(match.start_time).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                    onChange={(e) => handleUpdateMatch(match.id, { start_time: new Date(e.target.value).toISOString() })}
+                  />
                   
                   <select
                     className={`border rounded-lg p-2 min-w-[140px] font-bold ${
@@ -222,6 +275,57 @@ export default function AdminClient({
                   </div>
                 </div>
 
+                {/* Manage Predictions Toggle Button */}
+                <div className="mt-4 pt-4 border-t border-white/10 flex justify-end">
+                  <button 
+                    onClick={() => setActiveMatchId(activeMatchId === match.id ? null : match.id)}
+                    className="text-sm font-bold text-wc-purple hover:text-wc-purple-light"
+                  >
+                    {activeMatchId === match.id ? "Hide Predictions" : "Manage Predictions"}
+                  </button>
+                </div>
+
+                {/* Manage Predictions Panel */}
+                {activeMatchId === match.id && (
+                  <div className="mt-4 bg-black/40 rounded-xl p-4 border border-white/5 space-y-3">
+                    <h3 className="font-bold text-white/80 mb-2">User Predictions</h3>
+                    {users.map(u => {
+                      const userPred = predictions.find(p => p.match_id === match.id && p.user_id === u.id);
+                      return (
+                        <div key={u.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-2 hover:bg-white/5 rounded-lg border border-white/5 gap-2">
+                          <div className="text-sm font-medium">{u.display_name} <span className="text-white/30 text-xs">({u.email})</span></div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              className="w-12 bg-black border border-white/20 rounded p-1 text-center text-sm"
+                              placeholder="-"
+                              value={userPred?.home_prediction ?? ""}
+                              onChange={(e) => handleUpdatePrediction(
+                                userPred?.id || null, 
+                                match.id, 
+                                u.id, 
+                                { home_prediction: e.target.value === "" ? 0 : parseInt(e.target.value) }
+                              )}
+                            />
+                            <span className="text-white/40">-</span>
+                            <input
+                              type="number"
+                              className="w-12 bg-black border border-white/20 rounded p-1 text-center text-sm"
+                              placeholder="-"
+                              value={userPred?.away_prediction ?? ""}
+                              onChange={(e) => handleUpdatePrediction(
+                                userPred?.id || null, 
+                                match.id, 
+                                u.id, 
+                                { away_prediction: e.target.value === "" ? 0 : parseInt(e.target.value) }
+                              )}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             ))}
           </div>

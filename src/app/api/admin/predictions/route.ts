@@ -28,28 +28,55 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Proceed to update prediction
-    const { predictionId, home_prediction, away_prediction, points_earned } = await req.json();
+    // Proceed to update or create prediction
+    const { predictionId, user_id, match_id, home_prediction, away_prediction, points_earned } = await req.json();
 
-    const updateData: any = {
+    const upsertData: any = {
       home_prediction: Number(home_prediction),
       away_prediction: Number(away_prediction),
       updated_at: new Date().toISOString()
     };
 
     if (points_earned !== undefined && points_earned !== "") {
-      updateData.points_earned = Number(points_earned);
+      upsertData.points_earned = Number(points_earned);
     }
 
-    const { data: updated, error: updateError } = await supabaseAdmin
-      .from("predictions")
-      .update(updateData)
-      .eq("id", predictionId);
-
-    if (updateError) throw updateError;
+    let updated;
+    
+    if (predictionId) {
+      // Update existing prediction
+      const { data, error } = await supabaseAdmin
+        .from("predictions")
+        .update(upsertData)
+        .eq("id", predictionId)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      updated = data;
+    } else if (user_id && match_id) {
+      // Insert new prediction since ID was not provided
+      upsertData.id = crypto.randomUUID();
+      upsertData.user_id = user_id;
+      upsertData.match_id = match_id;
+      upsertData.points_earned = upsertData.points_earned || 0;
+      upsertData.scored = false;
+      upsertData.created_at = new Date().toISOString();
+      
+      const { data, error } = await supabaseAdmin
+        .from("predictions")
+        .insert(upsertData)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      updated = data;
+    } else {
+      throw new Error("Missing predictionId or (user_id and match_id)");
+    }
     
     return NextResponse.json({
-      message: "Prediction updated successfully",
+      message: "Prediction saved successfully",
       updated
     });
 
