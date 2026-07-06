@@ -32,7 +32,6 @@ export const metadata: Metadata = {
   title: "WC26 Predictions | World Cup 2026",
   description:
     "Predict World Cup 2026 knockout stage scores and compete on the global leaderboard. Make your picks before each match kicks off!",
-  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -58,6 +57,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${outfit.variable} ${inter.variable} ${fifa.variable}`}>
+      <head>
+        <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
+      </head>
       <body className="font-body text-gray-900 antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0 relative">
         <div className="wc-bg-pattern" />
         <Navigation />
