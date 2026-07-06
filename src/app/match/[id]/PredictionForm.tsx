@@ -8,6 +8,7 @@ import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { NeonButton } from "@/components/ui/NeonButton";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { useEffect } from "react";
 
 interface Props {
   match: Match;
@@ -27,8 +28,34 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
   const router = useRouter();
   const supabase = createClient();
 
-  // Match is locked if it has already started
-  const isLocked = new Date(match.start_time).getTime() < Date.now();
+  const [timeLeft, setTimeLeft] = useState<string>("");
+  const [isLocked, setIsLocked] = useState(false);
+
+  useEffect(() => {
+    const matchTime = new Date(match.start_time).getTime();
+    
+    const updateTimer = () => {
+      const now = Date.now();
+      if (now >= matchTime) {
+        setIsLocked(true);
+        setTimeLeft("00:00:00");
+        return;
+      }
+
+      const diff = matchTime - now;
+      const h = Math.floor(diff / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft(
+        `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+      );
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [match.start_time]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,9 +96,17 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
   };
 
   return (
-    <GlassCard className="mt-8 p-6 md:p-8 max-w-2xl mx-auto text-center" glow="purple">
-      <h3 className="font-display font-bold text-2xl mb-2">Your Prediction</h3>
-      <p className="text-white/50 mb-8">
+    <GlassCard className="mt-8 p-6 md:p-8 max-w-2xl mx-auto text-center relative overflow-hidden" glow="purple">
+      
+      {/* Ticking Timer */}
+      <div className="mb-8">
+        <h3 className="font-display font-bold text-lg mb-2 text-white/50 uppercase tracking-widest">Time Until Kickoff</h3>
+        <div className={`font-fifa text-5xl md:text-6xl tracking-widest ${isLocked ? 'text-wc-red' : 'text-wc-cyan drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]'}`}>
+          {isLocked ? "MATCH LIVE" : timeLeft}
+        </div>
+      </div>
+
+      <p className="text-white/50 mb-8 font-semibold">
         {isLocked
           ? "This match is locked. Predictions can no longer be edited."
           : "Enter your predicted scoreline below before kickoff."}

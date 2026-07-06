@@ -59,14 +59,51 @@
 
 html {
   scroll-behavior: smooth;
+  --color-wc-darker: #060913;
 }
 
 body {
-  background-color: #0A0A0F;
+  background-color: var(--color-wc-black);
   color: #ffffff;
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─────────────────────────────────────────────────────────
+   WC26 Decorative Background
+   ───────────────────────────────────────────────────────── */
+.wc-bg-pattern {
+  position: fixed;
+  inset: 0;
+  z-index: -50;
+  background-color: #0d0914; /* Deep, rich very dark purple/black base */
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(44, 55, 229, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(227, 26, 34, 0.05) 0%, transparent 60%);
+  overflow: hidden;
+}
+
+.wc-bg-watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-fifa);
+  font-size: 80vh;
+  line-height: 0.8;
+  color: rgba(255, 255, 255, 0.02);
+  z-index: -40;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .wc-bg-watermark {
+    font-size: 50vh;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────

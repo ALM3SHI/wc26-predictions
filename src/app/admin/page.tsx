@@ -31,20 +31,36 @@ export default async function AdminPage() {
     .select("*")
     .order("start_time", { ascending: false });
 
+  // Fetch all users
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("*")
+    .order("total_points", { ascending: false });
+
+  // Fetch all predictions
+  const { data: predictions } = await supabase
+    .from("predictions")
+    .select(`
+      *,
+      matches ( home_team, away_team )
+    `)
+    .order("updated_at", { ascending: false });
+
   return (
     <div className="min-h-screen pt-8 pb-24 px-4 sm:px-6 relative overflow-hidden">
-      <div className="absolute top-0 right-[-20%] w-[600px] h-[600px] bg-wc-red/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 left-[-20%] w-[600px] h-[600px] bg-wc-blue/5 rounded-full blur-[150px] pointer-events-none" />
-
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="max-w-7xl mx-auto relative z-10">
         <header className="mb-12 text-center">
           <h1 className="font-fifa text-5xl sm:text-7xl tracking-tighter mb-4 uppercase text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
             SUPER <span className="text-wc-red">ADMIN</span>
           </h1>
-          <p className="text-white/60">Manage matches, override scores, and trigger points calculation.</p>
+          <p className="text-white/60">Manage matches, override scores, create users, and edit predictions.</p>
         </header>
 
-        <AdminClient initialMatches={matches || []} />
+        <AdminClient 
+          initialMatches={matches || []} 
+          initialUsers={profiles || []}
+          initialPredictions={predictions || []}
+        />
       </div>
     </div>
   );
