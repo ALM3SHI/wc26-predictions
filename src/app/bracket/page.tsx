@@ -124,13 +124,13 @@ export default async function BracketPage() {
                             : "bg-white/10 hover:bg-white/20"
                         }`}
                       >
-                        <div className="bg-wc-surface-light h-full rounded-2xl p-4 flex flex-col justify-between">
+                        <div className={`h-full rounded-2xl p-5 flex flex-col justify-between backdrop-blur-xl border-t border-white/5 ${isLive ? 'bg-wc-black/60' : 'bg-wc-surface/90'}`}>
                           {/* Match Header */}
-                          <div className="flex justify-between items-start mb-4 text-xs font-semibold uppercase tracking-wider text-white/50">
+                          <div className="flex justify-between items-start mb-6 text-xs font-semibold uppercase tracking-wider text-white/50">
                             <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
+                              <Clock className="w-3.5 h-3.5" />
                               {isLive ? (
-                                <span className="text-wc-green animate-pulse">Live</span>
+                                <span className="text-wc-green font-bold animate-pulse drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]">Live</span>
                               ) : isFinished ? (
                                 "FT"
                               ) : (
@@ -150,33 +150,33 @@ export default async function BracketPage() {
                           </div>
 
                           {/* Teams & Scores */}
-                          <div className="space-y-3 font-display text-lg">
+                          <div className="space-y-4 font-display text-lg">
                             {/* Home Team */}
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
                               <div className="flex items-center gap-3">
                                 {match.home_team_logo ? (
-                                  <img src={match.home_team_logo} alt={match.home_team} className="w-6 h-6 object-contain" />
+                                  <img src={match.home_team_logo} alt={match.home_team} className="w-8 h-8 rounded-full object-cover shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-white/10" />
                                 ) : (
-                                  <div className="w-6 h-6 rounded-full bg-white/10" />
+                                  <div className="w-8 h-8 rounded-full bg-white/10" />
                                 )}
-                                <span className="font-bold truncate max-w-[120px]">{match.home_team}</span>
+                                <span className="font-bold tracking-wide truncate max-w-[120px]">{match.home_team}</span>
                               </div>
-                              <span className={`font-black ${isLive ? 'text-wc-green' : 'text-white'}`}>
+                              <span className={`font-black text-2xl ${isLive ? 'text-wc-green drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'text-white'}`}>
                                 {match.home_score ?? "-"}
                               </span>
                             </div>
 
                             {/* Away Team */}
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
                               <div className="flex items-center gap-3">
                                 {match.away_team_logo ? (
-                                  <img src={match.away_team_logo} alt={match.away_team} className="w-6 h-6 object-contain" />
+                                  <img src={match.away_team_logo} alt={match.away_team} className="w-8 h-8 rounded-full object-cover shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-white/10" />
                                 ) : (
-                                  <div className="w-6 h-6 rounded-full bg-white/10" />
+                                  <div className="w-8 h-8 rounded-full bg-white/10" />
                                 )}
-                                <span className="font-bold truncate max-w-[120px]">{match.away_team}</span>
+                                <span className="font-bold tracking-wide truncate max-w-[120px]">{match.away_team}</span>
                               </div>
-                              <span className={`font-black ${isLive ? 'text-wc-green' : 'text-white'}`}>
+                              <span className={`font-black text-2xl ${isLive ? 'text-wc-green drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'text-white'}`}>
                                 {match.away_score ?? "-"}
                               </span>
                             </div>
