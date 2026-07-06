@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { User, MessageSquare, Wallet, MapPin, Grid, Ticket, Gamepad2, Coffee, LayoutGrid } from "lucide-react";
+import { User, MessageSquare, Wallet, Trophy, Settings, Shield, Info, LayoutGrid } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
@@ -7,12 +7,12 @@ export default async function HomePage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   const quickAccess = [
-    { label: "Stadiums", icon: MapPin, color: "bg-orange-500", href: "#" },
-    { label: "Cities", icon: MapPin, color: "bg-pink-500", href: "#" },
-    { label: "Tournament", icon: LayoutGrid, color: "bg-blue-500", href: "/bracket" },
-    { label: "Tickets", icon: Ticket, color: "bg-indigo-500", href: "#" },
-    { label: "Play Zone", icon: Gamepad2, color: "bg-teal-400", href: "#" },
-    { label: "Hospitality", icon: Coffee, color: "bg-purple-500", href: "#" },
+    { label: "Matches", icon: LayoutGrid, color: "bg-blue-500", href: "/bracket" },
+    { label: "Leaderboard", icon: Trophy, color: "bg-yellow-500", href: "/leaderboard" },
+    { label: "My Profile", icon: User, color: "bg-pink-500", href: user ? `/user/${user.id}` : "/login" },
+    { label: "Settings", icon: Settings, color: "bg-gray-700", href: "/settings" },
+    { label: "Admin Panel", icon: Shield, color: "bg-red-500", href: "/admin" },
+    { label: "How to Play", icon: Info, color: "bg-teal-400", href: "#" },
   ];
 
   return (
@@ -37,27 +37,18 @@ export default async function HomePage() {
 
       <div className="max-w-4xl mx-auto px-4 mt-4 space-y-6">
         
-        {/* Teams Banner */}
-        <div className="relative w-full h-[250px] md:h-[350px] bg-gray-900 rounded-[2rem] overflow-hidden shadow-md">
+        {/* Predictions Banner */}
+        <Link href="/bracket" className="block relative w-full h-[250px] md:h-[350px] bg-gray-900 rounded-[2rem] overflow-hidden shadow-md hover:scale-[1.01] transition-transform">
           {/* A gradient placeholder representing the players background */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-gray-900 via-gray-800 to-black opacity-80" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-wc-purple via-gray-800 to-wc-cyan opacity-80" />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-white/10 font-fifa text-8xl">26</span>
+            <span className="text-white/10 font-fifa text-8xl">WC26</span>
           </div>
           <div className="absolute bottom-6 left-6 z-10 text-white">
-            <h2 className="font-bold text-3xl mb-1 drop-shadow-md">Teams</h2>
-            <p className="text-white/80 text-sm font-medium">News, latest scores and more for every team.</p>
+            <h2 className="font-bold text-3xl mb-1 drop-shadow-md">Predict & Win</h2>
+            <p className="text-white/80 text-sm font-medium">Predict the outcomes, earn points, and top the global leaderboard.</p>
           </div>
-        </div>
-
-        {/* City Selector */}
-        <button className="w-full bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3 text-blue-600 font-bold">
-            <MapPin className="w-5 h-5" />
-            <span className="text-gray-900">Select your city</span>
-          </div>
-          <span className="text-gray-400 font-bold">&gt;</span>
-        </button>
+        </Link>
 
         {/* Quick Access */}
         <div>
