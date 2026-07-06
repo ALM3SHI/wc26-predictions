@@ -146,77 +146,67 @@ export default function AdminClient({
             </button>
           </div>
 
-          <div className="bg-white/5 rounded-[2rem] border border-white/10 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-black/50 text-white/60 uppercase tracking-wider font-bold text-xs">
-                  <tr>
-                    <th className="p-4">Match</th>
-                    <th className="p-4">Time</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Score</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {matches.map((match) => (
-                    <tr key={match.id} className="hover:bg-white/5 transition-colors">
-                      <td className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                        <select
-                          className="bg-black border border-white/20 rounded p-1 max-w-[120px]"
-                          value={match.home_team}
-                          onChange={(e) => handleUpdateMatch(match.id, { home_team: e.target.value })}
-                        >
-                          {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                        <span className="text-white/40 text-xs font-bold">VS</span>
-                        <select
-                          className="bg-black border border-white/20 rounded p-1 max-w-[120px]"
-                          value={match.away_team}
-                          onChange={(e) => handleUpdateMatch(match.id, { away_team: e.target.value })}
-                        >
-                          {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </td>
-                      <td className="p-4 text-white/60">
-                        {new Date(match.start_time).toLocaleString()}
-                      </td>
-                      <td className="p-4">
-                        <select
-                          className="bg-black border border-white/20 rounded p-1"
-                          value={match.status}
-                          onChange={(e) => handleUpdateMatch(match.id, { status: e.target.value as any })}
-                        >
-                          <option value="NS">NS (Not Started)</option>
-                          <option value="1H">1H (Live)</option>
-                          <option value="HT">HT (Half Time)</option>
-                          <option value="2H">2H (Live)</option>
-                          <option value="FT">FT (Finished)</option>
-                        </select>
-                      </td>
-                      <td className="p-4 flex items-center gap-2">
-                        <input
-                          type="number"
-                          className="w-12 bg-black border border-white/20 rounded p-1 text-center"
-                          value={match.home_score ?? ""}
-                          onChange={(e) =>
-                            handleUpdateMatch(match.id, { home_score: parseInt(e.target.value) || 0 })
-                          }
-                        />
-                        <span>-</span>
-                        <input
-                          type="number"
-                          className="w-12 bg-black border border-white/20 rounded p-1 text-center"
-                          value={match.away_score ?? ""}
-                          onChange={(e) =>
-                            handleUpdateMatch(match.id, { away_score: parseInt(e.target.value) || 0 })
-                          }
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-4">
+            {matches.map((match) => (
+              <div key={match.id} className="bg-white/5 rounded-2xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                
+                {/* Match Teams */}
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <select
+                    className="bg-black border border-white/20 rounded-lg p-2 min-w-[120px] text-center"
+                    value={match.home_team}
+                    onChange={(e) => handleUpdateMatch(match.id, { home_team: e.target.value })}
+                  >
+                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <span className="text-white/40 text-xs font-bold px-2">VS</span>
+                  <select
+                    className="bg-black border border-white/20 rounded-lg p-2 min-w-[120px] text-center"
+                    value={match.away_team}
+                    onChange={(e) => handleUpdateMatch(match.id, { away_team: e.target.value })}
+                  >
+                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+
+                {/* Match Time & Status */}
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="text-white/60 text-xs text-center md:text-left min-w-[100px]">
+                    {new Date(match.start_time).toLocaleString()}
+                  </div>
+                  
+                  <select
+                    className="bg-black border border-white/20 rounded-lg p-2 min-w-[140px]"
+                    value={match.status}
+                    onChange={(e) => handleUpdateMatch(match.id, { status: e.target.value as any })}
+                  >
+                    <option value="NS">NS (Not Started)</option>
+                    <option value="1H">1H (Live)</option>
+                    <option value="HT">HT (Half Time)</option>
+                    <option value="2H">2H (Live)</option>
+                    <option value="FT">FT (Finished)</option>
+                  </select>
+
+                  {/* Score */}
+                  <div className="flex items-center gap-2 bg-black/50 p-2 rounded-lg border border-white/10">
+                    <input
+                      type="number"
+                      className="w-14 bg-transparent border-b border-white/20 p-1 text-center font-bold outline-none focus:border-wc-cyan"
+                      value={match.home_score ?? ""}
+                      onChange={(e) => handleUpdateMatch(match.id, { home_score: parseInt(e.target.value) || 0 })}
+                    />
+                    <span className="text-white/40">-</span>
+                    <input
+                      type="number"
+                      className="w-14 bg-transparent border-b border-white/20 p-1 text-center font-bold outline-none focus:border-wc-cyan"
+                      value={match.away_score ?? ""}
+                      onChange={(e) => handleUpdateMatch(match.id, { away_score: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+
+              </div>
+            ))}
           </div>
         </div>
       )}

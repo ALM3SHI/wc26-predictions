@@ -34,7 +34,7 @@ export default function SignupPage() {
       return;
     }
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -51,7 +51,13 @@ export default function SignupPage() {
       return;
     }
 
-    setSuccess(true);
+    if (data?.session) {
+      // Auto signed in (email confirmation is off in Supabase)
+      router.push("/");
+      router.refresh();
+    } else {
+      setSuccess(true);
+    }
     setLoading(false);
   };
 
