@@ -9,7 +9,7 @@ export default async function HomePage() {
   let userProfile = null;
   let userRank = 0;
   if (user) {
-    const { data } = await supabase.from("profiles").select("total_points, display_name, avatar_url").eq("id", user.id).single();
+    const { data } = await supabase.from("profiles").select("total_points, display_name, avatar_url, is_admin").eq("id", user.id).single();
     userProfile = data;
     if (data) {
       const { count } = await supabase.from("profiles").select("id", { count: "exact" }).gt("total_points", data.total_points || 0);
@@ -22,7 +22,7 @@ export default async function HomePage() {
     { label: "Leaderboard", icon: Trophy, image: "/images/qa-leaderboard.jpg", color: "bg-yellow-500", href: "/leaderboard" },
     { label: "My Profile", icon: User, image: "/images/qa-profile.jpg", color: "bg-pink-500", href: user ? `/user/${user.id}` : "/login" },
     { label: "Settings", icon: Settings, image: "/images/qa-settings.jpg", color: "bg-gray-700", href: "/settings" },
-    { label: "Admin Panel", icon: Shield, image: "/images/qa-admin.jpg", color: "bg-red-500", href: "/admin" },
+    ...(userProfile?.is_admin ? [{ label: "Admin Panel", icon: Shield, image: "/images/qa-admin.jpg", color: "bg-red-500", href: "/admin" }] : []),
     { label: "How to Play", icon: Info, image: "/images/qa-info.jpg", color: "bg-teal-400", href: "#" },
   ];
 
