@@ -100,13 +100,11 @@ export default async function LeaderboardPage() {
 
                       {/* Avatar & Name */}
                       <div className="flex-1 flex items-center gap-4">
-                        {entry.avatar_url ? (
-                          <img src={entry.avatar_url} alt={entry.display_name} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center font-bold text-wc-purple">
-                            {entry.display_name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        <img 
+                          src={entry.avatar_url || "/images/default-avatar.png"} 
+                          alt={entry.display_name} 
+                          className="w-10 h-10 rounded-full object-cover border border-gray-200" 
+                        />
                         <div>
                           <div className="font-bold text-lg flex items-center gap-2 text-gray-900">
                             {entry.display_name}

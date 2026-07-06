@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Clock, CalendarDays, MapPin } from "lucide-react";
 import PredictionForm from "./PredictionForm";
+import { getFlagPath } from "@/lib/utils";
 
 // Force dynamic since it relies on user session and real-time DB data
 export const dynamic = 'force-dynamic';
@@ -100,12 +101,12 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
               
               {/* Home Team */}
               <div className="flex items-center gap-4">
-                {match.home_team_logo ? (
-                  <img src={match.home_team_logo} alt={match.home_team} className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm border-2 border-gray-100" />
-                ) : (
-                  <div className="w-16 h-12 sm:w-20 sm:h-14 bg-gray-100 rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm" />
-                )}
-                <span className="hidden sm:block font-fifa text-4xl uppercase text-gray-900">{match.home_team.slice(0, 3)}</span>
+                <img 
+                  src={getFlagPath(match.home_team)} 
+                  alt={match.home_team} 
+                  className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-sm border border-gray-100" 
+                />
+                <span className="hidden sm:block font-bold text-3xl uppercase text-gray-900">{match.home_team.slice(0, 3)}</span>
               </div>
 
               {/* Score Box */}
@@ -131,12 +132,12 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
 
               {/* Away Team */}
               <div className="flex items-center gap-4">
-                <span className="hidden sm:block font-fifa text-4xl uppercase text-gray-900">{match.away_team.slice(0, 3)}</span>
-                {match.away_team_logo ? (
-                  <img src={match.away_team_logo} alt={match.away_team} className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm border-2 border-gray-100" />
-                ) : (
-                  <div className="w-16 h-12 sm:w-20 sm:h-14 bg-gray-100 rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm" />
-                )}
+                <span className="hidden sm:block font-bold text-3xl uppercase text-gray-900">{match.away_team.slice(0, 3)}</span>
+                <img 
+                  src={getFlagPath(match.away_team)} 
+                  alt={match.away_team} 
+                  className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-sm border border-gray-100" 
+                />
               </div>
             </div>
 

@@ -6,8 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
-import { NeonButton } from "@/components/ui/NeonButton";
-import { GlassCard } from "@/components/ui/GlassCard";
+import { getFlagPath } from "@/lib/utils";
 import { useEffect } from "react";
 
 interface Props {
@@ -96,7 +95,7 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
   };
 
   return (
-    <GlassCard className="mt-8 p-6 md:p-8 max-w-2xl mx-auto text-center relative overflow-hidden shadow-md border border-gray-200 bg-white" glow="purple">
+    <div className="mt-8 p-6 md:p-8 max-w-2xl mx-auto text-center relative overflow-hidden shadow-sm border border-gray-200 bg-white rounded-2xl">
       
       {/* Ticking Timer */}
       <div className="mb-8">
@@ -116,11 +115,11 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
         <div className="flex items-center justify-center gap-4 md:gap-8 mb-8">
           {/* Home Team Input */}
           <div className="flex flex-col items-center gap-3">
-            {match.home_team_logo ? (
-              <img src={match.home_team_logo} alt={match.home_team} className="w-16 h-16 object-contain" />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-gray-100" />
-            )}
+            <img 
+              src={getFlagPath(match.home_team)} 
+              alt={match.home_team} 
+              className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-sm border border-gray-100" 
+            />
             <span className="font-bold font-display text-lg hidden sm:block text-gray-900">{match.home_team}</span>
             <input
               type="number"
@@ -137,11 +136,11 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
 
           {/* Away Team Input */}
           <div className="flex flex-col items-center gap-3">
-            {match.away_team_logo ? (
-              <img src={match.away_team_logo} alt={match.away_team} className="w-16 h-16 object-contain" />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-gray-100" />
-            )}
+            <img 
+              src={getFlagPath(match.away_team)} 
+              alt={match.away_team} 
+              className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-sm border border-gray-100" 
+            />
             <span className="font-bold font-display text-lg hidden sm:block text-gray-900">{match.away_team}</span>
             <input
               type="number"
@@ -175,18 +174,16 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
         )}
 
         {!isLocked && (
-          <NeonButton
+          <button
             type="submit"
-            variant="purple"
-            size="lg"
-            className="w-full sm:w-auto min-w-[200px]"
+            className="w-full sm:w-auto min-w-[200px] px-8 py-4 bg-wc-purple text-white font-bold rounded-xl hover:bg-wc-purple-light transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
             disabled={loading}
-            loading={loading}
           >
+            {loading && <Loader2 className="w-5 h-5 animate-spin" />}
             {prediction ? "Update Prediction" : "Save Prediction"}
-          </NeonButton>
+          </button>
         )}
       </form>
-    </GlassCard>
+    </div>
   );
 }

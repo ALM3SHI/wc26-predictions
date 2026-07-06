@@ -9,7 +9,7 @@ export default async function HomePage() {
   let userProfile = null;
   let userRank = 0;
   if (user) {
-    const { data } = await supabase.from("profiles").select("total_points, display_name").eq("id", user.id).single();
+    const { data } = await supabase.from("profiles").select("total_points, display_name, avatar_url").eq("id", user.id).single();
     userProfile = data;
     if (data) {
       const { count } = await supabase.from("profiles").select("id", { count: "exact" }).gt("total_points", data.total_points || 0);
@@ -30,8 +30,14 @@ export default async function HomePage() {
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Top Header */}
       <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
-        <Link href={user ? "/user/" + user.id : "/login"} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200">
-          <User className="w-5 h-5" />
+        <Link href={user ? "/user/" + user.id : "/login"} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 overflow-hidden">
+          {userProfile?.avatar_url ? (
+            <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+          ) : user ? (
+            <img src="/images/default-avatar.png" alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            <User className="w-5 h-5" />
+          )}
         </Link>
         <div className="font-display font-black text-2xl tracking-tighter">
           26
@@ -50,8 +56,8 @@ export default async function HomePage() {
         
         {/* Predictions Banner */}
         <Link href="/bracket" className="block relative w-full h-[250px] md:h-[350px] bg-gray-900 rounded-[2rem] overflow-hidden shadow-md hover:scale-[1.01] transition-transform">
-          {/* A gradient placeholder representing the players background */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-wc-purple via-gray-800 to-wc-cyan opacity-80" />
+          <img src="/images/home-banner.jpg" alt="Home Banner" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <span className="text-white/10 font-fifa text-8xl">WC26</span>
           </div>

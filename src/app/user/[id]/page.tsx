@@ -65,7 +65,12 @@ export default async function UserProfilePage(props: { params: Promise<{ id: str
             Back to Leaderboard
           </Link>
 
-          <div className="text-center mb-12">
+          <div className="text-center mb-12 flex flex-col items-center">
+            <img 
+              src={profile.avatar_url || "/images/default-avatar.png"} 
+              alt={profile.display_name} 
+              className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md mb-6" 
+            />
             <h1 className="font-fifa text-5xl sm:text-7xl uppercase text-gray-900 mb-4">
               {profile.display_name}
             </h1>

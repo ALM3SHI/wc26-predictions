@@ -78,24 +78,18 @@ body {
   inset: 0;
   z-index: -50;
   background-color: #F9FAFB;
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.03), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.03), transparent 25%),
-    radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.03), transparent 25%);
+  background-image: url('/images/pattern.png');
+  background-size: cover;
   background-attachment: fixed;
+  background-position: center;
+  opacity: 0.8;
 }
 
 .wc-bg-pattern::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: 
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
-  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
-  opacity: 0.5;
+  background: linear-gradient(to bottom, rgba(249, 250, 251, 0.5), #F9FAFB);
 }
 
 /* ─────────────────────────────────────────────────────────

@@ -17,6 +17,8 @@ function formatMatchTime(dateString: string) {
 }
 
 export const dynamic = 'force-dynamic';
+import { getFlagPath } from "@/lib/utils";
+
 export const revalidate = 0;
 
 export default async function BracketPage() {
@@ -147,31 +149,27 @@ export default async function BracketPage() {
                               {/* Home Team */}
                               <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-4">
-                                  {match.home_team_logo ? (
-                                    <img src={match.home_team_logo} alt={match.home_team} className="w-12 h-10 object-cover rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm border-2 border-gray-100" />
-                                  ) : (
-                                    <div className="w-12 h-10 bg-gray-100 rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm" />
-                                  )}
-                                  <span className="font-fifa text-2xl uppercase tracking-wide text-gray-900">{match.home_team}</span>
+                                  <img 
+                                    src={getFlagPath(match.home_team)} 
+                                    alt={match.home_team} 
+                                    className="w-8 h-8 object-cover rounded-full shadow-sm border border-gray-100" 
+                                  />
+                                  <span className="font-bold text-gray-900 truncate max-w-[120px]">{match.home_team}</span>
                                 </div>
-                                <div className={`w-12 h-12 flex items-center justify-center rounded-xl font-fifa text-3xl ${isLive || isFinished ? 'bg-wc-cyan text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                  {match.home_score ?? "-"}
-                                </div>
+                                <span className="font-black text-xl text-gray-900">{match.home_score !== null ? match.home_score : "-"}</span>
                               </div>
 
                               {/* Away Team */}
-                              <div className="flex justify-between items-center">
+                              <div className="flex justify-between items-center mt-2">
                                 <div className="flex items-center gap-4">
-                                  {match.away_team_logo ? (
-                                    <img src={match.away_team_logo} alt={match.away_team} className="w-12 h-10 object-cover rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm border-2 border-gray-100" />
-                                  ) : (
-                                    <div className="w-12 h-10 bg-gray-100 rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm" />
-                                  )}
-                                  <span className="font-fifa text-2xl uppercase tracking-wide text-gray-900">{match.away_team}</span>
+                                  <img 
+                                    src={getFlagPath(match.away_team)} 
+                                    alt={match.away_team} 
+                                    className="w-8 h-8 object-cover rounded-full shadow-sm border border-gray-100" 
+                                  />
+                                  <span className="font-bold text-gray-900 truncate max-w-[120px]">{match.away_team}</span>
                                 </div>
-                                <div className={`w-12 h-12 flex items-center justify-center rounded-xl font-fifa text-3xl ${isLive || isFinished ? 'bg-wc-cyan text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                  {match.away_score ?? "-"}
-                                </div>
+                                <span className="font-black text-xl text-gray-900">{match.away_score !== null ? match.away_score : "-"}</span>
                               </div>
                             </div>
 
