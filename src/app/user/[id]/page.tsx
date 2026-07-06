@@ -37,6 +37,7 @@ export default async function UserProfilePage(props: { params: Promise<{ id: str
       home_prediction,
       away_prediction,
       points_earned,
+      scored,
       matches (
         id,
         home_team,
@@ -50,7 +51,6 @@ export default async function UserProfilePage(props: { params: Promise<{ id: str
       )
     `)
     .eq("user_id", userId)
-    .not("points_earned", "is", null) // Only show processed/finished matches
     .order("updated_at", { ascending: false });
 
   return (
@@ -97,10 +97,21 @@ export default async function UserProfilePage(props: { params: Promise<{ id: str
                       <div className="flex-1 flex items-center justify-between font-fifa text-2xl uppercase text-gray-900">
                         <span className="flex-1 text-right">{match.home_team}</span>
                         <div className="px-6 flex flex-col items-center">
-                          <span className="text-wc-cyan text-3xl">
-                            {match.home_score} - {match.away_score}
-                          </span>
-                          <span className="text-gray-400 text-sm tracking-widest mt-1">ACTUAL</span>
+                          {match.status === 'FT' || match.status === 'AET' || match.status === 'PEN' ? (
+                            <>
+                              <span className="text-wc-cyan text-3xl">
+                                {match.home_score} - {match.away_score}
+                              </span>
+                              <span className="text-gray-400 text-sm tracking-widest mt-1">ACTUAL</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-gray-400 text-3xl">-</span>
+                              <span className="text-gray-400 text-sm tracking-widest mt-1">
+                                {match.status === 'NS' ? 'UPCOMING' : 'LIVE'}
+                              </span>
+                            </>
+                          )}
                         </div>
                         <span className="flex-1 text-left">{match.away_team}</span>
                       </div>
@@ -112,7 +123,11 @@ export default async function UserProfilePage(props: { params: Promise<{ id: str
                           {pred.home_prediction} - {pred.away_prediction}
                         </div>
                         
-                        {pred.points_earned === 3 ? (
+                        {!pred.scored ? (
+                          <div className="flex items-center gap-1.5 text-gray-500 bg-gray-100 px-3 py-1 rounded-md text-sm font-bold">
+                            PENDING
+                          </div>
+                        ) : pred.points_earned === 3 ? (
                           <div className="flex items-center gap-1.5 text-wc-green bg-wc-green/10 px-3 py-1 rounded-md text-sm font-bold">
                             <CheckCircle2 className="w-4 h-4" /> EXACT (+3)
                           </div>

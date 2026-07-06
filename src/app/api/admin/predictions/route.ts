@@ -32,14 +32,12 @@ export async function POST(req: Request) {
     const { predictionId, user_id, match_id, home_prediction, away_prediction, points_earned } = await req.json();
 
     const upsertData: any = {
-      home_prediction: Number(home_prediction),
-      away_prediction: Number(away_prediction),
       updated_at: new Date().toISOString()
     };
 
-    if (points_earned !== undefined && points_earned !== "") {
-      upsertData.points_earned = Number(points_earned);
-    }
+    if (home_prediction !== undefined) upsertData.home_prediction = Number(home_prediction);
+    if (away_prediction !== undefined) upsertData.away_prediction = Number(away_prediction);
+    if (points_earned !== undefined && points_earned !== "") upsertData.points_earned = Number(points_earned);
 
     let updated;
     

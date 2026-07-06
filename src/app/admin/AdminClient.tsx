@@ -133,6 +133,28 @@ export default function AdminClient({
     }
   };
 
+  const handleUpdateUser = async (userId: string, updates: any) => {
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      
+      const res = await fetch("/api/admin/users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId, updates })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update user");
+      
+      setUsers(users.map(u => u.id === userId ? { ...u, ...updates } : u));
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
   // Prediction Functions
   const handleUpdatePrediction = async (
     predId: string | null,
@@ -374,7 +396,14 @@ export default function AdminClient({
                   <tr key={u.id} className="hover:bg-gray-50">
                     <td className="p-4 font-mono text-xs text-gray-400">{u.id.substring(0,8)}...</td>
                     <td className="p-4 font-bold text-gray-900">{u.display_name}</td>
-                    <td className="p-4 text-wc-purple font-bold">{u.total_points}</td>
+                    <td className="p-4 font-bold">
+                      <input
+                        type="number"
+                        className="w-20 bg-gray-50 border border-gray-200 rounded p-1 text-center text-wc-purple"
+                        value={u.total_points ?? ""}
+                        onChange={(e) => handleUpdateUser(u.id, { total_points: parseInt(e.target.value) || 0 })}
+                      />
+                    </td>
                     <td className="p-4 text-gray-700">{u.is_admin ? "YES" : "NO"}</td>
                   </tr>
                 ))}

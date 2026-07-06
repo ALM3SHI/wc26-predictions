@@ -18,12 +18,12 @@ export default async function HomePage() {
   }
 
   const quickAccess = [
-    { label: "Matches", icon: LayoutGrid, color: "bg-blue-500", href: "/bracket" },
-    { label: "Leaderboard", icon: Trophy, color: "bg-yellow-500", href: "/leaderboard" },
-    { label: "My Profile", icon: User, color: "bg-pink-500", href: user ? `/user/${user.id}` : "/login" },
-    { label: "Settings", icon: Settings, color: "bg-gray-700", href: "/settings" },
-    { label: "Admin Panel", icon: Shield, color: "bg-red-500", href: "/admin" },
-    { label: "How to Play", icon: Info, color: "bg-teal-400", href: "#" },
+    { label: "Matches", icon: LayoutGrid, image: "/images/qa-matches.jpg", color: "bg-blue-500", href: "/bracket" },
+    { label: "Leaderboard", icon: Trophy, image: "/images/qa-leaderboard.jpg", color: "bg-yellow-500", href: "/leaderboard" },
+    { label: "My Profile", icon: User, image: "/images/qa-profile.jpg", color: "bg-pink-500", href: user ? `/user/${user.id}` : "/login" },
+    { label: "Settings", icon: Settings, image: "/images/qa-settings.jpg", color: "bg-gray-700", href: "/settings" },
+    { label: "Admin Panel", icon: Shield, image: "/images/qa-admin.jpg", color: "bg-red-500", href: "/admin" },
+    { label: "How to Play", icon: Info, image: "/images/qa-info.jpg", color: "bg-teal-400", href: "#" },
   ];
 
   return (
@@ -87,10 +87,15 @@ export default async function HomePage() {
           <div className="grid grid-cols-3 gap-3">
             {quickAccess.map((item) => (
               <Link key={item.label} href={item.href} className="flex flex-col gap-2">
-                <div className={`aspect-square rounded-2xl ${item.color} flex items-center justify-center text-white shadow-sm hover:scale-105 transition-transform relative overflow-hidden`}>
-                  <item.icon className="w-8 h-8 md:w-12 md:h-12 relative z-10" />
+                <div className={`aspect-square rounded-2xl ${item.color} flex items-center justify-center text-white shadow-sm hover:scale-[1.03] transition-transform relative overflow-hidden group`}>
+                  {/* Background Image */}
+                  <img src={item.image} alt={item.label} className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:opacity-80 transition-opacity" />
+                  
+                  {/* Icon */}
+                  <item.icon className="w-8 h-8 md:w-12 md:h-12 relative z-10 drop-shadow-md" />
+                  
                   {/* Subtle color bar at bottom matching the screenshot */}
-                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-wc-purple via-wc-red to-wc-green" />
+                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-wc-purple via-wc-red to-wc-green z-10" />
                 </div>
                 <span className="text-xs md:text-sm font-medium text-gray-700">{item.label}</span>
               </Link>
