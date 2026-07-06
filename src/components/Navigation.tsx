@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Trophy, LayoutGrid, Settings, LogOut, LogIn, ShieldAlert } from "lucide-react";
+import { Home, Trophy, LayoutGrid, Settings, LogOut, LogIn, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
@@ -39,8 +39,8 @@ export function Navigation() {
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
-  // Don't show nav on auth pages or home page (home has its own nav)
-  if (pathname === "/" || pathname === "/login" || pathname === "/signup") {
+  // Don't show nav on auth pages
+  if (pathname === "/login" || pathname === "/signup") {
     return null;
   }
 
@@ -50,6 +50,7 @@ export function Navigation() {
   };
 
   const navItems = [
+    { label: "Home", href: "/", icon: Home },
     { label: "Bracket", href: "/bracket", icon: LayoutGrid },
     { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { label: "Settings", href: "/settings", icon: Settings },
@@ -65,7 +66,7 @@ export function Navigation() {
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-gray-200 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-around p-2">
           {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href);
+            const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}

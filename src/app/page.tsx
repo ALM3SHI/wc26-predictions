@@ -6,6 +6,17 @@ export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  let userProfile = null;
+  let userRank = 0;
+  if (user) {
+    const { data } = await supabase.from("profiles").select("total_points, display_name").eq("id", user.id).single();
+    userProfile = data;
+    if (data) {
+      const { count } = await supabase.from("profiles").select("id", { count: "exact" }).gt("total_points", data.total_points || 0);
+      userRank = (count || 0) + 1;
+    }
+  }
+
   const quickAccess = [
     { label: "Matches", icon: LayoutGrid, color: "bg-blue-500", href: "/bracket" },
     { label: "Leaderboard", icon: Trophy, color: "bg-yellow-500", href: "/leaderboard" },
@@ -49,6 +60,20 @@ export default async function HomePage() {
             <p className="text-white/80 text-sm font-medium">Predict the outcomes, earn points, and top the global leaderboard.</p>
           </div>
         </Link>
+
+        {/* User Dashboard Stats (If Logged In) */}
+        {user && userProfile && (
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
+              <span className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Your Points</span>
+              <span className="text-3xl font-black text-gray-900">{userProfile.total_points || 0}</span>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
+              <span className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Global Rank</span>
+              <span className="text-3xl font-black text-blue-600">#{userRank}</span>
+            </div>
+          </div>
+        )}
 
         {/* Quick Access */}
         <div>
