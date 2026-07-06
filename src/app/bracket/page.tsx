@@ -87,9 +87,10 @@ export default async function BracketPage() {
       <div className="fixed bottom-[-100px] right-[-100px] w-[400px] h-[400px] bg-wc-cyan/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <header className="mb-12 text-center">
-          <h1 className="font-display font-black text-4xl sm:text-5xl tracking-tight mb-4">
-            Knockout <span className="text-gradient gradient-purple-cyan">Bracket</span>
+        <header className="mb-12 text-center flex flex-col items-center">
+          <h1 className="font-fifa text-6xl sm:text-7xl tracking-tighter mb-4 uppercase text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+            KNOCKOUT <br />
+            <span className="text-wc-cyan drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">BRACKET</span>
           </h1>
           <p className="text-white/60">
             Predict matches before kickoff. Green glowing matches are live!
@@ -102,8 +103,8 @@ export default async function BracketPage() {
 
             return (
               <section key={group.title} className="w-full">
-                <div className="flex items-center gap-4 mb-6">
-                  <h2 className={`font-display font-bold text-2xl ${group.color}`}>
+                <div className="flex items-center gap-4 mb-8">
+                  <h2 className={`font-fifa text-3xl uppercase tracking-wide ${group.color} drop-shadow-[0_0_10px_currentColor]`}>
                     {group.title}
                   </h2>
                   <div className={`h-px flex-1 bg-gradient-to-r ${group.line} to-transparent`} />
@@ -121,79 +122,78 @@ export default async function BracketPage() {
                       <Link
                         key={match.id}
                         href={`/match/${match.id}`}
-                        className={`block relative p-[1px] rounded-2xl overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] ${
-                          isLive
-                            ? "bg-gradient-to-b from-wc-green/50 to-wc-green/10 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
-                            : "bg-white/10 hover:bg-white/20"
-                        }`}
+                        className="block relative transition-transform hover:scale-[1.02] active:scale-[0.98]"
                       >
-                        <div className={`h-full rounded-2xl p-5 flex flex-col justify-between backdrop-blur-xl border-t border-white/5 ${isLive ? 'bg-wc-black/60' : 'bg-wc-surface/90'}`}>
-                          {/* Match Header */}
-                          <div className="flex justify-between items-start mb-6 text-xs font-semibold uppercase tracking-wider text-white/50">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5" />
-                              {isLive ? (
-                                <span className="text-wc-green font-bold animate-pulse drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]">Live</span>
-                              ) : isFinished ? (
-                                "FT"
-                              ) : (
-                                formatMatchTime(match.start_time)
-                              )}
-                            </span>
-                            {match.prediction ? (
-                              <span className="text-wc-purple-light flex items-center gap-1">
-                                <Trophy className="w-3 h-3" />
-                                Picked
+                        <div className="wc-border-gradient h-full">
+                          <div className="bg-wc-black rounded-[1.4rem] p-5 h-full flex flex-col relative z-10 overflow-hidden">
+                            
+                            {/* Match Header */}
+                            <div className="flex justify-between items-center mb-5 text-xs font-bold uppercase tracking-widest text-white/50">
+                              <span className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-md">
+                                <Clock className="w-3.5 h-3.5" />
+                                {isLive ? (
+                                  <span className="text-wc-green animate-pulse drop-shadow-[0_0_8px_rgba(16,185,129,1)]">LIVE NOW</span>
+                                ) : isFinished ? (
+                                  "FULL TIME"
+                                ) : (
+                                  formatMatchTime(match.start_time)
+                                )}
                               </span>
-                            ) : !isLocked ? (
-                              <span className="text-wc-cyan">Predict</span>
-                            ) : (
-                              <span className="text-white/30">Locked</span>
+                              {match.prediction ? (
+                                <span className="text-wc-purple-light flex items-center gap-1 bg-wc-purple/10 px-2 py-1 rounded-md">
+                                  <Trophy className="w-3.5 h-3.5" />
+                                  PICKED
+                                </span>
+                              ) : !isLocked ? (
+                                <span className="text-wc-cyan bg-wc-cyan/10 px-2 py-1 rounded-md">PREDICT</span>
+                              ) : (
+                                <span className="text-white/30 bg-white/5 px-2 py-1 rounded-md">LOCKED</span>
+                              )}
+                            </div>
+
+                            {/* Teams & Scores Block */}
+                            <div className="flex flex-col gap-3 font-display">
+                              {/* Home Team */}
+                              <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-4">
+                                  {match.home_team_logo ? (
+                                    <img src={match.home_team_logo} alt={match.home_team} className="w-12 h-10 object-cover rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm border-2 border-white/10" />
+                                  ) : (
+                                    <div className="w-12 h-10 bg-white/10 rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm" />
+                                  )}
+                                  <span className="font-fifa text-2xl uppercase tracking-wide">{match.home_team}</span>
+                                </div>
+                                <div className={`w-12 h-12 flex items-center justify-center rounded-xl font-fifa text-3xl ${isLive || isFinished ? 'bg-wc-cyan text-black' : 'bg-white/5 text-white/50'}`}>
+                                  {match.home_score ?? "-"}
+                                </div>
+                              </div>
+
+                              {/* Away Team */}
+                              <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-4">
+                                  {match.away_team_logo ? (
+                                    <img src={match.away_team_logo} alt={match.away_team} className="w-12 h-10 object-cover rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm border-2 border-white/10" />
+                                  ) : (
+                                    <div className="w-12 h-10 bg-white/10 rounded-tr-xl rounded-bl-xl rounded-tl-sm rounded-br-sm" />
+                                  )}
+                                  <span className="font-fifa text-2xl uppercase tracking-wide">{match.away_team}</span>
+                                </div>
+                                <div className={`w-12 h-12 flex items-center justify-center rounded-xl font-fifa text-3xl ${isLive || isFinished ? 'bg-wc-cyan text-black' : 'bg-white/5 text-white/50'}`}>
+                                  {match.away_score ?? "-"}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Prediction Footer */}
+                            {match.prediction && (
+                              <div className="mt-5 pt-4 border-t border-white/5 flex justify-between items-center">
+                                <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Your Pick</span>
+                                <span className="font-fifa text-2xl text-wc-purple-light">
+                                  {match.prediction.home_prediction} - {match.prediction.away_prediction}
+                                </span>
+                              </div>
                             )}
                           </div>
-
-                          {/* Teams & Scores */}
-                          <div className="space-y-4 font-display text-lg">
-                            {/* Home Team */}
-                            <div className="flex justify-between items-center p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                              <div className="flex items-center gap-3">
-                                {match.home_team_logo ? (
-                                  <img src={match.home_team_logo} alt={match.home_team} className="w-8 h-8 rounded-full object-cover shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-white/10" />
-                                ) : (
-                                  <div className="w-8 h-8 rounded-full bg-white/10" />
-                                )}
-                                <span className="font-bold tracking-wide truncate max-w-[120px]">{match.home_team}</span>
-                              </div>
-                              <span className={`font-black text-2xl ${isLive ? 'text-wc-green drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'text-white'}`}>
-                                {match.home_score ?? "-"}
-                              </span>
-                            </div>
-
-                            {/* Away Team */}
-                            <div className="flex justify-between items-center p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                              <div className="flex items-center gap-3">
-                                {match.away_team_logo ? (
-                                  <img src={match.away_team_logo} alt={match.away_team} className="w-8 h-8 rounded-full object-cover shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-white/10" />
-                                ) : (
-                                  <div className="w-8 h-8 rounded-full bg-white/10" />
-                                )}
-                                <span className="font-bold tracking-wide truncate max-w-[120px]">{match.away_team}</span>
-                              </div>
-                              <span className={`font-black text-2xl ${isLive ? 'text-wc-green drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'text-white'}`}>
-                                {match.away_score ?? "-"}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Prediction Footer */}
-                          {match.prediction && (
-                            <div className="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-sm">
-                              <span className="text-white/40">Your Pick:</span>
-                              <span className="font-display font-bold">
-                                {match.prediction.home_prediction} - {match.prediction.away_prediction}
-                              </span>
-                            </div>
-                          )}
                         </div>
                       </Link>
                     );

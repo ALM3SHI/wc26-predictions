@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { Navigation } from "@/components/Navigation";
 import "./globals.css";
@@ -18,6 +19,13 @@ const inter = Inter({
   variable: "--font-body",
   display: "swap",
 });
+
+const fifa = localFont({
+  src: "../../public/fonts/fifa-26.otf",
+  variable: "--font-fifa",
+  display: "swap",
+});
+
 
 /* ── Metadata ─────────────────────────────────────────── */
 export const metadata: Metadata = {
@@ -49,8 +57,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${outfit.variable} ${inter.variable}`}>
-      <body className="min-h-screen bg-wc-black text-white font-body antialiased">
+    <html lang="en" className={`${outfit.variable} ${inter.variable} ${fifa.variable}`}>
+      <body className="font-body bg-wc-black text-white antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0">
         <Navigation />
         {children}
         <ServiceWorkerRegistrar />

@@ -59,106 +59,108 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
       <div className="absolute top-0 right-[-20%] w-[600px] h-[600px] bg-wc-green/5 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 left-[-20%] w-[600px] h-[600px] bg-wc-purple/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto relative z-10">
-        <Link
-          href="/bracket"
-          className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-8"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Bracket
-        </Link>
+      <div className="max-w-4xl mx-auto relative z-10 wc-border-gradient p-1 bg-wc-black rounded-[2rem] shadow-2xl">
+        <div className="p-6 sm:p-12 relative z-10">
+          <Link
+            href="/bracket"
+            className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-12"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Bracket
+          </Link>
 
-        {/* Match Info Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-sm font-medium mb-6">
-            <span className="text-wc-cyan">{match.round}</span>
-          </div>
-
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-white/60 text-sm">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="w-4 h-4" />
-              {formattedDate}
+          {/* Massive MATCH STATS Header */}
+          <div className="text-center mb-12">
+            <h1 className="font-fifa text-6xl sm:text-8xl tracking-tighter mb-6 uppercase text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+              MATCH STATS
+            </h1>
+            
+            <div className="inline-flex items-center gap-4 text-wc-yellow text-sm font-bold tracking-widest uppercase mb-4">
+              <span className="flex items-center gap-2"><CalendarDays className="w-4 h-4" /> {formattedDate}</span>
+              <span>|</span>
+              <span className="text-wc-green">{match.round}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              {formattedTime}
-            </div>
+            
             {match.venue && (
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
+              <div className="flex items-center justify-center gap-2 text-white/50 text-xs font-semibold tracking-widest uppercase">
+                <MapPin className="w-3.5 h-3.5" />
                 {match.venue}
               </div>
             )}
           </div>
-        </div>
 
-        {/* Big Score / Team Display */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16 mb-12">
-          {/* Home Team */}
-          <div className="flex flex-col items-center gap-4 flex-1">
-            {match.home_team_logo ? (
-              <img src={match.home_team_logo} alt={match.home_team} className="w-24 h-24 object-contain" />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10" />
-            )}
-            <h2 className="font-display font-black text-2xl sm:text-3xl text-center">
-              {match.home_team}
-            </h2>
-          </div>
-
-          {/* VS / Score */}
-          <div className="flex flex-col items-center">
-            {isLive || isFinished ? (
-              <div className="flex items-center gap-6 font-display font-black text-5xl sm:text-7xl">
-                <span className={isLive ? "text-wc-green neon-text-green" : "text-white"}>
-                  {match.home_score}
-                </span>
-                <span className="text-white/20 text-3xl">-</span>
-                <span className={isLive ? "text-wc-green neon-text-green" : "text-white"}>
-                  {match.away_score}
-                </span>
-              </div>
-            ) : (
-              <span className="font-display font-black text-4xl text-white/20">VS</span>
-            )}
+          {/* Big Score / Team Display */}
+          <div className="flex flex-col items-center justify-center mb-16">
             
-            {isLive && (
-              <div className="mt-4 px-4 py-1 rounded-full bg-wc-green/10 border border-wc-green/20 text-wc-green font-bold text-sm animate-pulse">
-                {match.status} (LIVE)
-              </div>
-            )}
-            {isFinished && (
-              <div className="mt-4 px-4 py-1 rounded-full bg-white/10 text-white/60 font-bold text-sm">
-                FULL TIME
-              </div>
-            )}
-          </div>
+            <div className="text-wc-cyan font-bold tracking-[0.2em] mb-6">
+              {isLive ? <span className="animate-pulse">LIVE NOW</span> : isFinished ? "FULL TIME" : "UPCOMING"}
+            </div>
 
-          {/* Away Team */}
-          <div className="flex flex-col items-center gap-4 flex-1">
-            {match.away_team_logo ? (
-              <img src={match.away_team_logo} alt={match.away_team} className="w-24 h-24 object-contain" />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10" />
-            )}
-            <h2 className="font-display font-black text-2xl sm:text-3xl text-center">
-              {match.away_team}
-            </h2>
-          </div>
-        </div>
+            <div className="flex items-center justify-center gap-2 sm:gap-6 bg-white/5 p-4 sm:p-6 rounded-full border border-white/10 shadow-2xl">
+              
+              {/* Home Team */}
+              <div className="flex items-center gap-4">
+                {match.home_team_logo ? (
+                  <img src={match.home_team_logo} alt={match.home_team} className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm border-2 border-white/10" />
+                ) : (
+                  <div className="w-16 h-12 sm:w-20 sm:h-14 bg-white/10 rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm" />
+                )}
+                <span className="hidden sm:block font-fifa text-4xl uppercase">{match.home_team.slice(0, 3)}</span>
+              </div>
 
-        {/* Form */}
-        <PredictionForm match={match} prediction={prediction || null} userId={user.id} />
-        
-        {/* Post-match result view */}
-        {isFinished && prediction && (
-          <div className="mt-8 text-center">
-            <h4 className="font-display font-bold text-xl mb-2">Points Earned</h4>
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-purple-cyan neon-glow-purple font-display font-black text-4xl">
-              +{prediction.points_earned}
+              {/* Score Box */}
+              <div className="flex items-center bg-wc-cyan rounded-[1.5rem] px-4 py-2 shadow-[0_0_20px_rgba(6,182,212,0.4)] text-black">
+                {isLive || isFinished ? (
+                  <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl">
+                    <span>{match.home_score}</span>
+                    <div className="flex flex-col items-center justify-center w-8 h-12 bg-black rounded-lg text-white">
+                      <span className="text-[0.5rem] font-bold tracking-widest text-white/50 mb-1">26</span>
+                    </div>
+                    <span>{match.away_score}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl text-black/40">
+                    <span>-</span>
+                    <div className="flex flex-col items-center justify-center w-8 h-12 bg-black/20 rounded-lg text-black/50">
+                      <span className="text-[0.5rem] font-bold tracking-widest mb-1">VS</span>
+                    </div>
+                    <span>-</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Away Team */}
+              <div className="flex items-center gap-4">
+                <span className="hidden sm:block font-fifa text-4xl uppercase">{match.away_team.slice(0, 3)}</span>
+                {match.away_team_logo ? (
+                  <img src={match.away_team_logo} alt={match.away_team} className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm border-2 border-white/10" />
+                ) : (
+                  <div className="w-16 h-12 sm:w-20 sm:h-14 bg-white/10 rounded-tr-2xl rounded-bl-2xl rounded-tl-sm rounded-br-sm" />
+                )}
+              </div>
+            </div>
+
+            {/* Full Team Names Below */}
+            <div className="flex justify-between w-full max-w-sm mt-6 font-fifa text-2xl text-white/60 uppercase">
+              <span className="flex-1 text-center">{match.home_team}</span>
+              <span className="w-20"></span>
+              <span className="flex-1 text-center">{match.away_team}</span>
             </div>
           </div>
-        )}
+
+          {/* Form */}
+          <PredictionForm match={match} prediction={prediction || null} userId={user.id} />
+          
+          {/* Post-match result view */}
+          {isFinished && prediction && (
+            <div className="mt-8 text-center">
+              <h4 className="font-display font-bold text-xl mb-2">Points Earned</h4>
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-purple-cyan neon-glow-purple font-display font-black text-4xl">
+                +{prediction.points_earned}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
