@@ -172,6 +172,7 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
               required
+              autoComplete="username"
               className="w-full pl-11 pr-4 py-3 rounded-xl bg-wc-surface/50 border border-white/10 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-white/30 transition-colors"
             />
           </div>
