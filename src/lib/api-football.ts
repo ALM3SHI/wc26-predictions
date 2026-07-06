@@ -1,0 +1,189 @@
+import {
+  getCached,
+  setCached,
+  getCacheKey,
+  FIXTURES_TTL,
+  LIVE_SCORE_TTL,
+  FINISHED_MATCH_TTL,
+} from '@/lib/cache';
+import {
+  type APIFixture,
+  type APIFootballResponse,
+  type Match,
+  type MatchRound,
+  type MatchStatus,
+  FINISHED_STATUSES,
+  LIVE_STATUSES,
+  MATCH_ROUNDS_ORDER,
+} from '@/lib/types';
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+
+const API_BASE_URL = `https://${process.env.API_FOOTBALL_HOST}`;
+const API_KEY = process.env.API_FOOTBALL_KEY!;
+
+const WC_LEAGUE_ID = 1; // FIFA World Cup
+const WC_SEASON = 2026;
+
+// ---------------------------------------------------------------------------
+// Private helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Generic fetcher for the API-Football REST API.
+ * All calls go through this so headers / error handling stay in one place.
+ */
+async function apiFetch<T>(
+  endpoint: string,
+  params: Record<string, string>,
+): Promise<APIFootballResponse<T>> {
+  const url = new URL(`${API_BASE_URL}/${endpoint}`);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+  const res = await fetch(url.toString(), {
+    headers: {
+      'x-apisports-key': API_KEY,
+    },
+    // Next.js 16 — opt out of automatic caching for API routes
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `[api-football] ${endpoint} responded with ${res.status}: ${res.statusText}`,
+    );
+  }
+
+  return res.json() as Promise<APIFootballResponse<T>>;
+}
+
+/**
+ * Map an API-Football round string (e.g. "Round of 16") to our MatchRound
+ * union, or return `null` if it isn't a knockout round we care about.
+ */
+function parseRound(apiRound: string): MatchRound | null {
+  // API-Football uses labels like "Knockout Round - Round of 16"
+  const normalised = apiRound.replace(/^.*-\s*/, '').trim();
+  if (MATCH_ROUNDS_ORDER.includes(normalised as MatchRound)) {
+    return normalised as MatchRound;
+  }
+  return null;
+}
+
+/**
+ * Determine the appropriate cache TTL for a fixture based on its status.
+ */
+function ttlForStatus(status: string): number {
+  if (FINISHED_STATUSES.includes(status as MatchStatus)) return FINISHED_MATCH_TTL;
+  if (LIVE_STATUSES.includes(status as MatchStatus)) return LIVE_SCORE_TTL;
+  return FIXTURES_TTL;
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch all World Cup knockout-stage fixtures.
+ * Uses a single API call for all fixtures, then filters to knockout rounds
+ * server-side to conserve the 100-req/day budget.
+ */
+export async function getKnockoutFixtures(): Promise<APIFixture[]> {
+  const cacheKey = getCacheKey('fixtures', 'knockout');
+
+  // 1. Try cache
+  const cached = await getCached<APIFixture[]>(cacheKey);
+  if (cached) return cached;
+
+  // 2. Fetch ALL WC fixtures in one request
+  const data = await apiFetch<APIFixture>('fixtures', {
+    league: String(WC_LEAGUE_ID),
+    season: String(WC_SEASON),
+  });
+
+  // 3. Filter to knockout rounds only
+  const knockoutFixtures = data.response.filter(
+    (f) => parseRound(f.league.round) !== null,
+  );
+
+  // 4. Cache & return
+  await setCached(cacheKey, knockoutFixtures, FIXTURES_TTL);
+  return knockoutFixtures;
+}
+
+/**
+ * Fetch currently live World Cup matches.
+ */
+export async function getLiveScores(): Promise<APIFixture[]> {
+  const cacheKey = getCacheKey('live-scores');
+
+  const cached = await getCached<APIFixture[]>(cacheKey);
+  if (cached) return cached;
+
+  const data = await apiFetch<APIFixture>('fixtures', {
+    league: String(WC_LEAGUE_ID),
+    season: String(WC_SEASON),
+    status: '1H-HT-2H-ET-BT-P',
+  });
+
+  await setCached(cacheKey, data.response, LIVE_SCORE_TTL);
+  return data.response;
+}
+
+/**
+ * Fetch a single fixture by its API-Football ID.
+ */
+export async function getFixtureById(
+  fixtureId: number,
+): Promise<APIFixture | null> {
+  const cacheKey = getCacheKey('fixture', String(fixtureId));
+
+  const cached = await getCached<APIFixture>(cacheKey);
+  if (cached) return cached;
+
+  const data = await apiFetch<APIFixture>('fixtures', {
+    id: String(fixtureId),
+  });
+
+  const fixture = data.response[0] ?? null;
+  if (!fixture) return null;
+
+  const ttl = ttlForStatus(fixture.fixture.status.short);
+  await setCached(cacheKey, fixture, ttl);
+  return fixture;
+}
+
+// ---------------------------------------------------------------------------
+// Mapper: APIFixture → partial Match (without DB-generated fields)
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert an API-Football fixture into the shape our `matches` Supabase table
+ * expects.  The returned object intentionally omits `id`, `created_at`, and
+ * `updated_at` since those are generated by the database.
+ */
+export function mapAPIFixtureToMatch(
+  fixture: APIFixture,
+): Omit<Match, 'id' | 'created_at' | 'updated_at'> {
+  const round = parseRound(fixture.league.round) ?? 'Round of 32';
+  const status = fixture.fixture.status.short as MatchStatus;
+
+  return {
+    api_fixture_id: fixture.fixture.id,
+    round,
+    home_team: fixture.teams.home.name,
+    away_team: fixture.teams.away.name,
+    home_team_logo: fixture.teams.home.logo ?? null,
+    away_team_logo: fixture.teams.away.logo ?? null,
+    home_score: fixture.goals.home,
+    away_score: fixture.goals.away,
+    start_time: fixture.fixture.date,
+    status,
+    venue: fixture.fixture.venue
+      ? `${fixture.fixture.venue.name}, ${fixture.fixture.venue.city}`
+      : null,
+    scored: FINISHED_STATUSES.includes(status),
+  };
+}
