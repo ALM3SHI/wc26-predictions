@@ -6,6 +6,7 @@ import PredictionForm from "./PredictionForm";
 
 // Force dynamic since it relies on user session and real-time DB data
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function MatchPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
