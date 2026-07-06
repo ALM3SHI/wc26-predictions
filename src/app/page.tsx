@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, UserPlus, LogIn } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   return (
     <div className="min-h-screen bg-wc-black relative overflow-hidden flex flex-col items-center justify-center">
       {/* Background Shapes mimicking the abstract '26' brand shapes */}
@@ -29,16 +32,35 @@ export default function HomePage() {
           The ultimate knockout stage prediction experience for the 2026 World Cup.
         </p>
 
-        <Link
-          href="/bracket"
-          className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 text-lg font-display font-bold text-white bg-white/5 border border-white/10 rounded-full overflow-hidden transition-all hover:scale-105 hover:border-wc-cyan/50 hover:bg-white/10 hover:shadow-[0_0_40px_rgba(6,182,212,0.3)] active:scale-95"
-        >
-          {/* Subtle gradient sweep on hover */}
-          <div className="absolute inset-0 bg-gradient-to-r from-wc-purple/20 to-wc-cyan/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
-          
-          <span className="relative z-10 tracking-widest uppercase">Enter the Bracket</span>
-          <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-        </Link>
+        {user ? (
+          <Link
+            href="/bracket"
+            className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 text-lg font-display font-bold text-white bg-white/5 border border-white/10 rounded-full overflow-hidden transition-all hover:scale-105 hover:border-wc-cyan/50 hover:bg-white/10 hover:shadow-[0_0_40px_rgba(6,182,212,0.3)] active:scale-95"
+          >
+            {/* Subtle gradient sweep on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-wc-purple/20 to-wc-cyan/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
+            
+            <span className="relative z-10 tracking-widest uppercase">Enter the Bracket</span>
+            <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        ) : (
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <Link
+              href="/signup"
+              className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-lg font-display font-bold text-white bg-gradient-to-r from-wc-purple to-wc-cyan rounded-full overflow-hidden transition-all hover:scale-105 shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] active:scale-95"
+            >
+              <span className="relative z-10 tracking-widest uppercase">Sign Up</span>
+              <UserPlus className="relative z-10 w-5 h-5" />
+            </Link>
+            <Link
+              href="/login"
+              className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-lg font-display font-bold text-white bg-white/5 border border-white/10 rounded-full overflow-hidden transition-all hover:scale-105 hover:bg-white/10 active:scale-95"
+            >
+              <span className="relative z-10 tracking-widest uppercase">Log In</span>
+              <LogIn className="relative z-10 w-5 h-5" />
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Footer minimal text */}

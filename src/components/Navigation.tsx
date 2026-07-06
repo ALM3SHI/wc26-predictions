@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Trophy, LayoutGrid, Settings, LogOut } from "lucide-react";
+import { Trophy, LayoutGrid, Settings, LogOut, LogIn } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
@@ -58,6 +58,24 @@ export function Navigation() {
               </Link>
             );
           })}
+          {!user && (
+            <Link
+              href="/login"
+              className="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all text-white/50 hover:text-white"
+            >
+              <LogIn className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-medium">Login</span>
+            </Link>
+          )}
+          {user && (
+            <button
+              onClick={handleLogout}
+              className="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all text-white/50 hover:text-wc-red"
+            >
+              <LogOut className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-medium">Logout</span>
+            </button>
+          )}
         </div>
       </nav>
 
@@ -85,11 +103,16 @@ export function Navigation() {
               );
             })}
             
-            {user && (
+            {user ? (
               <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-medium text-white/50 hover:text-wc-red transition-colors ml-4 pl-4 border-l border-white/10">
                 <LogOut className="w-4 h-4" />
                 Logout
               </button>
+            ) : (
+              <Link href="/login" className="flex items-center gap-2 text-sm font-medium text-white/50 hover:text-wc-purple-light transition-colors ml-4 pl-4 border-l border-white/10">
+                <LogIn className="w-4 h-4" />
+                Login
+              </Link>
             )}
           </div>
         </div>
