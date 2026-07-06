@@ -158,7 +158,7 @@ export default function AdminClient({
                         <select
                           className="bg-black border border-white/20 rounded p-1"
                           value={match.status}
-                          onChange={(e) => handleUpdateMatch(match.id, { status: e.target.value })}
+                          onChange={(e) => handleUpdateMatch(match.id, { status: e.target.value as any })}
                         >
                           <option value="NS">NS (Not Started)</option>
                           <option value="1H">1H (Live)</option>
