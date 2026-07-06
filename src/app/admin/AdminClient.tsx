@@ -5,16 +5,29 @@ import { Match, Profile } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 
 const COUNTRIES = [
-  "TBD", "Argentina", "Brazil", "France", "England", "Spain", "Portugal", "Germany", 
-  "Italy", "Netherlands", "Belgium", "Croatia", "Uruguay", "Colombia", "USA", 
-  "Mexico", "Canada", "Senegal", "Morocco", "Japan", "South Korea", "Saudi Arabia",
-  "Iran", "Australia", "Switzerland", "Denmark", "Serbia", "Ecuador", "Peru",
-  "Chile", "Sweden", "Poland", "Wales", "Ukraine", "Nigeria", "Egypt", "Algeria",
-  "Ivory Coast", "Cameroon", "Ghana", "Mali", "Qatar", "UAE", "Iraq", "Oman",
-  "Uzbekistan", "China", "New Zealand", "Jamaica", "Costa Rica", "Panama",
-  "Honduras", "El Salvador", "Venezuela", "Paraguay", "Bolivia", "Turkey",
-  "Norway", "Scotland", "Ireland", "Greece", "Czech Republic", "Austria", "Hungary"
-].sort();
+  { name: "TBD", flag: "❓" },
+  { name: "Argentina", flag: "🇦🇷" }, { name: "Brazil", flag: "🇧🇷" }, { name: "France", flag: "🇫🇷" },
+  { name: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" }, { name: "Spain", flag: "🇪🇸" }, { name: "Portugal", flag: "🇵🇹" },
+  { name: "Germany", flag: "🇩🇪" }, { name: "Italy", flag: "🇮🇹" }, { name: "Netherlands", flag: "🇳🇱" },
+  { name: "Belgium", flag: "🇧🇪" }, { name: "Croatia", flag: "🇭🇷" }, { name: "Uruguay", flag: "🇺🇾" },
+  { name: "Colombia", flag: "🇨🇴" }, { name: "USA", flag: "🇺🇸" }, { name: "Mexico", flag: "🇲🇽" },
+  { name: "Canada", flag: "🇨🇦" }, { name: "Senegal", flag: "🇸🇳" }, { name: "Morocco", flag: "🇲🇦" },
+  { name: "Japan", flag: "🇯🇵" }, { name: "South Korea", flag: "🇰🇷" }, { name: "Saudi Arabia", flag: "🇸🇦" },
+  { name: "Iran", flag: "🇮🇷" }, { name: "Australia", flag: "🇦🇺" }, { name: "Switzerland", flag: "🇨🇭" },
+  { name: "Denmark", flag: "🇩🇰" }, { name: "Serbia", flag: "🇷🇸" }, { name: "Ecuador", flag: "🇪🇨" },
+  { name: "Peru", flag: "🇵🇪" }, { name: "Chile", flag: "🇨🇱" }, { name: "Sweden", flag: "🇸🇪" },
+  { name: "Poland", flag: "🇵🇱" }, { name: "Wales", flag: "🏴󠁧󠁢󠁷󠁬󠁳󠁿" }, { name: "Ukraine", flag: "🇺🇦" },
+  { name: "Nigeria", flag: "🇳🇬" }, { name: "Egypt", flag: "🇪🇬" }, { name: "Algeria", flag: "🇩🇿" },
+  { name: "Ivory Coast", flag: "🇨🇮" }, { name: "Cameroon", flag: "🇨🇲" }, { name: "Ghana", flag: "🇬🇭" },
+  { name: "Mali", flag: "🇲🇱" }, { name: "Qatar", flag: "🇶🇦" }, { name: "UAE", flag: "🇦🇪" },
+  { name: "Iraq", flag: "🇮🇶" }, { name: "Oman", flag: "🇴🇲" }, { name: "Uzbekistan", flag: "🇺🇿" },
+  { name: "China", flag: "🇨🇳" }, { name: "New Zealand", flag: "🇳🇿" }, { name: "Jamaica", flag: "🇯🇲" },
+  { name: "Costa Rica", flag: "🇨🇷" }, { name: "Panama", flag: "🇵🇦" }, { name: "Honduras", flag: "🇭🇳" },
+  { name: "El Salvador", flag: "🇸🇻" }, { name: "Venezuela", flag: "🇻🇪" }, { name: "Paraguay", flag: "🇵🇾" },
+  { name: "Bolivia", flag: "🇧🇴" }, { name: "Turkey", flag: "🇹🇷" }, { name: "Norway", flag: "🇳🇴" },
+  { name: "Scotland", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" }, { name: "Ireland", flag: "🇮🇪" }, { name: "Greece", flag: "🇬🇷" },
+  { name: "Czech Republic", flag: "🇨🇿" }, { name: "Austria", flag: "🇦🇹" }, { name: "Hungary", flag: "🇭🇺" }
+].sort((a, b) => a.name === "TBD" ? -1 : a.name.localeCompare(b.name));
 
 export default function AdminClient({
   initialMatches,
@@ -115,12 +128,12 @@ export default function AdminClient({
   return (
     <div className="space-y-8">
       {/* Tabs */}
-      <div className="flex gap-4 mb-8">
+      <div className="flex gap-4 mb-8 overflow-x-auto pb-4 hide-scrollbar whitespace-nowrap">
         {["matches", "users", "predictions"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t as any)}
-            className={`px-6 py-3 rounded-full font-bold uppercase tracking-widest ${
+            className={`px-6 py-3 rounded-full font-bold uppercase tracking-widest flex-shrink-0 ${
               tab === t ? "bg-wc-cyan text-black" : "bg-white/10 text-white/50 hover:bg-white/20"
             }`}
           >
@@ -153,19 +166,19 @@ export default function AdminClient({
                 {/* Match Teams */}
                 <div className="flex flex-col sm:flex-row items-center gap-3">
                   <select
-                    className="bg-black border border-white/20 rounded-lg p-2 min-w-[120px] text-center"
+                    className="bg-black border border-white/20 rounded-lg p-2 min-w-[140px] font-medium"
                     value={match.home_team}
                     onChange={(e) => handleUpdateMatch(match.id, { home_team: e.target.value })}
                   >
-                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {COUNTRIES.map(c => <option key={c.name} value={c.name}>{c.flag} {c.name}</option>)}
                   </select>
                   <span className="text-white/40 text-xs font-bold px-2">VS</span>
                   <select
-                    className="bg-black border border-white/20 rounded-lg p-2 min-w-[120px] text-center"
+                    className="bg-black border border-white/20 rounded-lg p-2 min-w-[140px] font-medium"
                     value={match.away_team}
                     onChange={(e) => handleUpdateMatch(match.id, { away_team: e.target.value })}
                   >
-                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {COUNTRIES.map(c => <option key={c.name} value={c.name}>{c.flag} {c.name}</option>)}
                   </select>
                 </div>
 
@@ -176,7 +189,11 @@ export default function AdminClient({
                   </div>
                   
                   <select
-                    className="bg-black border border-white/20 rounded-lg p-2 min-w-[140px]"
+                    className={`border rounded-lg p-2 min-w-[140px] font-bold ${
+                      match.status === "FT" ? "bg-wc-green/20 border-wc-green text-wc-green" : 
+                      match.status === "NS" ? "bg-black border-white/20 text-white/70" : 
+                      "bg-wc-red/20 border-wc-red text-wc-red"
+                    }`}
                     value={match.status}
                     onChange={(e) => handleUpdateMatch(match.id, { status: e.target.value as any })}
                   >
