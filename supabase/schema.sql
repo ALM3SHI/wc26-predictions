@@ -409,3 +409,6 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
 -- 2. Verify RLS policies in Authentication > Policies
 -- 3. Test by inserting a match and prediction via the SQL Editor
 -- ============================================================
+
+-- Add is_admin to profiles
+ALTER TABLE public.profiles ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;

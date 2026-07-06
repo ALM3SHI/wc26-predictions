@@ -88,60 +88,65 @@ export default async function LeaderboardPage() {
                       : "bg-white/10 hover:bg-white/20"
                   }`}
                 >
-                  <div className={`bg-wc-surface-light rounded-2xl p-4 sm:p-6 flex items-center gap-4 sm:gap-6 ${isCurrentUser ? "opacity-95" : ""}`}>
-                    {/* Rank */}
-                    <div className="w-8 flex justify-center font-display text-xl">
-                      {rankDisplay}
-                    </div>
+                  <Link 
+                    href={`/user/${entry.user_id}`}
+                    className={`block bg-wc-surface-light rounded-2xl p-4 sm:p-6 transition-colors hover:bg-white/10 ${isCurrentUser ? "opacity-95" : ""}`}
+                  >
+                    <div className="flex items-center gap-4 sm:gap-6">
+                      {/* Rank */}
+                      <div className="w-8 flex justify-center font-display text-xl">
+                        {rankDisplay}
+                      </div>
 
-                    {/* Avatar & Name */}
-                    <div className="flex-1 flex items-center gap-4">
-                      {entry.avatar_url ? (
-                        <img src={entry.avatar_url} alt={entry.display_name} className="w-10 h-10 rounded-full object-cover border border-white/10" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-wc-purple/20 border border-wc-purple/30 flex items-center justify-center font-bold text-wc-purple-light">
-                          {entry.display_name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div>
-                        <div className="font-bold text-lg flex items-center gap-2">
-                          {entry.display_name}
-                          {isCurrentUser && (
-                            <span className="text-[10px] uppercase tracking-wider bg-wc-purple/20 text-wc-purple-light px-2 py-0.5 rounded-full">
-                              You
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-white/40">
-                          {entry.total_predictions} match{entry.total_predictions !== 1 && "es"} predicted
+                      {/* Avatar & Name */}
+                      <div className="flex-1 flex items-center gap-4">
+                        {entry.avatar_url ? (
+                          <img src={entry.avatar_url} alt={entry.display_name} className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-wc-purple/20 border border-wc-purple/30 flex items-center justify-center font-bold text-wc-purple-light">
+                            {entry.display_name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-bold text-lg flex items-center gap-2">
+                            {entry.display_name}
+                            {isCurrentUser && (
+                              <span className="text-[10px] uppercase tracking-wider bg-wc-purple/20 text-wc-purple-light px-2 py-0.5 rounded-full">
+                                You
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-white/40">
+                            {entry.total_predictions} match{entry.total_predictions !== 1 && "es"} predicted
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Stats */}
-                    <div className="hidden md:flex items-center gap-8 mr-8">
-                      <div className="text-center">
-                        <div className="text-xs text-white/40 mb-1">Exact</div>
-                        <div className="font-bold text-wc-green">{entry.exact_scores}</div>
+                      {/* Stats */}
+                      <div className="hidden md:flex items-center gap-8 mr-8">
+                        <div className="text-center">
+                          <div className="text-xs text-white/40 mb-1">Exact</div>
+                          <div className="font-bold text-wc-green">{entry.exact_scores}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-white/40 mb-1">Outcome</div>
+                          <div className="font-bold text-wc-purple-light">{entry.correct_outcomes}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-white/40 mb-1">Wrong</div>
+                          <div className="font-bold text-wc-red/50">{entry.wrong_predictions}</div>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-xs text-white/40 mb-1">Outcome</div>
-                        <div className="font-bold text-wc-purple-light">{entry.correct_outcomes}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xs text-white/40 mb-1">Wrong</div>
-                        <div className="font-bold text-wc-red/50">{entry.wrong_predictions}</div>
-                      </div>
-                    </div>
 
-                    {/* Total Points */}
-                    <div className="text-right pl-4 border-l border-white/10">
-                      <div className="text-xs text-white/40 mb-1 uppercase tracking-wider font-semibold">Points</div>
-                      <div className="font-display font-black text-2xl sm:text-3xl text-gradient gradient-purple-cyan">
-                        {entry.total_points}
+                      {/* Total Points */}
+                      <div className="text-right pl-4 border-l border-white/10">
+                        <div className="text-xs text-white/40 mb-1 uppercase tracking-wider font-semibold">Points</div>
+                        <div className="font-display font-black text-2xl sm:text-3xl text-gradient gradient-purple-cyan">
+                          {entry.total_points}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               );
             })

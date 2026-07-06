@@ -58,7 +58,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${outfit.variable} ${inter.variable} ${fifa.variable}`}>
-      <body className="font-body bg-wc-black text-white antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0">
+      <body className="font-body text-white antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0" style={{
+        backgroundColor: '#0A0A0F',
+        backgroundImage: 'radial-gradient(circle at top right, rgba(44, 55, 229, 0.15), transparent 40%), radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.15), transparent 40%), radial-gradient(circle at 50% 50%, rgba(227, 26, 34, 0.05), transparent 60%)',
+        backgroundAttachment: 'fixed'
+      }}>
         <Navigation />
         {children}
         <ServiceWorkerRegistrar />

@@ -4,6 +4,7 @@ export interface Profile {
   display_name: string;
   avatar_url: string | null;
   total_points: number;
+  is_admin?: boolean;
   push_subscription: PushSubscriptionJSON | null;
   email_notifications: boolean;
   created_at: string;
