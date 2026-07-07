@@ -191,7 +191,7 @@ export default function AdminClient({
   return (
     <div className="space-y-8">
       {/* Tabs */}
-      <div className="flex gap-4 mb-8 overflow-x-auto pb-4 hide-scrollbar whitespace-nowrap">
+      <div className="flex gap-4 mb-8 overflow-x-auto pb-4 no-scrollbar whitespace-nowrap max-w-full">
         {["matches", "users", "predictions"].map((t) => (
           <button
             key={t}
@@ -233,64 +233,66 @@ export default function AdminClient({
 
           <div className="space-y-4">
             {matches.map((match) => (
-              <div key={match.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div key={match.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col gap-4">
                 
-                {/* Match Teams */}
-                <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <select
-                    className="bg-gray-50 border border-gray-200 rounded-lg p-2 min-w-[140px] font-medium text-gray-900"
-                    value={match.home_team}
-                    onChange={(e) => handleUpdateMatch(match.id, { home_team: e.target.value })}
-                  >
-                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <span className="text-gray-400 text-xs font-bold px-2">VS</span>
-                  <select
-                    className="bg-gray-50 border border-gray-200 rounded-lg p-2 min-w-[140px] font-medium text-gray-900"
-                    value={match.away_team}
-                    onChange={(e) => handleUpdateMatch(match.id, { away_team: e.target.value })}
-                  >
-                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
+                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                  {/* Match Teams */}
+                  <div className="flex items-center justify-between sm:justify-start gap-2 w-full xl:w-auto bg-gray-50/50 p-2 rounded-xl border border-gray-100">
+                    <select
+                      className="bg-white border border-gray-200 rounded-lg p-2 flex-1 sm:w-[140px] font-medium text-gray-900 text-sm"
+                      value={match.home_team}
+                      onChange={(e) => handleUpdateMatch(match.id, { home_team: e.target.value })}
+                    >
+                      {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <span className="text-gray-400 text-xs font-bold">VS</span>
+                    <select
+                      className="bg-white border border-gray-200 rounded-lg p-2 flex-1 sm:w-[140px] font-medium text-gray-900 text-sm"
+                      value={match.away_team}
+                      onChange={(e) => handleUpdateMatch(match.id, { away_team: e.target.value })}
+                    >
+                      {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
 
-                {/* Match Time & Status */}
-                <div className="flex flex-wrap items-center gap-4">
-                  <input
-                    type="datetime-local"
-                    className="bg-gray-50 border border-gray-200 rounded-lg p-2 text-gray-500 text-xs min-w-[150px] outline-none focus:border-wc-purple"
-                    value={new Date(new Date(match.start_time).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
-                    onChange={(e) => handleUpdateMatch(match.id, { start_time: new Date(e.target.value).toISOString() })}
-                  />
-                  
-                  <select
-                    className={`border rounded-lg p-2 min-w-[140px] font-bold ${
-                      match.status === "FT" ? "bg-green-100 border-green-200 text-green-700" : 
-                      match.status === "NS" ? "bg-gray-50 border-gray-200 text-gray-500" : 
-                      "bg-red-100 border-red-200 text-red-700"
-                    }`}
-                    value={match.status}
-                    onChange={(e) => handleUpdateMatch(match.id, { status: e.target.value as any })}
-                  >
-                    <option value="NS">NS (Not Started)</option>
-                    <option value="1H">1H (Live)</option>
-                    <option value="HT">HT (Half Time)</option>
-                    <option value="2H">2H (Live)</option>
-                    <option value="FT">FT (Finished)</option>
-                  </select>
+                  {/* Match Time & Status */}
+                  <div className="flex items-center gap-2 w-full xl:w-auto">
+                    <input
+                      type="datetime-local"
+                      className="bg-white border border-gray-200 rounded-lg p-2 text-gray-500 text-sm flex-1 xl:w-[160px] outline-none focus:border-wc-purple"
+                      value={new Date(new Date(match.start_time).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                      onChange={(e) => handleUpdateMatch(match.id, { start_time: new Date(e.target.value).toISOString() })}
+                    />
+                    
+                    <select
+                      className={`border rounded-lg p-2 flex-1 xl:w-[120px] font-bold text-sm ${
+                        match.status === "FT" ? "bg-green-100 border-green-200 text-green-700" : 
+                        match.status === "NS" ? "bg-gray-50 border-gray-200 text-gray-500" : 
+                        "bg-red-100 border-red-200 text-red-700"
+                      }`}
+                      value={match.status}
+                      onChange={(e) => handleUpdateMatch(match.id, { status: e.target.value as any })}
+                    >
+                      <option value="NS">NS</option>
+                      <option value="1H">1H</option>
+                      <option value="HT">HT</option>
+                      <option value="2H">2H</option>
+                      <option value="FT">FT</option>
+                    </select>
+                  </div>
 
                   {/* Score */}
-                  <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-lg border border-gray-200">
+                  <div className="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-xl border border-gray-200 w-full xl:w-auto">
                     <input
                       type="number"
-                      className="w-14 bg-transparent border-b border-gray-300 p-1 text-center font-bold text-gray-900 outline-none focus:border-wc-purple"
+                      className="w-12 bg-white border border-gray-200 rounded-lg p-1 text-center font-bold text-gray-900 outline-none focus:border-wc-purple"
                       value={match.home_score ?? ""}
                       onChange={(e) => handleUpdateMatch(match.id, { home_score: parseInt(e.target.value) || 0 })}
                     />
-                    <span className="text-gray-400">-</span>
+                    <span className="text-gray-400 font-bold">-</span>
                     <input
                       type="number"
-                      className="w-14 bg-transparent border-b border-gray-300 p-1 text-center font-bold text-gray-900 outline-none focus:border-wc-purple"
+                      className="w-12 bg-white border border-gray-200 rounded-lg p-1 text-center font-bold text-gray-900 outline-none focus:border-wc-purple"
                       value={match.away_score ?? ""}
                       onChange={(e) => handleUpdateMatch(match.id, { away_score: parseInt(e.target.value) || 0 })}
                     />
@@ -387,7 +389,8 @@ export default function AdminClient({
                 <tr>
                   <th className="p-4">ID</th>
                   <th className="p-4">Display Name</th>
-                  <th className="p-4">Points</th>
+                  <th className="p-4">Legacy Pts</th>
+                  <th className="p-4">Total Pts</th>
                   <th className="p-4">Is Admin</th>
                 </tr>
               </thead>
@@ -396,14 +399,15 @@ export default function AdminClient({
                   <tr key={u.id} className="hover:bg-gray-50">
                     <td className="p-4 font-mono text-xs text-gray-400">{u.id.substring(0,8)}...</td>
                     <td className="p-4 font-bold text-gray-900">{u.display_name}</td>
-                    <td className="p-4 font-bold">
+                    <td className="p-4">
                       <input
                         type="number"
                         className="w-20 bg-gray-50 border border-gray-200 rounded p-1 text-center text-wc-purple"
-                        value={u.total_points ?? ""}
-                        onChange={(e) => handleUpdateUser(u.id, { total_points: parseInt(e.target.value) || 0 })}
+                        value={u.legacy_points ?? 0}
+                        onChange={(e) => handleUpdateUser(u.id, { legacy_points: parseInt(e.target.value) || 0 })}
                       />
                     </td>
+                    <td className="p-4 font-bold text-gray-500">{u.total_points}</td>
                     <td className="p-4 text-gray-700">{u.is_admin ? "YES" : "NO"}</td>
                   </tr>
                 ))}

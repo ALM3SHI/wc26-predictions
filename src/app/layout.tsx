@@ -61,7 +61,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
       </head>
-      <body className="font-body text-gray-900 antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0 relative">
+      <body className="font-body text-gray-900 antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0 pt-[env(safe-area-inset-top)] relative">
         <div className="fixed inset-0 -z-50 bg-[#F9FAFB]">
           <Image src="/images/pattern.png" alt="Background Pattern" fill priority className="object-cover opacity-80" sizes="100vw" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#F9FAFB]/50 to-[#F9FAFB]" />
