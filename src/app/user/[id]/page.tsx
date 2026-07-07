@@ -54,7 +54,7 @@ export default async function UserProfilePage(props: { params: Promise<{ id: str
     .order("updated_at", { ascending: false });
 
   return (
-    <div className="min-h-screen pt-8 pb-24 px-4 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden">
       <div className="max-w-4xl mx-auto relative z-10 wc-border-gradient p-1 bg-white rounded-[2rem] shadow-sm">
         <div className="p-6 sm:p-12">
           <Link
@@ -74,9 +74,16 @@ export default async function UserProfilePage(props: { params: Promise<{ id: str
             <h1 className="font-fifa text-5xl sm:text-7xl uppercase text-gray-900 mb-4">
               {profile.display_name}
             </h1>
-            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-wc-cyan/20 bg-wc-cyan/10 text-wc-cyan font-bold text-xl">
-              <Trophy className="w-5 h-5" />
-              {profile.total_points} PTS
+            <div className="flex flex-col items-center">
+              <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-wc-cyan/20 bg-wc-cyan/10 text-wc-cyan font-bold text-xl">
+                <Trophy className="w-5 h-5" />
+                {profile.total_points} PTS
+              </div>
+              {(profile.legacy_points && profile.legacy_points > 0) ? (
+                <p className="mt-3 text-sm font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
+                  Includes {profile.legacy_points} Legacy Points
+                </p>
+              ) : null}
             </div>
           </div>
 
@@ -94,26 +101,26 @@ export default async function UserProfilePage(props: { params: Promise<{ id: str
                   return (
                     <div key={pred.id} className="bg-gray-50 border border-gray-200 p-4 sm:p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
                       {/* Teams */}
-                      <div className="flex-1 flex items-center justify-between font-fifa text-2xl uppercase text-gray-900">
-                        <span className="flex-1 text-right">{match.home_team}</span>
-                        <div className="px-6 flex flex-col items-center">
+                      <div className="w-full flex-1 flex flex-col sm:flex-row items-center justify-between font-fifa text-xl sm:text-2xl uppercase text-gray-900 gap-1 sm:gap-0">
+                        <span className="w-full sm:flex-1 text-center sm:text-right truncate px-2">{match.home_team}</span>
+                        <div className="px-2 sm:px-6 flex flex-col items-center flex-shrink-0">
                           {match.status === 'FT' || match.status === 'AET' || match.status === 'PEN' ? (
                             <>
-                              <span className="text-wc-cyan text-3xl">
+                              <span className="text-wc-cyan text-2xl sm:text-3xl">
                                 {match.home_score} - {match.away_score}
                               </span>
-                              <span className="text-gray-400 text-sm tracking-widest mt-1">ACTUAL</span>
+                              <span className="text-gray-400 text-[10px] sm:text-sm tracking-widest mt-1">ACTUAL</span>
                             </>
                           ) : (
                             <>
-                              <span className="text-gray-400 text-3xl">-</span>
-                              <span className="text-gray-400 text-sm tracking-widest mt-1">
+                              <span className="text-gray-400 text-2xl sm:text-3xl">-</span>
+                              <span className="text-gray-400 text-[10px] sm:text-sm tracking-widest mt-1">
                                 {match.status === 'NS' ? 'UPCOMING' : 'LIVE'}
                               </span>
                             </>
                           )}
                         </div>
-                        <span className="flex-1 text-left">{match.away_team}</span>
+                        <span className="w-full sm:flex-1 text-center sm:text-left truncate px-2">{match.away_team}</span>
                       </div>
                       
                       {/* Prediction & Points */}

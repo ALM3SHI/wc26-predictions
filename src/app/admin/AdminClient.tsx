@@ -44,6 +44,7 @@ export default function AdminClient({
   const [predictions, setPredictions] = useState<any[]>(initialPredictions);
   const [loading, setLoading] = useState(false);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string>("all");
   
   const [newUser, setNewUser] = useState({ email: "", password: "", displayName: "" });
 
@@ -384,56 +385,75 @@ export default function AdminClient({
           </div>
 
           <div className="bg-white rounded-[2rem] border border-gray-200 overflow-hidden shadow-sm">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold text-xs border-b border-gray-200">
-                <tr>
-                  <th className="p-4">ID</th>
-                  <th className="p-4">Display Name</th>
-                  <th className="p-4">Legacy Pts</th>
-                  <th className="p-4">Total Pts</th>
-                  <th className="p-4">Is Admin</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {users.map(u => (
-                  <tr key={u.id} className="hover:bg-gray-50">
-                    <td className="p-4 font-mono text-xs text-gray-400">{u.id.substring(0,8)}...</td>
-                    <td className="p-4 font-bold text-gray-900">{u.display_name}</td>
-                    <td className="p-4">
-                      <input
-                        type="number"
-                        className="w-20 bg-gray-50 border border-gray-200 rounded p-1 text-center text-wc-purple"
-                        value={u.legacy_points ?? 0}
-                        onChange={(e) => handleUpdateUser(u.id, { legacy_points: parseInt(e.target.value) || 0 })}
-                      />
-                    </td>
-                    <td className="p-4 font-bold text-gray-500">{u.total_points}</td>
-                    <td className="p-4 text-gray-700">{u.is_admin ? "YES" : "NO"}</td>
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left text-sm min-w-[500px]">
+                <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold text-xs border-b border-gray-200">
+                  <tr>
+                    <th className="p-4">ID</th>
+                    <th className="p-4">Display Name</th>
+                    <th className="p-4">Legacy Pts</th>
+                    <th className="p-4">Total Pts</th>
+                    <th className="p-4">Is Admin</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {users.map(u => (
+                    <tr key={u.id} className="hover:bg-gray-50">
+                      <td className="p-4 font-mono text-xs text-gray-400">{u.id.substring(0,8)}...</td>
+                      <td className="p-4 font-bold text-gray-900 whitespace-nowrap">{u.display_name}</td>
+                      <td className="p-4">
+                        <input
+                          type="number"
+                          className="w-20 bg-gray-50 border border-gray-200 rounded p-1 text-center text-wc-purple"
+                          value={u.legacy_points ?? 0}
+                          onChange={(e) => handleUpdateUser(u.id, { legacy_points: parseInt(e.target.value) || 0 })}
+                        />
+                      </td>
+                      <td className="p-4 font-bold text-gray-500">{u.total_points}</td>
+                      <td className="p-4 text-gray-700">{u.is_admin ? "YES" : "NO"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
       {/* PREDICTIONS TAB */}
       {tab === "predictions" && (
-        <div className="bg-white rounded-[2rem] border border-gray-200 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold text-xs border-b border-gray-200">
-                <tr>
-                  <th className="p-4">User ID</th>
-                  <th className="p-4">Match</th>
-                  <th className="p-4">Predicted Score</th>
-                  <th className="p-4">Points Earned</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {predictions.map(p => {
-                  const u = users.find(user => user.id === p.user_id);
-                  return (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h2 className="text-xl font-bold text-gray-900">Manage Predictions</h2>
+            <select
+              className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-900 font-bold w-full sm:w-64"
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
+            >
+              <option value="all">All Users</option>
+              {users.map(u => (
+                <option key={u.id} value={u.id}>{u.display_name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="bg-white rounded-[2rem] border border-gray-200 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left text-sm min-w-[600px]">
+                <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold text-xs border-b border-gray-200">
+                  <tr>
+                    <th className="p-4">User</th>
+                    <th className="p-4">Match</th>
+                    <th className="p-4">Predicted Score</th>
+                    <th className="p-4">Points Earned</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {predictions
+                    .filter(p => selectedUserId === "all" || p.user_id === selectedUserId)
+                    .map(p => {
+                      const u = users.find(user => user.id === p.user_id);
+                      return (
                     <tr key={p.id} className="hover:bg-gray-50">
                       <td className="p-4">
                         <div className="font-bold text-gray-900">{u?.display_name || "Unknown"}</div>
@@ -455,20 +475,21 @@ export default function AdminClient({
                           onChange={(e) => handleUpdatePrediction(p.id, p.match_id, p.user_id, { away_prediction: parseInt(e.target.value) || 0 })}
                         />
                       </td>
-                      <td className="p-4">
-                        <input
-                          type="number"
-                          className="w-16 bg-gray-50 border border-gray-200 rounded p-1 text-center text-gray-900"
-                          value={p.points_earned ?? ""}
-                          placeholder="null"
-                          onChange={(e) => handleUpdatePrediction(p.id, p.match_id, p.user_id, { points_earned: e.target.value === "" ? null : parseInt(e.target.value) })}
-                        />
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                        <td className="p-4">
+                          <input
+                            type="number"
+                            className="w-16 bg-gray-50 border border-gray-200 rounded p-1 text-center text-gray-900"
+                            value={p.points_earned ?? ""}
+                            placeholder="null"
+                            onChange={(e) => handleUpdatePrediction(p.id, p.match_id, p.user_id, { points_earned: e.target.value === "" ? null : parseInt(e.target.value) })}
+                          />
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

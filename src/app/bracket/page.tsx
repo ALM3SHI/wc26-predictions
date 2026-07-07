@@ -83,7 +83,7 @@ export default async function BracketPage() {
   ];
 
   return (
-    <div className="min-h-screen pt-8 pb-24 px-4 sm:px-6">
+    <div className="min-h-screen pt-8 pb-6 px-4 sm:px-6">
       {/* Background Glows */}
       <div className="fixed top-[-100px] left-[-100px] w-[400px] h-[400px] bg-wc-purple/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="fixed bottom-[-100px] right-[-100px] w-[400px] h-[400px] bg-wc-cyan/10 rounded-full blur-[120px] pointer-events-none" />

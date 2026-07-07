@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="min-h-screen pt-8 pb-24 px-4 sm:px-6 relative overflow-hidden animate-pulse">
+    <div className="min-h-screen pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden animate-pulse">
       <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-center mb-12">
           <div className="w-64 h-16 bg-gray-200 rounded mx-auto mb-4" />

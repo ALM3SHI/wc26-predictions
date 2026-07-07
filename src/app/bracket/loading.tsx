@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="min-h-screen pt-8 pb-24 px-4 relative overflow-hidden animate-pulse">
+    <div className="min-h-screen pt-8 pb-6 px-4 relative overflow-hidden animate-pulse">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 lg:h-[80vh]">
         {/* Knockout Bracket Skeleton */}
         <div className="w-full lg:w-3/4 bg-white/50 rounded-2xl border border-gray-200 p-4 shadow-sm relative z-10 flex flex-col">

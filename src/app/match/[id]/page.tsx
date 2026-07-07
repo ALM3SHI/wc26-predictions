@@ -55,7 +55,7 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
   const isFinished = ["FT", "AET", "PEN"].includes(match.status);
 
   return (
-    <div className="min-h-screen pt-8 pb-24 px-4 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden">
       {/* Background Decorators */}
       <div className="absolute top-0 right-[-20%] w-[600px] h-[600px] bg-wc-green/5 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 left-[-20%] w-[600px] h-[600px] bg-wc-purple/5 rounded-full blur-[150px] pointer-events-none" />

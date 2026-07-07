@@ -47,7 +47,7 @@ export default async function AdminPage() {
     .order("updated_at", { ascending: false });
 
   return (
-    <div className="min-h-screen pt-8 pb-24 px-4 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
 
 

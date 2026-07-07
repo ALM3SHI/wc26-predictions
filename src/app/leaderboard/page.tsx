@@ -26,7 +26,7 @@ export default async function LeaderboardPage() {
   const entries: LeaderboardEntry[] = leaderboard || [];
 
   return (
-    <div className="min-h-screen bg-white pt-8 pb-24 px-4 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-white pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden">
       {/* Background Decorators */}
       <div className="absolute top-0 right-[20%] w-[500px] h-[500px] bg-wc-gold/10 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-[20%] left-[-10%] w-[600px] h-[600px] bg-wc-purple/5 rounded-full blur-[150px] pointer-events-none" />

@@ -28,7 +28,7 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-6">
       {/* Top Header */}
       <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
         <Link href={user ? "/user/" + user.id : "/login"} className="relative w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 overflow-hidden">
