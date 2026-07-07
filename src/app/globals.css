@@ -70,27 +70,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─────────────────────────────────────────────────────────
-   WC26 Decorative Background
-   ───────────────────────────────────────────────────────── */
-.wc-bg-pattern {
-  position: fixed;
-  inset: 0;
-  z-index: -50;
-  background-color: #F9FAFB;
-  background-image: url('/images/pattern.png');
-  background-size: cover;
-  background-attachment: fixed;
-  background-position: center;
-  opacity: 0.8;
-}
-
-.wc-bg-pattern::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(249, 250, 251, 0.5), #F9FAFB);
-}
 
 /* ─────────────────────────────────────────────────────────
    Glassmorphism Utilities

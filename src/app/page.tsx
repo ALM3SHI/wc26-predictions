@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { User, MessageSquare, Wallet, Trophy, Settings, Shield, Info, LayoutGrid } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
@@ -30,11 +31,11 @@ export default async function HomePage() {
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Top Header */}
       <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
-        <Link href={user ? "/user/" + user.id : "/login"} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 overflow-hidden">
+        <Link href={user ? "/user/" + user.id : "/login"} className="relative w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 overflow-hidden">
           {userProfile?.avatar_url ? (
             <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
           ) : user ? (
-            <img src="/images/default-avatar.png" alt="Profile" className="w-full h-full object-cover" />
+            <Image src="/images/default-avatar.png" alt="Profile" fill className="object-cover" sizes="40px" />
           ) : (
             <User className="w-5 h-5" />
           )}
@@ -56,7 +57,7 @@ export default async function HomePage() {
         
         {/* Predictions Banner */}
         <Link href="/bracket" className="block relative w-full h-[250px] md:h-[350px] bg-gray-900 rounded-[2rem] overflow-hidden shadow-md hover:scale-[1.01] transition-transform">
-          <img src="/images/home-banner.jpg" alt="Home Banner" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+          <Image src="/images/home-banner.jpg" alt="Home Banner" fill priority className="object-cover opacity-80" sizes="(max-width: 768px) 100vw, 800px" />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <span className="text-white/10 font-fifa text-8xl">WC26</span>
@@ -89,7 +90,7 @@ export default async function HomePage() {
               <Link key={item.label} href={item.href} className="flex flex-col gap-2">
                 <div className={`aspect-square rounded-2xl ${item.color} flex items-center justify-center text-white shadow-sm hover:scale-[1.03] transition-transform relative overflow-hidden group`}>
                   {/* Background Image */}
-                  <img src={item.image} alt={item.label} className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:opacity-80 transition-opacity" />
+                  <Image src={item.image} alt={item.label} fill className="object-cover opacity-60 mix-blend-overlay group-hover:opacity-80 transition-opacity" sizes="(max-width: 768px) 33vw, 250px" />
                   
                   {/* Icon */}
                   <item.icon className="w-8 h-8 md:w-12 md:h-12 relative z-10 drop-shadow-md" />

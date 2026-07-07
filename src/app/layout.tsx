@@ -3,6 +3,7 @@ import { Outfit, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { Navigation } from "@/components/Navigation";
+import Image from "next/image";
 import "./globals.css";
 
 /* ── Google Fonts ─────────────────────────────────────── */
@@ -61,7 +62,10 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
       </head>
       <body className="font-body text-gray-900 antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0 relative">
-        <div className="wc-bg-pattern" />
+        <div className="fixed inset-0 -z-50 bg-[#F9FAFB]">
+          <Image src="/images/pattern.png" alt="Background Pattern" fill priority className="object-cover opacity-80" sizes="100vw" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#F9FAFB]/50 to-[#F9FAFB]" />
+        </div>
         <Navigation />
         {children}
         <ServiceWorkerRegistrar />
