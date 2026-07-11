@@ -11,6 +11,7 @@ import {
   LayoutGrid,
   Flame,
   Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Ticker } from "@/components/ui/Ticker";
@@ -78,6 +79,13 @@ export default async function HomePage() {
       image: "/images/qa-info.jpg",
       color: "bg-red-500",
       href: "/legends",
+    },
+    {
+      label: "Insights",
+      icon: TrendingUp,
+      image: "/images/qa-leaderboard.jpg",
+      color: "bg-blue-800",
+      href: "/insights",
     },
     {
       label: "Leaderboard",

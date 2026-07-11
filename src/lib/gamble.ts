@@ -6,7 +6,7 @@
 // optional migration in supabase/migrations/001_gamble_stake.sql.
 // ─────────────────────────────────────────────────────────────
 
-export const SERVER_STAKE_ENABLED = false;
+export const SERVER_STAKE_ENABLED = true;
 
 export type StakeId = "safe" | "bold" | "legend" | "allin";
 

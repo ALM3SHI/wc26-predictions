@@ -7,6 +7,8 @@ import GambleResult from "./GambleResult";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { CommunityConsensus } from "@/components/ui/CommunityConsensus";
+import { MatchRichBadges } from "@/components/ui/MatchRichBadges";
+import { getMatchByApiId } from "@/lib/football-data";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 
 // Force dynamic since it relies on user session and real-time DB data
@@ -46,6 +48,11 @@ export default async function MatchPage(props: {
     .eq("match_id", matchId)
     .eq("user_id", user.id)
     .single();
+
+  // Rich context from football-data.org (halftime, referee, group, etc.)
+  const richMatch = match.api_fixture_id
+    ? await getMatchByApiId(match.api_fixture_id)
+    : null;
 
   // Community consensus — only readable after kickoff per RLS
   const isKicked = new Date(match.start_time).getTime() <= Date.now();
@@ -197,6 +204,9 @@ export default async function MatchPage(props: {
 
           {/* Form */}
           <PredictionForm match={match} prediction={prediction || null} userId={user.id} />
+
+          {/* Rich API context — halftime, referee, group, duration */}
+          <MatchRichBadges rich={richMatch} />
 
           {/* Community consensus — only visible after kickoff */}
           {isKicked && (

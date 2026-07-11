@@ -16,6 +16,7 @@ import {
   getStake,
   setStake,
   getStakeById,
+  SERVER_STAKE_ENABLED,
   type StakeId,
 } from "@/lib/gamble";
 import { HOST_RED, HOST_BLUE } from "@/lib/wc26-theme";
@@ -81,16 +82,20 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
     setLoading(true);
     setMessage(null);
 
-    const { error } = await supabase.from("predictions").upsert(
-      {
-        match_id: match.id,
-        user_id: userId,
-        home_prediction: homeScore,
-        away_prediction: awayScore,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "match_id,user_id" },
-    );
+    const payload: Record<string, string | number> = {
+      match_id: match.id,
+      user_id: userId,
+      home_prediction: homeScore,
+      away_prediction: awayScore,
+      updated_at: new Date().toISOString(),
+    };
+    if (SERVER_STAKE_ENABLED) {
+      payload.stake_multiplier = selectedStake.mult;
+    }
+
+    const { error } = await supabase.from("predictions").upsert(payload, {
+      onConflict: "match_id,user_id",
+    });
 
     if (error) {
       setMessage({ type: "error", text: error.message });
