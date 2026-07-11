@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Trophy, LayoutGrid, Settings, LogOut, LogIn, ShieldAlert } from "lucide-react";
+import { Home, Trophy, LayoutGrid, Settings, LogOut, LogIn, ShieldAlert, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
@@ -52,6 +52,7 @@ export function Navigation() {
   const navItems = [
     { label: "Home", href: "/", icon: Home },
     { label: "Bracket", href: "/bracket", icon: LayoutGrid },
+    { label: "Legends", href: "/legends", icon: Sparkles },
     { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { label: "Settings", href: "/settings", icon: Settings },
   ];
@@ -71,12 +72,21 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all ${
+                className={`relative flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all ${
                   isActive ? "text-black" : "text-gray-400 hover:text-gray-900"
                 }`}
               >
                 <item.icon className={`w-5 h-5 mb-1 ${isActive ? "text-black drop-shadow-md" : ""}`} />
                 <span className="text-[10px] font-medium">{item.label}</span>
+                {isActive && (
+                  <span
+                    className="absolute -top-0.5 h-1 w-8 rounded-full"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, #C8102E 0%, #C8102E 33%, #002868 33%, #002868 66%, #006847 66%, #006847 100%)",
+                    }}
+                  />
+                )}
               </Link>
             );
           })}
@@ -104,7 +114,10 @@ export function Navigation() {
       {/* Desktop Top Nav */}
       <header className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200 shadow-sm">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/bracket" className="font-display font-black text-xl tracking-tight text-gradient gradient-purple-cyan">
+          <Link
+            href="/bracket"
+            className="font-fifa font-black text-2xl tracking-tight host-text-gradient"
+          >
             WC26
           </Link>
           

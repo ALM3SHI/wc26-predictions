@@ -1,13 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Match, Prediction } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, Lock } from "lucide-react";
 import { motion } from "framer-motion";
-import { getFlagPath } from "@/lib/utils";
-import { useEffect } from "react";
+import { ScoreDial } from "@/components/ui/ScoreDial";
+import { StakeSelector } from "@/components/ui/StakeSelector";
+import { CountdownDigits } from "@/components/ui/CountdownDigits";
+import { LockInScreen } from "@/components/ui/LockInScreen";
+import { Confetti } from "@/components/ui/Confetti";
+import {
+  getStake,
+  setStake,
+  getStakeById,
+  type StakeId,
+} from "@/lib/gamble";
+import { HOST_RED, HOST_BLUE } from "@/lib/wc26-theme";
 
 interface Props {
   match: Match;
@@ -16,44 +26,32 @@ interface Props {
 }
 
 export default function PredictionForm({ match, prediction, userId }: Props) {
-  const [homeScore, setHomeScore] = useState<number | "">(
-    prediction ? prediction.home_prediction : ""
+  const [homeScore, setHomeScore] = useState<number>(
+    prediction ? prediction.home_prediction : 1,
   );
-  const [awayScore, setAwayScore] = useState<number | "">(
-    prediction ? prediction.away_prediction : ""
+  const [awayScore, setAwayScore] = useState<number>(
+    prediction ? prediction.away_prediction : 0,
   );
+  const [stakeId, setStakeId] = useState<StakeId>("safe");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [lockInOpen, setLockInOpen] = useState(false);
+  const [confetti, setConfetti] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+  const selectedStake = getStakeById(stakeId);
 
-  const [timeLeft, setTimeLeft] = useState<string>("");
-  const [isLocked, setIsLocked] = useState(false);
+  // Hydrate stake from localStorage after mount
+  useEffect(() => {
+    setStakeId(getStake(match.id));
+  }, [match.id]);
 
   useEffect(() => {
-    const matchTime = new Date(match.start_time).getTime();
-    
-    const updateTimer = () => {
-      const now = Date.now();
-      if (now >= matchTime) {
-        setIsLocked(true);
-        setTimeLeft("00:00:00");
-        return;
-      }
-
-      const diff = matchTime - now;
-      const h = Math.floor(diff / (1000 * 60 * 60));
-      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-      setTimeLeft(
-        `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-      );
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-    return () => clearInterval(interval);
+    setIsLocked(new Date(match.start_time).getTime() <= Date.now());
   }, [match.start_time]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,26 +60,20 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
       setMessage({ type: "error", text: "Match is locked." });
       return;
     }
-    if (homeScore === "" || awayScore === "") {
-      setMessage({ type: "error", text: "Please enter a valid score." });
-      return;
-    }
 
     setLoading(true);
     setMessage(null);
 
-    const { error } = await supabase
-      .from("predictions")
-      .upsert(
-        {
-          match_id: match.id,
-          user_id: userId,
-          home_prediction: Number(homeScore),
-          away_prediction: Number(awayScore),
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "match_id,user_id" }
-      );
+    const { error } = await supabase.from("predictions").upsert(
+      {
+        match_id: match.id,
+        user_id: userId,
+        home_prediction: homeScore,
+        away_prediction: awayScore,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "match_id,user_id" },
+    );
 
     if (error) {
       setMessage({ type: "error", text: error.message });
@@ -89,101 +81,143 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
       return;
     }
 
-    setMessage({ type: "success", text: "Prediction saved!" });
+    // Save stake client-side (bounded to this device)
+    setStake(match.id, stakeId);
+
     setLoading(false);
-    router.refresh(); // Refresh RSC data
+    setLockInOpen(true);
+    if (selectedStake.mult >= 3) setConfetti(true);
+
+    setMessage({ type: "success", text: "Prediction saved!" });
+  };
+
+  const closeLockIn = () => {
+    setLockInOpen(false);
+    setConfetti(false);
+    router.refresh();
   };
 
   return (
-    <div className="mt-8 p-6 md:p-8 max-w-2xl mx-auto text-center relative overflow-hidden shadow-sm border border-gray-200 bg-white rounded-2xl">
-      
-      {/* Ticking Timer */}
-      <div className="mb-8">
-        <h3 className="font-display font-bold text-lg mb-2 text-gray-400 uppercase tracking-widest">Time Until Kickoff</h3>
-        <div className={`font-fifa text-5xl md:text-6xl tracking-widest ${isLocked ? 'text-wc-red' : 'text-wc-cyan'}`}>
-          {isLocked ? "MATCH LIVE" : timeLeft}
+    <>
+      <div className="mt-4 relative overflow-hidden">
+        {/* Countdown header */}
+        <div className="mb-8 flex flex-col items-center gap-2">
+          <CountdownDigits
+            target={match.start_time}
+            label="Time until kickoff"
+            accentColor={isLocked ? "#EF4444" : "#06B6D4"}
+            onLock={() => setIsLocked(true)}
+          />
+          <div className="tri-underline w-40 mt-3" />
         </div>
+
+        <p className="text-gray-500 mb-8 font-semibold text-center">
+          {isLocked
+            ? "This match is locked. Predictions can no longer be edited."
+            : "Dial in your scoreline, then pick a stake before kickoff."}
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Dials block */}
+          <div
+            className="rounded-3xl p-6 md:p-8 border border-gray-200 bg-white shadow-sm"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 15% 20%, rgba(200,16,46,0.05), transparent 40%), radial-gradient(circle at 85% 80%, rgba(0,40,104,0.05), transparent 40%)",
+            }}
+          >
+            <div className="flex items-center justify-center gap-6 md:gap-12">
+              <ScoreDial
+                value={homeScore}
+                onChange={setHomeScore}
+                disabled={isLocked || loading}
+                accentColor={HOST_RED}
+                label={match.home_team}
+              />
+              <div className="flex flex-col items-center pt-4">
+                <span className="font-fifa text-3xl md:text-5xl text-gray-300 leading-none">
+                  –
+                </span>
+                <span className="mt-3 text-[10px] uppercase tracking-widest text-gray-400 font-bold">
+                  Full time
+                </span>
+              </div>
+              <ScoreDial
+                value={awayScore}
+                onChange={setAwayScore}
+                disabled={isLocked || loading}
+                accentColor={HOST_BLUE}
+                label={match.away_team}
+              />
+            </div>
+          </div>
+
+          {/* Stake selector */}
+          {!isLocked && (
+            <StakeSelector
+              value={stakeId}
+              onChange={setStakeId}
+              disabled={loading}
+            />
+          )}
+
+          {message && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex items-center justify-center gap-2 p-4 rounded-xl ${
+                message.type === "success"
+                  ? "bg-wc-green/10 text-wc-green border border-wc-green/20"
+                  : "bg-wc-red/10 text-wc-red border border-wc-red/20"
+              }`}
+            >
+              {message.type === "success" ? (
+                <CheckCircle2 className="w-5 h-5" />
+              ) : (
+                <AlertCircle className="w-5 h-5" />
+              )}
+              <span className="font-medium">{message.text}</span>
+            </motion.div>
+          )}
+
+          {!isLocked && (
+            <div className="flex justify-center">
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="relative min-w-[240px] px-8 py-4 rounded-2xl font-fifa text-xl tracking-widest uppercase text-white shadow-xl disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-3 overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${selectedStake.color}, ${selectedStake.ring})`,
+                  boxShadow: `0 12px 40px ${selectedStake.glow}`,
+                }}
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : (
+                  <Lock className="w-5 h-5" />
+                )}
+                {prediction ? "Update & Lock" : "Lock It In"}
+                <span className="ml-1 text-white/70 text-sm">
+                  ({selectedStake.mult}x)
+                </span>
+              </motion.button>
+            </div>
+          )}
+        </form>
       </div>
 
-      <p className="text-gray-500 mb-8 font-semibold">
-        {isLocked
-          ? "This match is locked. Predictions can no longer be edited."
-          : "Enter your predicted scoreline below before kickoff."}
-      </p>
-
-      <form onSubmit={handleSubmit}>
-        <div className="flex items-center justify-center gap-4 md:gap-8 mb-8">
-          {/* Home Team Input */}
-          <div className="flex flex-col items-center gap-3">
-            <img 
-              src={getFlagPath(match.home_team)} 
-              alt={match.home_team} 
-              className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-sm border border-gray-100" 
-            />
-            <span className="font-bold font-display text-lg hidden sm:block text-gray-900">{match.home_team}</span>
-            <input
-              type="number"
-              min="0"
-              max="20"
-              value={homeScore}
-              onChange={(e) => setHomeScore(e.target.value === "" ? "" : parseInt(e.target.value))}
-              disabled={isLocked || loading}
-              className="w-20 md:w-24 h-24 text-center font-display font-black text-4xl md:text-5xl rounded-2xl bg-gray-50 border border-gray-200 text-gray-900 focus:border-wc-purple focus:outline-none focus:ring-2 focus:ring-wc-purple/50 disabled:opacity-50 transition-all"
-            />
-          </div>
-
-          <span className="font-display font-black text-3xl text-gray-300">-</span>
-
-          {/* Away Team Input */}
-          <div className="flex flex-col items-center gap-3">
-            <img 
-              src={getFlagPath(match.away_team)} 
-              alt={match.away_team} 
-              className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-sm border border-gray-100" 
-            />
-            <span className="font-bold font-display text-lg hidden sm:block text-gray-900">{match.away_team}</span>
-            <input
-              type="number"
-              min="0"
-              max="20"
-              value={awayScore}
-              onChange={(e) => setAwayScore(e.target.value === "" ? "" : parseInt(e.target.value))}
-              disabled={isLocked || loading}
-              className="w-20 md:w-24 h-24 text-center font-display font-black text-4xl md:text-5xl rounded-2xl bg-gray-50 border border-gray-200 text-gray-900 focus:border-wc-purple focus:outline-none focus:ring-2 focus:ring-wc-purple/50 disabled:opacity-50 transition-all"
-            />
-          </div>
-        </div>
-
-        {message && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`flex items-center justify-center gap-2 p-4 rounded-xl mb-6 ${
-              message.type === "success"
-                ? "bg-wc-green/10 text-wc-green border border-wc-green/20"
-                : "bg-wc-red/10 text-wc-red border border-wc-red/20"
-            }`}
-          >
-            {message.type === "success" ? (
-              <CheckCircle2 className="w-5 h-5" />
-            ) : (
-              <AlertCircle className="w-5 h-5" />
-            )}
-            <span className="font-medium">{message.text}</span>
-          </motion.div>
-        )}
-
-        {!isLocked && (
-          <button
-            type="submit"
-            className="w-full sm:w-auto min-w-[200px] px-8 py-4 bg-wc-purple text-white font-bold rounded-xl hover:bg-wc-purple-light transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
-            disabled={loading}
-          >
-            {loading && <Loader2 className="w-5 h-5 animate-spin" />}
-            {prediction ? "Update Prediction" : "Save Prediction"}
-          </button>
-        )}
-      </form>
-    </div>
+      <LockInScreen
+        open={lockInOpen}
+        onClose={closeLockIn}
+        homeTeam={match.home_team}
+        awayTeam={match.away_team}
+        homeScore={homeScore}
+        awayScore={awayScore}
+        stakeId={stakeId}
+      />
+      <Confetti active={confetti} />
+    </>
   );
 }

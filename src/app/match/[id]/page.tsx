@@ -1,20 +1,27 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Clock, CalendarDays, MapPin } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPin } from "lucide-react";
 import PredictionForm from "./PredictionForm";
-import { getFlagPath } from "@/lib/utils";
+import GambleResult from "./GambleResult";
+import { TeamBadge } from "@/components/ui/TeamBadge";
+import { HostSeal } from "@/components/ui/HostSeal";
+import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 
 // Force dynamic since it relies on user session and real-time DB data
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function MatchPage(props: { params: Promise<{ id: string }> }) {
+export default async function MatchPage(props: {
+  params: Promise<{ id: string }>;
+}) {
   const params = await props.params;
   const matchId = params.id;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     redirect("/login?next=/match/" + matchId);
@@ -45,11 +52,6 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
     month: "long",
     day: "numeric",
   });
-  const formattedTime = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZoneName: "short",
-  });
 
   const isLive = ["1H", "HT", "2H", "ET", "BT", "P"].includes(match.status);
   const isFinished = ["FT", "AET", "PEN"].includes(match.status);
@@ -62,103 +64,134 @@ export default async function MatchPage(props: { params: Promise<{ id: string }>
 
       <div className="max-w-4xl mx-auto relative z-10 wc-border-gradient p-1 bg-white rounded-[2rem] shadow-sm">
         <div className="p-6 sm:p-12 relative z-10">
-          <Link
-            href="/bracket"
-            className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-12"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Bracket
-          </Link>
+          <div className="flex items-center justify-between mb-8">
+            <Link
+              href="/bracket"
+              className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Bracket
+            </Link>
+            <HostSeal size={56} />
+          </div>
 
-          {/* Massive MATCH STATS Header */}
-          <div className="text-center mb-12">
-            <h1 className="font-fifa text-6xl sm:text-8xl tracking-tighter mb-6 uppercase text-gray-900">
-              MATCH STATS
+          {/* Header */}
+          <div className="text-center mb-10">
+            <h1 className="font-fifa text-5xl sm:text-7xl tracking-tighter mb-4 uppercase text-gray-900">
+              MATCH DAY
             </h1>
-            
-            <div className="inline-flex items-center gap-4 text-wc-yellow text-sm font-bold tracking-widest uppercase mb-4">
-              <span className="flex items-center gap-2"><CalendarDays className="w-4 h-4" /> {formattedDate}</span>
-              <span>|</span>
-              <span className="text-wc-green">{match.round}</span>
+            <div
+              className="mx-auto tri-underline"
+              style={{ width: 180, background: HOST_TRI_GRADIENT }}
+            />
+
+            <div className="inline-flex flex-wrap items-center justify-center gap-4 text-sm font-bold tracking-widest uppercase mt-6">
+              <span className="flex items-center gap-2 text-gray-700">
+                <CalendarDays className="w-4 h-4" /> {formattedDate}
+              </span>
+              <span className="text-gray-300">|</span>
+              <span className="text-wc-purple">{match.round}</span>
+              {isLive && (
+                <>
+                  <span className="text-gray-300">|</span>
+                  <span className="inline-flex items-center gap-2 text-red-500">
+                    <span className="live-dot" /> LIVE
+                  </span>
+                </>
+              )}
             </div>
-            
+
             {match.venue && (
-              <div className="flex items-center justify-center gap-2 text-gray-500 text-xs font-semibold tracking-widest uppercase">
+              <div className="flex items-center justify-center gap-2 text-gray-500 text-xs font-semibold tracking-widest uppercase mt-3">
                 <MapPin className="w-3.5 h-3.5" />
                 {match.venue}
               </div>
             )}
           </div>
 
-          {/* Big Score / Team Display */}
-          <div className="flex flex-col items-center justify-center mb-16">
-            
-            <div className="text-wc-cyan font-bold tracking-[0.2em] mb-6">
-              {isLive ? <span className="animate-pulse">LIVE NOW</span> : isFinished ? "FULL TIME" : "UPCOMING"}
-            </div>
+          {/* Scoreboard */}
+          <div className="relative flex flex-col items-center justify-center mb-12">
+            <div className="flex items-center justify-center gap-6 sm:gap-10 w-full">
+              <TeamBadge
+                team={match.home_team}
+                size="xl"
+                showName={false}
+                from="left"
+                delay={0.1}
+              />
 
-            <div className="flex items-center justify-center gap-2 sm:gap-6 bg-gray-50 p-4 sm:p-6 rounded-full border border-gray-200 shadow-sm">
-              
-              {/* Home Team */}
-              <div className="flex items-center gap-4">
-                <img 
-                  src={getFlagPath(match.home_team)} 
-                  alt={match.home_team} 
-                  className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-sm border border-gray-100" 
-                />
-                <span className="hidden sm:block font-bold text-3xl uppercase text-gray-900">{match.home_team.slice(0, 3)}</span>
-              </div>
-
-              {/* Score Box */}
-              <div className="flex items-center bg-wc-cyan rounded-[1.5rem] px-4 py-2 shadow-sm text-white">
-                {isLive || isFinished ? (
-                  <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl">
-                    <span>{match.home_score}</span>
-                    <div className="flex flex-col items-center justify-center w-8 h-12 bg-black rounded-lg text-white">
-                      <span className="text-[0.5rem] font-bold tracking-widest text-white/50 mb-1">26</span>
+              <div className="relative">
+                <div
+                  className="rounded-[1.4rem] px-6 py-3 shadow-lg text-white"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #002868, #0a1a4a 60%, #0a0f1f)",
+                  }}
+                >
+                  {isLive || isFinished ? (
+                    <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl">
+                      <span>{match.home_score ?? 0}</span>
+                      <div className="flex flex-col items-center justify-center w-10 h-14 rounded-lg bg-white/10 border border-white/20">
+                        <span className="text-[0.55rem] font-bold tracking-widest text-white/60">
+                          {isLive ? "LIVE" : match.status}
+                        </span>
+                      </div>
+                      <span>{match.away_score ?? 0}</span>
                     </div>
-                    <span>{match.away_score}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl text-white/80">
-                    <span>-</span>
-                    <div className="flex flex-col items-center justify-center w-8 h-12 bg-black/20 rounded-lg text-white/50">
-                      <span className="text-[0.5rem] font-bold tracking-widest mb-1">VS</span>
+                  ) : (
+                    <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl text-white/70">
+                      <span>-</span>
+                      <div className="flex flex-col items-center justify-center w-10 h-14 rounded-lg bg-white/10 border border-white/20">
+                        <span className="text-[0.55rem] font-bold tracking-widest text-white/50">
+                          VS
+                        </span>
+                      </div>
+                      <span>-</span>
                     </div>
-                    <span>-</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Away Team */}
-              <div className="flex items-center gap-4">
-                <span className="hidden sm:block font-bold text-3xl uppercase text-gray-900">{match.away_team.slice(0, 3)}</span>
-                <img 
-                  src={getFlagPath(match.away_team)} 
-                  alt={match.away_team} 
-                  className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-sm border border-gray-100" 
+                  )}
+                </div>
+                <div
+                  className="tri-underline mt-2"
+                  style={{ background: HOST_TRI_GRADIENT }}
                 />
               </div>
+
+              <TeamBadge
+                team={match.away_team}
+                size="xl"
+                showName={false}
+                from="right"
+                delay={0.1}
+              />
             </div>
 
-            {/* Full Team Names Below */}
-            <div className="flex justify-between w-full max-w-sm mt-6 font-fifa text-2xl text-gray-500 uppercase">
-              <span className="flex-1 text-center">{match.home_team}</span>
-              <span className="w-20"></span>
-              <span className="flex-1 text-center">{match.away_team}</span>
+            {/* Team Names Below */}
+            <div className="flex justify-between w-full max-w-md mt-6 font-fifa text-xl md:text-2xl text-gray-700 uppercase">
+              <span className="flex-1 text-center truncate px-2">
+                {match.home_team}
+              </span>
+              <span className="w-12" />
+              <span className="flex-1 text-center truncate px-2">
+                {match.away_team}
+              </span>
             </div>
           </div>
 
           {/* Form */}
           <PredictionForm match={match} prediction={prediction || null} userId={user.id} />
-          
+
           {/* Post-match result view */}
           {isFinished && prediction && (
-            <div className="mt-8 text-center">
-              <h4 className="font-display font-bold text-xl mb-2">Points Earned</h4>
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-purple-cyan neon-glow-purple font-display font-black text-4xl">
-                +{prediction.points_earned}
-              </div>
+            <div className="mt-10">
+              <GambleResult
+                matchId={match.id}
+                pointsEarned={prediction.points_earned}
+                scored={prediction.scored}
+                userHome={prediction.home_prediction}
+                userAway={prediction.away_prediction}
+                actualHome={match.home_score ?? 0}
+                actualAway={match.away_score ?? 0}
+              />
             </div>
           )}
         </div>
