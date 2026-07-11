@@ -11,6 +11,7 @@ import { StakeSelector } from "@/components/ui/StakeSelector";
 import { CountdownDigits } from "@/components/ui/CountdownDigits";
 import { LockInScreen } from "@/components/ui/LockInScreen";
 import { Confetti } from "@/components/ui/Confetti";
+import { sfx } from "@/components/ui/SoundFX";
 import {
   getStake,
   setStake,
@@ -18,6 +19,7 @@ import {
   type StakeId,
 } from "@/lib/gamble";
 import { HOST_RED, HOST_BLUE } from "@/lib/wc26-theme";
+import { useI18n } from "@/lib/i18n";
 
 interface Props {
   match: Match;
@@ -26,6 +28,7 @@ interface Props {
 }
 
 export default function PredictionForm({ match, prediction, userId }: Props) {
+  const { t } = useI18n();
   const [homeScore, setHomeScore] = useState<number>(
     prediction ? prediction.home_prediction : 1,
   );
@@ -45,7 +48,6 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
   const supabase = createClient();
   const selectedStake = getStakeById(stakeId);
 
-  // Hydrate stake from localStorage after mount
   useEffect(() => {
     setStakeId(getStake(match.id));
   }, [match.id]);
@@ -54,10 +56,25 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
     setIsLocked(new Date(match.start_time).getTime() <= Date.now());
   }, [match.start_time]);
 
+  const onStakeChange = (id: StakeId) => {
+    setStakeId(id);
+    sfx.chip();
+  };
+
+  const bumpHome = (n: number) => {
+    setHomeScore(n);
+    sfx.tick();
+  };
+  const bumpAway = (n: number) => {
+    setAwayScore(n);
+    sfx.tick();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLocked) {
-      setMessage({ type: "error", text: "Match is locked." });
+      setMessage({ type: "error", text: t("match.locked") });
+      sfx.fail();
       return;
     }
 
@@ -78,17 +95,16 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
     if (error) {
       setMessage({ type: "error", text: error.message });
       setLoading(false);
+      sfx.fail();
       return;
     }
 
-    // Save stake client-side (bounded to this device)
     setStake(match.id, stakeId);
-
     setLoading(false);
     setLockInOpen(true);
+    sfx.lockIn();
     if (selectedStake.mult >= 3) setConfetti(true);
-
-    setMessage({ type: "success", text: "Prediction saved!" });
+    setMessage({ type: "success", text: t("match.saved") });
   };
 
   const closeLockIn = () => {
@@ -100,36 +116,32 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
   return (
     <>
       <div className="mt-4 relative overflow-hidden">
-        {/* Countdown header */}
         <div className="mb-8 flex flex-col items-center gap-2">
           <CountdownDigits
             target={match.start_time}
-            label="Time until kickoff"
+            label={t("match.countdown")}
             accentColor={isLocked ? "#EF4444" : "#06B6D4"}
             onLock={() => setIsLocked(true)}
           />
           <div className="tri-underline w-40 mt-3" />
         </div>
 
-        <p className="text-gray-500 mb-8 font-semibold text-center">
-          {isLocked
-            ? "This match is locked. Predictions can no longer be edited."
-            : "Dial in your scoreline, then pick a stake before kickoff."}
+        <p className="text-gray-500 mb-8 font-semibold text-center px-2">
+          {isLocked ? t("match.locked") : t("match.dial")}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Dials block */}
           <div
-            className="rounded-3xl p-6 md:p-8 border border-gray-200 bg-white shadow-sm"
+            className="rounded-3xl p-4 md:p-8 border border-gray-200 bg-white shadow-sm"
             style={{
               backgroundImage:
                 "radial-gradient(circle at 15% 20%, rgba(200,16,46,0.05), transparent 40%), radial-gradient(circle at 85% 80%, rgba(0,40,104,0.05), transparent 40%)",
             }}
           >
-            <div className="flex items-center justify-center gap-6 md:gap-12">
+            <div className="flex items-center justify-center gap-3 sm:gap-6 md:gap-12">
               <ScoreDial
                 value={homeScore}
-                onChange={setHomeScore}
+                onChange={bumpHome}
                 disabled={isLocked || loading}
                 accentColor={HOST_RED}
                 label={match.home_team}
@@ -138,13 +150,13 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
                 <span className="font-fifa text-3xl md:text-5xl text-gray-300 leading-none">
                   –
                 </span>
-                <span className="mt-3 text-[10px] uppercase tracking-widest text-gray-400 font-bold">
-                  Full time
+                <span className="mt-3 text-[9px] md:text-[10px] uppercase tracking-widest text-gray-400 font-bold whitespace-nowrap">
+                  {t("match.fulltime")}
                 </span>
               </div>
               <ScoreDial
                 value={awayScore}
-                onChange={setAwayScore}
+                onChange={bumpAway}
                 disabled={isLocked || loading}
                 accentColor={HOST_BLUE}
                 label={match.away_team}
@@ -152,11 +164,10 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
             </div>
           </div>
 
-          {/* Stake selector */}
           {!isLocked && (
             <StakeSelector
               value={stakeId}
-              onChange={setStakeId}
+              onChange={onStakeChange}
               disabled={loading}
             />
           )}
@@ -186,7 +197,7 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
                 type="submit"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="relative min-w-[240px] px-8 py-4 rounded-2xl font-fifa text-xl tracking-widest uppercase text-white shadow-xl disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-3 overflow-hidden"
+                className="relative min-w-[220px] px-6 py-4 rounded-2xl font-fifa text-lg md:text-xl tracking-widest uppercase text-white shadow-xl disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-3 overflow-hidden"
                 style={{
                   background: `linear-gradient(135deg, ${selectedStake.color}, ${selectedStake.ring})`,
                   boxShadow: `0 12px 40px ${selectedStake.glow}`,
@@ -194,11 +205,11 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
                 disabled={loading}
               >
                 {loading ? (
-                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <Lock className="w-5 h-5" />
                 )}
-                {prediction ? "Update & Lock" : "Lock It In"}
+                {prediction ? t("cta.update") : t("cta.lock")}
                 <span className="ml-1 text-white/70 text-sm">
                   ({selectedStake.mult}x)
                 </span>

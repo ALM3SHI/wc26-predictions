@@ -21,8 +21,7 @@ export function Podium({ top, currentUserId }: Props) {
   const byRank = new Map(top.map((e) => [e.rank, e]));
 
   return (
-    <div className="relative rounded-3xl border border-gray-200 bg-white p-6 md:p-8 mb-10 overflow-hidden">
-      {/* stadium radial */}
+    <div className="relative rounded-3xl border border-gray-200 bg-white p-4 md:p-8 mb-10 overflow-hidden">
       <div
         className="absolute inset-0 pointer-events-none opacity-60"
         style={{
@@ -35,23 +34,23 @@ export function Podium({ top, currentUserId }: Props) {
           <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">
             Podium — Top Predictors
           </div>
-          <h2 className="font-fifa text-4xl md:text-5xl text-gray-900 uppercase">
+          <h2 className="font-fifa text-3xl md:text-5xl text-gray-900 uppercase">
             The Big Three
           </h2>
         </div>
 
-        <div className="flex items-end justify-center gap-4 md:gap-8">
+        <div className="grid grid-cols-3 gap-2 md:gap-6 items-end">
           {STEPS.map((step) => {
             const entry = byRank.get(step.rank);
             if (!entry) {
               return (
                 <div
                   key={step.rank}
-                  className="flex flex-col items-center flex-1 opacity-40"
+                  className="flex flex-col items-center min-w-0 opacity-40"
                 >
-                  <div className="text-4xl mb-2">–</div>
+                  <div className="text-3xl md:text-4xl mb-2">–</div>
                   <div
-                    className="w-full max-w-[140px] rounded-t-xl bg-gray-200"
+                    className="w-full rounded-t-xl bg-gray-200"
                     style={{ height: step.height }}
                   />
                 </div>
@@ -71,20 +70,20 @@ export function Podium({ top, currentUserId }: Props) {
                   stiffness: 180,
                   damping: 16,
                 }}
-                className="flex flex-col items-center flex-1 min-w-0"
+                className="flex flex-col items-center min-w-0"
               >
                 <Link
                   href={`/user/${entry.user_id}`}
-                  className="flex flex-col items-center"
+                  className="flex flex-col items-center w-full min-w-0"
                 >
                   {step.rank === 1 ? (
                     <Crown
-                      className="w-6 h-6 mb-1"
+                      className="w-5 h-5 md:w-6 md:h-6 mb-1"
                       style={{ color: HOST_GOLD }}
                     />
                   ) : (
                     <Medal
-                      className="w-5 h-5 mb-1"
+                      className="w-4 h-4 md:w-5 md:h-5 mb-1"
                       style={{
                         color: step.medal === "silver" ? "#B8C1D1" : "#B98040",
                       }}
@@ -94,34 +93,36 @@ export function Podium({ top, currentUserId }: Props) {
                     <img
                       src={entry.avatar_url || "/images/default-avatar.png"}
                       alt={entry.display_name}
-                      className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-4 shadow-lg"
+                      className="w-12 h-12 md:w-20 md:h-20 rounded-full object-cover border-4 shadow-lg"
                       style={{ borderColor: step.color }}
                     />
                     {isMe && (
-                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[9px] font-bold px-2 py-0.5 rounded-full bg-white border border-gray-200">
+                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[8px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 rounded-full bg-white border border-gray-200 whitespace-nowrap">
                         YOU
                       </span>
                     )}
                   </div>
-                  <div className="mt-3 font-fifa text-lg md:text-xl text-gray-900 uppercase truncate max-w-[140px] text-center">
-                    {entry.display_name}
-                  </div>
-                  <div
-                    className="font-fifa text-2xl md:text-3xl leading-none"
-                    style={{ color: step.color }}
-                  >
-                    {entry.total_points}
+                  <div className="mt-3 w-full min-w-0 px-1 text-center">
+                    <div className="font-fifa text-sm md:text-xl text-gray-900 uppercase truncate leading-tight">
+                      {entry.display_name}
+                    </div>
+                    <div
+                      className="font-fifa text-xl md:text-3xl leading-none mt-1"
+                      style={{ color: step.color }}
+                    >
+                      {entry.total_points}
+                    </div>
                   </div>
                 </Link>
 
                 <div
-                  className="mt-4 w-full max-w-[160px] rounded-t-xl shadow-inner text-white flex items-start justify-center pt-2"
+                  className="mt-4 w-full rounded-t-xl shadow-inner text-white flex items-start justify-center pt-2"
                   style={{
                     height: step.height,
                     background: `linear-gradient(180deg, ${step.color}, ${step.color}cc)`,
                   }}
                 >
-                  <span className="font-fifa text-3xl md:text-4xl">
+                  <span className="font-fifa text-2xl md:text-4xl">
                     {step.rank}
                   </span>
                 </div>

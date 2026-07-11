@@ -3,6 +3,7 @@ import { Outfit, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { Navigation } from "@/components/Navigation";
+import { I18nProvider } from "@/lib/i18n";
 import Image from "next/image";
 import "./globals.css";
 
@@ -66,8 +67,10 @@ export default function RootLayout({
           <Image src="/images/pattern.png" alt="Background Pattern" fill priority className="object-cover opacity-80" sizes="100vw" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#F9FAFB]/50 to-[#F9FAFB]" />
         </div>
-        <Navigation />
-        {children}
+        <I18nProvider>
+          <Navigation />
+          {children}
+        </I18nProvider>
         <ServiceWorkerRegistrar />
       </body>
     </html>

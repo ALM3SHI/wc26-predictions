@@ -6,9 +6,11 @@ import { Home, Trophy, LayoutGrid, Settings, LogOut, LogIn, ShieldAlert, Sparkle
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
+import { useI18n } from "@/lib/i18n";
 
 export function Navigation() {
   const pathname = usePathname();
+  const { t } = useI18n();
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const supabase = createClient();
@@ -50,15 +52,15 @@ export function Navigation() {
   };
 
   const navItems = [
-    { label: "Home", href: "/", icon: Home },
-    { label: "Bracket", href: "/bracket", icon: LayoutGrid },
-    { label: "Legends", href: "/legends", icon: Sparkles },
-    { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
-    { label: "Settings", href: "/settings", icon: Settings },
+    { label: t("nav.home"), href: "/", icon: Home },
+    { label: t("nav.bracket"), href: "/bracket", icon: LayoutGrid },
+    { label: t("nav.legends"), href: "/legends", icon: Sparkles },
+    { label: t("nav.leaderboard"), href: "/leaderboard", icon: Trophy },
+    { label: t("nav.settings"), href: "/settings", icon: Settings },
   ];
 
   if (isAdmin) {
-    navItems.push({ label: "Admin", href: "/admin", icon: ShieldAlert });
+    navItems.push({ label: t("nav.admin"), href: "/admin", icon: ShieldAlert });
   }
 
   return (
@@ -96,7 +98,7 @@ export function Navigation() {
               className="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all text-gray-400 hover:text-gray-900"
             >
               <LogIn className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-medium">Login</span>
+              <span className="text-[10px] font-medium">{t("nav.login")}</span>
             </Link>
           )}
           {user && (
@@ -105,7 +107,7 @@ export function Navigation() {
               className="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all text-gray-400 hover:text-red-500"
             >
               <LogOut className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-medium">Logout</span>
+              <span className="text-[10px] font-medium">{t("nav.logout")}</span>
             </button>
           )}
         </div>
@@ -141,12 +143,12 @@ export function Navigation() {
             {user ? (
               <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-500 transition-colors ml-4 pl-4 border-l border-gray-200">
                 <LogOut className="w-4 h-4" />
-                Logout
+                {t("nav.logout")}
               </button>
             ) : (
               <Link href="/login" className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-black transition-colors ml-4 pl-4 border-l border-gray-200">
                 <LogIn className="w-4 h-4" />
-                Login
+                {t("nav.login")}
               </Link>
             )}
           </div>

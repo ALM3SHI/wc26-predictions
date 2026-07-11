@@ -122,34 +122,41 @@ async function handler(req: Request) {
             await resend.emails.send({
               from: "WC26 Predictions <onboarding@resend.dev>",
               to: user.email,
-              subject: `⚽ ${match.home_team} vs ${match.away_team} — Predict Now!`,
+              subject: `⚽ ${match.home_team} vs ${match.away_team} — Lock your pick!`,
               html: `
-                <div style="background-color: #0A0A0F; color: #ffffff; padding: 40px; font-family: 'Inter', Arial, sans-serif; border-radius: 16px;">
-                  <div style="text-align: center; margin-bottom: 24px;">
-                    <h1 style="font-size: 28px; font-weight: 800; margin: 0; background: linear-gradient(135deg, #8B5CF6, #06B6D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                      WC26 PREDICTIONS
-                    </h1>
+                <div style="background-color: #F9FAFB; color: #111827; padding: 24px; font-family: 'Inter', Arial, sans-serif;">
+                  <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.06);">
+                    <div style="height: 8px; background: linear-gradient(90deg, #C8102E 0%, #C8102E 33%, #002868 33%, #002868 66%, #006847 66%, #006847 100%);"></div>
+                    <div style="padding: 32px; text-align: center;">
+                      <div style="display: inline-block; background: #002868; color: white; width: 56px; height: 56px; border-radius: 50%; line-height: 56px; font-weight: 900; font-size: 22px; margin-bottom: 16px;">26</div>
+                      <p style="font-size: 12px; color: #C8102E; text-transform: uppercase; letter-spacing: 3px; font-weight: 800; margin: 0 0 8px 0;">
+                        ⏰ Kickoff in ~1 hour
+                      </p>
+                      <h2 style="font-size: 28px; font-weight: 900; margin: 0 0 8px 0; color: #111827; text-transform: uppercase;">
+                        ${match.home_team} <span style="color: #C8102E;">vs</span> ${match.away_team}
+                      </h2>
+                      <p style="color: #6B7280; margin: 0 0 8px 0; font-size: 14px;">
+                        ${matchTime}${match.venue ? ` • ${match.venue}` : ""}
+                      </p>
+                      <p style="color: #6B7280; margin: 0 0 24px 0; font-size: 13px;">
+                        Round: <strong style="color: #002868;">${match.round}</strong>
+                      </p>
+                      <div style="padding: 16px; border: 1.5px dashed #C8102E; border-radius: 12px; background: rgba(200,16,46,0.04); margin-bottom: 24px;">
+                        <p style="color: #C8102E; font-weight: 700; margin: 0; font-size: 15px;">
+                          You haven't picked yet. Stake a chip while you still can.
+                        </p>
+                      </div>
+                      <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://wc26-predictions.vercel.app"}/match/${match.id}"
+                         style="display: inline-block; background: linear-gradient(135deg, #C8102E 0%, #002868 100%); color: #ffffff; padding: 16px 40px; border-radius: 14px; text-decoration: none; font-weight: 800; font-size: 16px; letter-spacing: 1px;">
+                        LOCK IN MY PICK →
+                      </a>
+                      <p style="color: #9CA3AF; font-size: 11px; margin: 24px 0 0 0;">
+                        WC26 · USA · Canada · Mexico
+                      </p>
+                    </div>
                   </div>
-                  <div style="background: rgba(26,26,46,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 32px; text-align: center;">
-                    <p style="font-size: 14px; color: #A78BFA; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px;">
-                      ⏰ Starting in ~1 hour
-                    </p>
-                    <h2 style="font-size: 24px; font-weight: 700; margin: 0 0 8px 0;">
-                      ${match.home_team} vs ${match.away_team}
-                    </h2>
-                    <p style="color: #9CA3AF; margin-bottom: 24px;">
-                      ${matchTime}${match.venue ? ` • ${match.venue}` : ""}
-                    </p>
-                    <p style="color: #F87171; font-weight: 600; margin-bottom: 24px;">
-                      You haven't submitted a prediction yet!
-                    </p>
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://wc26-predictions.vercel.app"}/match/${match.id}"
-                       style="display: inline-block; background: linear-gradient(135deg, #8B5CF6, #06B6D4); color: #ffffff; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 16px;">
-                      Make Your Prediction →
-                    </a>
-                  </div>
-                  <p style="text-align: center; color: #6B7280; font-size: 12px; margin-top: 24px;">
-                    You're receiving this because you enabled email notifications.
+                  <p style="text-align: center; color: #9CA3AF; font-size: 11px; margin-top: 16px;">
+                    You're receiving this because email reminders are on. <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://wc26-predictions.vercel.app"}/settings" style="color: #002868;">Manage in settings</a>
                   </p>
                 </div>
               `,

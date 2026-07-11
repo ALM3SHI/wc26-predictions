@@ -505,7 +505,183 @@ body {
   );
 }
 
-/* Respect reduced motion */
+/* ─────────────────────────────────────────────────────────
+   Anime-tier effects: fire, speed lines, goal, sparkle
+   ───────────────────────────────────────────────────────── */
+@keyframes fireFlicker {
+  0% {
+    transform: translate(-50%, -50%) rotate(var(--rot, 0deg))
+      translateY(calc(var(--dy, -50%) - 4px)) scaleY(1) scaleX(1);
+    opacity: 0.85;
+    filter: blur(1.5px) brightness(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(calc(var(--rot, 0deg) + 4deg))
+      translateY(var(--dy, -50%)) scaleY(1.15) scaleX(0.92);
+    opacity: 1;
+    filter: blur(0.5px) brightness(1.3);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(calc(var(--rot, 0deg) - 4deg))
+      translateY(calc(var(--dy, -50%) + 4px)) scaleY(0.9) scaleX(1.05);
+    opacity: 0.6;
+    filter: blur(2px) brightness(0.9);
+  }
+}
+
+@keyframes corePulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes speedLines {
+  0% {
+    transform: translateX(-100%) skewX(-8deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(200%) skewX(-8deg);
+    opacity: 0;
+  }
+}
+
+@keyframes goalNet {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.05);
+  }
+}
+
+@keyframes sparkleTwinkle {
+  0%,
+  100% {
+    transform: scale(0.5) rotate(0deg);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+@keyframes cardFlipIn {
+  0% {
+    transform: perspective(800px) rotateY(-90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(800px) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes ballBounce {
+  0% {
+    transform: translateY(-80px) rotate(0deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(6px) rotate(180deg);
+  }
+  100% {
+    transform: translateY(0) rotate(360deg);
+  }
+}
+
+@keyframes ringBurst {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes textPop {
+  0% {
+    transform: scale(0.4) rotate(-4deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15) rotate(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+/* Anime speed-lines background — apply as overlay */
+.anime-speed-lines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    100deg,
+    transparent 0 12px,
+    rgba(255, 255, 255, 0.06) 12px 13px,
+    transparent 13px 20px
+  );
+  animation: speedLines 700ms linear;
+}
+
+.ring-burst {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 3px solid currentColor;
+  animation: ringBurst 900ms ease-out forwards;
+  pointer-events: none;
+}
+
+.text-pop {
+  animation: textPop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.rtl-flip {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .rtl-flip-auto {
+  transform: scaleX(-1);
+}
+
+/* User-toggled reduced motion (Settings page) */
+html.motion-reduced .ticker-track,
+html.motion-reduced .host-seal,
+html.motion-reduced .sweep-shine,
+html.motion-reduced .stadium-pulse,
+html.motion-reduced .confetti-piece,
+html.motion-reduced .chip-active,
+html.motion-reduced .live-dot::after,
+html.motion-reduced .fire-tongue,
+html.motion-reduced .ring-burst,
+html.motion-reduced .text-pop,
+html.motion-reduced .flag-wave-hover:hover img,
+html.motion-reduced .anime-speed-lines::before {
+  animation: none !important;
+}
+
+/* Respect OS reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .ticker-track,
   .host-seal,
@@ -514,7 +690,11 @@ body {
   .confetti-piece,
   .chip-active,
   .live-dot::after,
-  .flag-wave-hover:hover img {
+  .flag-wave-hover:hover img,
+  .fire-tongue,
+  .anime-speed-lines::before,
+  .ring-burst,
+  .text-pop {
     animation: none !important;
   }
 }

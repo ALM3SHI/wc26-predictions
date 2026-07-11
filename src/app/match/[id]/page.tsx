@@ -6,6 +6,7 @@ import PredictionForm from "./PredictionForm";
 import GambleResult from "./GambleResult";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { HostSeal } from "@/components/ui/HostSeal";
+import { CommunityConsensus } from "@/components/ui/CommunityConsensus";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 
 // Force dynamic since it relies on user session and real-time DB data
@@ -45,6 +46,23 @@ export default async function MatchPage(props: {
     .eq("match_id", matchId)
     .eq("user_id", user.id)
     .single();
+
+  // Community consensus — only readable after kickoff per RLS
+  const isKicked = new Date(match.start_time).getTime() <= Date.now();
+  const consensus = { home: 0, draw: 0, away: 0 };
+  if (isKicked) {
+    const { data: allPreds } = await supabase
+      .from("predictions")
+      .select("home_prediction, away_prediction")
+      .eq("match_id", matchId);
+    (allPreds || []).forEach(
+      (p: { home_prediction: number; away_prediction: number }) => {
+        if (p.home_prediction > p.away_prediction) consensus.home += 1;
+        else if (p.home_prediction < p.away_prediction) consensus.away += 1;
+        else consensus.draw += 1;
+      },
+    );
+  }
 
   const date = new Date(match.start_time);
   const formattedDate = date.toLocaleDateString("en-US", {
@@ -179,6 +197,17 @@ export default async function MatchPage(props: {
 
           {/* Form */}
           <PredictionForm match={match} prediction={prediction || null} userId={user.id} />
+
+          {/* Community consensus — only visible after kickoff */}
+          {isKicked && (
+            <CommunityConsensus
+              home={consensus.home}
+              draw={consensus.draw}
+              away={consensus.away}
+              homeTeam={match.home_team}
+              awayTeam={match.away_team}
+            />
+          )}
 
           {/* Post-match result view */}
           {isFinished && prediction && (

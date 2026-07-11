@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, XCircle, Trophy } from "lucide-react";
 import GambleStats from "./GambleStats";
+import { Achievements } from "@/components/ui/Achievements";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 
@@ -109,6 +110,15 @@ export default async function UserProfilePage(props: {
           </div>
 
           <GambleStats isSelf={isSelf} predictions={finishedPredictions} />
+
+          <Achievements
+            isSelf={isSelf}
+            predictions={(predictions || []).map((p: any) => ({
+              match_id: p.match_id,
+              points_earned: p.points_earned,
+              scored: p.scored,
+            }))}
+          />
 
           <div className="space-y-4">
             <h2 className="font-fifa text-3xl text-gray-900 uppercase tracking-widest mb-6">
