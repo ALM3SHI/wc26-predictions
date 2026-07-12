@@ -2,8 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   User,
-  MessageSquare,
-  Wallet,
   Trophy,
   Settings,
   Shield,
@@ -143,11 +141,12 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen pb-6" dir={dir}>
-      {/* Top Header */}
+      {/* Top Header — avatar (start) + WC26 seal (end), clutter-free */}
       <header className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur border-b border-gray-100">
         <Link
           href={user ? "/user/" + user.id : "/login"}
-          className="relative w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 overflow-hidden"
+          className="relative w-11 h-11 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 overflow-hidden transition-transform duration-150 active:scale-90"
+          aria-label={t("home.qa.profile")}
         >
           {userProfile?.avatar_url ? (
             <img
@@ -161,21 +160,13 @@ export default async function HomePage() {
               alt="Profile"
               fill
               className="object-cover"
-              sizes="40px"
+              sizes="44px"
             />
           ) : (
             <User className="w-5 h-5" />
           )}
         </Link>
         <HostSeal size={44} />
-        <div className="flex gap-3 text-gray-600">
-          <button className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
-            <MessageSquare className="w-5 h-5" />
-          </button>
-          <button className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
-            <Wallet className="w-5 h-5" />
-          </button>
-        </div>
       </header>
 
       <div className="max-w-4xl mx-auto px-4 mt-4 space-y-6">
