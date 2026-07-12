@@ -1,14 +1,14 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, MapPin } from "lucide-react";
 import PredictionForm from "./PredictionForm";
 import GambleResult from "./GambleResult";
+import { RichBadgesLoader } from "./RichBadgesLoader";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { CommunityConsensus } from "@/components/ui/CommunityConsensus";
-import { MatchRichBadges } from "@/components/ui/MatchRichBadges";
-import { getMatchByApiId } from "@/lib/football-data";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import { getServerT } from "@/lib/i18n-server";
 import {
@@ -56,16 +56,15 @@ export default async function MatchPage(props: {
 
   const isKicked = new Date(match.start_time).getTime() <= Date.now();
 
-  // Rich API context + consensus are also independent — batch them.
-  const [richMatch, allPredsRes] = await Promise.all([
-    match.api_fixture_id ? getMatchByApiId(match.api_fixture_id) : Promise.resolve(null),
-    isKicked
-      ? supabase
-          .from("predictions")
-          .select("home_prediction, away_prediction")
-          .eq("match_id", matchId)
-      : Promise.resolve({ data: [] as { home_prediction: number; away_prediction: number }[] }),
-  ]);
+  // Consensus can piggyback on the DB — no third-party lookup. The rich
+  // football-data.org context now streams in via <Suspense> below, so it
+  // never blocks the score + prediction form.
+  const allPredsRes = isKicked
+    ? await supabase
+        .from("predictions")
+        .select("home_prediction, away_prediction")
+        .eq("match_id", matchId)
+    : { data: [] as { home_prediction: number; away_prediction: number }[] };
 
   const consensus = { home: 0, draw: 0, away: 0 };
   (allPredsRes.data || []).forEach((p) => {
@@ -213,7 +212,12 @@ export default async function MatchPage(props: {
             userId={user.id}
           />
 
-          <MatchRichBadges rich={richMatch} />
+          {/* Third-party enrichment streams in on its own timeline — if
+              football-data.org is slow it silently drops off, never
+              blocking the prediction UI. */}
+          <Suspense fallback={null}>
+            <RichBadgesLoader apiFixtureId={match.api_fixture_id ?? null} />
+          </Suspense>
 
           {isKicked && (
             <CommunityConsensus

@@ -189,11 +189,19 @@ export interface FDCompetitionResponse {
 // Private fetcher
 // ─────────────────────────────────────────────────────────────
 
+// Hard cap so a slow/dead upstream never blocks a Server Component render.
+// football-data.org has occasional 5-10s tail latency; we'd rather show a
+// missing badge than a frozen page.
+const FD_TIMEOUT_MS = 2500;
+
 async function fdFetch<T>(path: string): Promise<T | null> {
+  const controller = new AbortController();
+  const abortTimer = setTimeout(() => controller.abort(), FD_TIMEOUT_MS);
   try {
     const res = await fetch(`${BASE}${path}`, {
       headers: { "X-Auth-Token": KEY },
       cache: "no-store",
+      signal: controller.signal,
     });
     if (!res.ok) {
       console.error(`[football-data] ${path} → ${res.status}`);
@@ -201,8 +209,14 @@ async function fdFetch<T>(path: string): Promise<T | null> {
     }
     return (await res.json()) as T;
   } catch (err) {
-    console.error(`[football-data] ${path} threw`, err);
+    if ((err as Error)?.name === "AbortError") {
+      console.error(`[football-data] ${path} timed out after ${FD_TIMEOUT_MS}ms`);
+    } else {
+      console.error(`[football-data] ${path} threw`, err);
+    }
     return null;
+  } finally {
+    clearTimeout(abortTimer);
   }
 }
 

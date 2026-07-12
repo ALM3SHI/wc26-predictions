@@ -37,33 +37,57 @@ export const TEAMS_TTL = 604_800;
 // Cache helpers
 // ---------------------------------------------------------------------------
 
+// Redis can wedge if Upstash is under load. A 1s cap keeps the caller
+// moving — a cache miss is fine, a hung render isn't.
+const REDIS_TIMEOUT_MS = 1000;
+
+function withTimeout<T>(p: Promise<T>, ms: number, tag: string): Promise<T | null> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      console.error(`[cache] ${tag} timed out after ${ms}ms`);
+      resolve(null);
+    }, ms);
+    p.then((v) => {
+      clearTimeout(timer);
+      resolve(v);
+    }).catch((err) => {
+      clearTimeout(timer);
+      console.error(`[cache] ${tag} threw`, err);
+      resolve(null);
+    });
+  });
+}
+
 /**
  * Retrieve a value from cache.
- * Returns `null` on cache miss or if deserialization fails.
+ * Returns `null` on cache miss, timeout, or deserialization failure.
  */
 export async function getCached<T>(key: string): Promise<T | null> {
-  try {
-    const data = await getRedis().get<T>(key);
-    return data ?? null;
-  } catch (error) {
-    console.error(`[cache] GET failed for key "${key}":`, error);
-    return null;
-  }
+  if (!process.env.UPSTASH_REDIS_REST_URL) return null;
+  const data = await withTimeout(
+    getRedis().get<T>(key),
+    REDIS_TIMEOUT_MS,
+    `GET ${key}`,
+  );
+  return data ?? null;
 }
 
 /**
  * Store a value in cache with an explicit TTL.
+ * Fire-and-forget: never blocks the caller.
  */
 export async function setCached<T>(
   key: string,
   value: T,
   ttlSeconds: number,
 ): Promise<void> {
-  try {
-    await getRedis().set(key, value, { ex: ttlSeconds });
-  } catch (error) {
-    console.error(`[cache] SET failed for key "${key}":`, error);
-  }
+  if (!process.env.UPSTASH_REDIS_REST_URL) return;
+  // Don't await — if the cache write is slow, the response should still ship.
+  void withTimeout(
+    getRedis().set(key, value, { ex: ttlSeconds }),
+    REDIS_TIMEOUT_MS,
+    `SET ${key}`,
+  );
 }
 
 /**
