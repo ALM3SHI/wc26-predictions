@@ -51,8 +51,19 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore
     }
-    // No stored preference — persist the default so server pages see it too.
-    writeLangCookie("en");
+    // First visit — pick Arabic if the browser prefers it; otherwise English.
+    const preferred: Lang =
+      typeof navigator !== "undefined" &&
+      (navigator.language || "").toLowerCase().startsWith("ar")
+        ? "ar"
+        : "en";
+    setLangState(preferred);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, preferred);
+    } catch {
+      // ignore
+    }
+    writeLangCookie(preferred);
   }, []);
 
   useEffect(() => {

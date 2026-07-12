@@ -257,6 +257,7 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "ios.hint": "Waiting for you to open the app from the WC26 icon…",
     "ios.notsafari":
       "Please open this link in Safari — Add to Home Screen only works there.",
+    "ios.toggle": "العربية",
 
     // ── Loading ──────────────────────────────────────────
     "loading.title": "Loading",
@@ -516,6 +517,7 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "ios.hint": "بانتظار فتحك للتطبيق من أيقونة WC26…",
     "ios.notsafari":
       "الرجاء فتح الرابط في Safari — الإضافة إلى الشاشة الرئيسية تعمل فقط من هناك.",
+    "ios.toggle": "English",
 
     // ── التحميل ──────────────────────────────────────
     "loading.title": "جارٍ التحميل",
