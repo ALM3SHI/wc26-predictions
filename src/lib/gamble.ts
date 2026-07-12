@@ -63,6 +63,14 @@ export function getStakeById(id: StakeId | string | null | undefined): Stake {
   return STAKES.find((s) => s.id === id) ?? STAKES[0];
 }
 
+// Reverse lookup: match a numeric multiplier (as stored on the predictions
+// row in Supabase) back to the local Stake definition. Falls back to Safe
+// so callers always get a well-formed stake even for legacy rows.
+export function getStakeByMult(mult: number | null | undefined): Stake {
+  if (typeof mult !== "number") return STAKES[0];
+  return STAKES.find((s) => s.mult === mult) ?? STAKES[0];
+}
+
 const STORAGE_KEY = "wc26.stakes";
 
 type StakeMap = Record<string, StakeId>;

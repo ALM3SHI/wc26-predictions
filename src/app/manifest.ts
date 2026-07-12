@@ -29,5 +29,62 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
+    // App shortcuts — long-pressing the home-screen icon on Android
+    // and 3D-touching on iOS reveals these quick-entry points. Order
+    // matters: Android surfaces the first 4 in most launchers.
+    shortcuts: [
+      {
+        name: "Matches",
+        short_name: "Matches",
+        description: "Predict the next kickoff",
+        url: "/bracket",
+        icons: [
+          {
+            src: "/icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+        ],
+      },
+      {
+        name: "Battle Pass",
+        short_name: "Pass",
+        description: "Track your season path",
+        url: "/battle-pass",
+        icons: [
+          {
+            src: "/icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+        ],
+      },
+      {
+        name: "Leagues",
+        short_name: "Leagues",
+        description: "Mini-leagues with friends",
+        url: "/leagues",
+        icons: [
+          {
+            src: "/icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+        ],
+      },
+      {
+        name: "Weekly recap",
+        short_name: "Recap",
+        description: "Your week in numbers",
+        url: "/summary",
+        icons: [
+          {
+            src: "/icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+        ],
+      },
+    ],
   };
 }

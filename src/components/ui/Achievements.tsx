@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { Flame, Target, Award, Zap, Sparkles, TrendingUp, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getAllStakes, getStakeById } from "@/lib/gamble";
 import { useI18n } from "@/lib/i18n";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 
@@ -11,6 +10,9 @@ interface Pred {
   match_id: string;
   points_earned: number;
   scored: boolean;
+  // Multiplier as stored on the predictions row in Supabase. Cloud-backed
+  // now — used to survive device swaps, wipes, and multi-device sign-in.
+  stake_multiplier?: number | null;
   created_at?: string;
 }
 
@@ -38,7 +40,6 @@ export function Achievements({ predictions, isSelf }: Props) {
     const outcomes = scored.filter(
       (p) => p.points_earned >= 1,
     );
-    const stakes = isSelf ? getAllStakes() : {};
 
     // Streak count — 3 in a row correct (any base > 0)
     const sorted = [...scored].sort(
@@ -57,15 +58,19 @@ export function Achievements({ predictions, isSelf }: Props) {
       }
     }
 
-    // Legend / All-In cash-ins
+    // Cloud-backed stake reads: use the multiplier stored on each
+    // prediction row instead of a client-only localStorage map. This
+    // keeps achievements consistent across devices and browser wipes.
     let legendHits = 0;
     let allinHits = 0;
-    scored.forEach((p) => {
-      if (p.points_earned <= 0) return;
-      const stake = getStakeById(stakes[p.match_id]);
-      if (stake.mult === 3) legendHits += 1;
-      if (stake.mult === 5) allinHits += 1;
-    });
+    if (isSelf) {
+      scored.forEach((p) => {
+        if (p.points_earned <= 0) return;
+        const mult = p.stake_multiplier ?? 1;
+        if (mult === 3) legendHits += 1;
+        if (mult === 5) allinHits += 1;
+      });
+    }
 
     setItems([
       {
@@ -130,6 +135,9 @@ export function Achievements({ predictions, isSelf }: Props) {
         <h3 className="font-fifa text-2xl uppercase text-gray-900">
           {t("ach.title")}
         </h3>
+        <span className="ms-auto text-[10px] uppercase tracking-widest text-gray-500 font-bold" dir="ltr">
+          {items.filter((a) => a.unlocked).length}/{items.length}
+        </span>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -151,7 +159,7 @@ export function Achievements({ predictions, isSelf }: Props) {
                 borderColor: a.unlocked ? `${a.color}44` : undefined,
               }}
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-start gap-3 mb-2">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                     a.unlocked ? "" : "grayscale opacity-50"
@@ -168,15 +176,15 @@ export function Achievements({ predictions, isSelf }: Props) {
                     <Lock className="w-4 h-4" />
                   )}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div
-                    className={`font-bold text-sm truncate ${
+                    className={`font-bold text-sm leading-tight break-words ${
                       a.unlocked ? "text-gray-900" : "text-gray-400"
                     }`}
                   >
                     {t(`ach.${a.id}.title`)}
                   </div>
-                  <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">
+                  <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mt-1" dir="ltr">
                     {a.progress}
                   </div>
                 </div>

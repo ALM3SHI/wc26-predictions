@@ -4,13 +4,26 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  Loader2,
+  Eye,
+  EyeOff,
+  Languages,
+} from "lucide-react";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n";
+import { OAuthButtons, OrDivider } from "@/components/ui/OAuthButtons";
 
 export default function SignupPage() {
+  const { t, lang, setLang, dir } = useI18n();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -23,13 +36,13 @@ export default function SignupPage() {
     setLoading(true);
 
     if (displayName.trim().length < 2) {
-      setError("Display name must be at least 2 characters.");
+      setError(t("auth.error.displayName"));
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setError(t("auth.error.password"));
       setLoading(false);
       return;
     }
@@ -61,11 +74,16 @@ export default function SignupPage() {
     setLoading(false);
   };
 
-
+  const iconPos = dir === "rtl" ? "right-3" : "left-3";
+  const inputPad = dir === "rtl" ? "pr-11 pl-4" : "pl-11 pr-4";
+  const eyePos = dir === "rtl" ? "left-3" : "right-3";
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 bg-white">
+      <div
+        className="min-h-screen flex items-center justify-center px-4 bg-white"
+        dir={dir}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -75,12 +93,14 @@ export default function SignupPage() {
             <Mail className="w-8 h-8 text-wc-green" />
           </div>
           <h2 className="text-2xl font-display font-bold mb-3 text-gray-900">
-            Check your email!
+            {t("auth.check.title")}
           </h2>
           <p className="text-gray-500">
-            We&apos;ve sent a confirmation link to{" "}
-            <span className="text-wc-purple font-semibold">{email}</span>.
-            Click it to activate your account.
+            {t("auth.check.sub")}{" "}
+            <span className="text-wc-purple font-semibold" dir="ltr">
+              {email}
+            </span>
+            {t("auth.check.suffix")}
           </p>
         </motion.div>
       </div>
@@ -88,10 +108,22 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-white relative overflow-hidden">
-      {/* Background decorative elements */}
+    <div
+      className="min-h-screen flex items-center justify-center px-4 bg-white relative overflow-hidden"
+      dir={dir}
+    >
       <div className="absolute top-0 left-0 w-96 h-96 bg-wc-purple/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-wc-cyan/5 rounded-full blur-[120px] translate-x-1/2 translate-y-1/2" />
+
+      {/* Language toggle */}
+      <button
+        type="button"
+        onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+        className="absolute top-4 end-4 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white/80 backdrop-blur hover:bg-gray-50 text-xs font-bold text-gray-700 shadow-sm"
+      >
+        <Languages className="w-3.5 h-3.5" />
+        {lang === "ar" ? "English" : "العربية"}
+      </button>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -103,58 +135,74 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-display font-black tracking-tight">
             <span className="text-gradient gradient-purple-cyan bg-clip-text text-transparent">
-              JOIN WC26
+              {t("auth.signup.title")}
             </span>
           </h1>
-          <p className="text-gray-500 mt-2">
-            Create your account and start predicting
-          </p>
+          <p className="text-gray-500 mt-2">{t("auth.signup.sub")}</p>
         </div>
+
+        {/* Social sign-up — most new users land here through this path. */}
+        <OAuthButtons onError={(msg) => setError(msg)} />
+
+        <OrDivider label={t("auth.or")} />
 
         {/* Signup Form */}
         <form onSubmit={handleSignup} className="space-y-4">
           {/* Display Name */}
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <User className={`absolute ${iconPos} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400`} />
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Display Name (for leaderboard)"
+              placeholder={t("auth.displayName")}
               required
               minLength={2}
               maxLength={30}
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
+              className={`w-full ${inputPad} py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900`}
+              style={{ textAlign: dir === "rtl" ? "right" : "left" }}
             />
           </div>
 
           {/* Email */}
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Mail className={`absolute ${iconPos} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400`} />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
+              placeholder={t("auth.email")}
               required
               autoComplete="username"
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
+              dir="ltr"
+              className={`w-full ${inputPad} py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900`}
+              style={{ textAlign: dir === "rtl" ? "right" : "left" }}
             />
           </div>
 
           {/* Password */}
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Lock className={`absolute ${iconPos} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400`} />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password (min. 6 characters)"
+              placeholder={t("auth.password.new")}
               required
               minLength={6}
               autoComplete="new-password"
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
+              dir="ltr"
+              className={`w-full ${inputPad} py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900`}
+              style={{ textAlign: dir === "rtl" ? "right" : "left" }}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+              className={`absolute ${eyePos} top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1`}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
 
           {/* Error */}
@@ -178,8 +226,8 @@ export default function SignupPage() {
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                Create Account
-                <ArrowRight className="w-5 h-5" />
+                {t("auth.createAccount")}
+                <ArrowRight className="w-5 h-5 rtl-flip-auto" />
               </>
             )}
           </button>
@@ -187,12 +235,12 @@ export default function SignupPage() {
 
         {/* Login Link */}
         <p className="text-center text-gray-500 mt-6 text-sm">
-          Already have an account?{" "}
+          {t("auth.haveAccount")}{" "}
           <Link
             href="/login"
             className="text-wc-purple hover:text-wc-purple-light transition-colors font-medium"
           >
-            Sign in
+            {t("auth.signInCta")}
           </Link>
         </p>
       </motion.div>

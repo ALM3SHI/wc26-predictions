@@ -1,6 +1,6 @@
 "use client";
 
-import { getFlagPath } from "@/lib/utils";
+import { Flag } from "@/components/ui/Flag";
 import type { Match } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { formatMatchTimeShort, localizeTeam } from "@/lib/i18n-data";
@@ -29,8 +29,8 @@ export function Ticker({ matches, emptyText = "No matches scheduled" }: Props) {
         key={`${m.id}-${idx}`}
         className="inline-flex items-center gap-2 px-4 text-sm font-bold uppercase tracking-wider"
       >
-        <img
-          src={getFlagPath(m.home_team)}
+        <Flag
+          team={m.home_team}
           alt=""
           className="w-5 h-5 rounded-full object-cover border border-white/20"
         />
@@ -45,8 +45,8 @@ export function Ticker({ matches, emptyText = "No matches scheduled" }: Props) {
           </span>
         )}
         <span>{localizeTeam(m.away_team, lang)}</span>
-        <img
-          src={getFlagPath(m.away_team)}
+        <Flag
+          team={m.away_team}
           alt=""
           className="w-5 h-5 rounded-full object-cover border border-white/20"
         />

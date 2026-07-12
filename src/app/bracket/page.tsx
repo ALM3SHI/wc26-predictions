@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MatchWithPrediction, Prediction } from "@/lib/types";
 import Link from "next/link";
 import { Clock, Trophy, Flame, Sparkles } from "lucide-react";
-import { getFlagPath } from "@/lib/utils";
+import { Flag } from "@/components/ui/Flag";
 import { Ticker } from "@/components/ui/Ticker";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { StakeBadge } from "@/components/ui/StakeBadge";
@@ -243,9 +243,8 @@ export default async function BracketPage() {
                           <div className="flex flex-col gap-3 font-display">
                             <div className="flex justify-between items-center">
                               <div className="flex items-center gap-4">
-                                <img
-                                  src={getFlagPath(match.home_team)}
-                                  alt={match.home_team}
+                                <Flag
+                                  team={match.home_team}
                                   className="w-8 h-8 object-cover rounded-full shadow-sm border border-gray-100"
                                 />
                                 <span className="font-bold text-gray-900 truncate max-w-[120px]">
@@ -264,9 +263,8 @@ export default async function BracketPage() {
 
                             <div className="flex justify-between items-center mt-2">
                               <div className="flex items-center gap-4">
-                                <img
-                                  src={getFlagPath(match.away_team)}
-                                  alt={match.away_team}
+                                <Flag
+                                  team={match.away_team}
                                   className="w-8 h-8 object-cover rounded-full shadow-sm border border-gray-100"
                                 />
                                 <span className="font-bold text-gray-900 truncate max-w-[120px]">

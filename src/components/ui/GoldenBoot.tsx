@@ -5,7 +5,7 @@ import { Crown, Award } from "lucide-react";
 import Link from "next/link";
 import type { FDScorer } from "@/lib/football-data";
 import { HOST_RED, HOST_BLUE, HOST_GREEN, HOST_GOLD } from "@/lib/wc26-theme";
-import { getFlagPath } from "@/lib/utils";
+import { Flag } from "@/components/ui/Flag";
 import { useI18n } from "@/lib/i18n";
 import { localizeTeam } from "@/lib/i18n-data";
 
@@ -111,9 +111,8 @@ export function GoldenBoot({ scorers }: Props) {
               >
                 {i + 1}
               </div>
-              <img
-                src={getFlagPath(nat)}
-                alt={nat}
+              <Flag
+                team={nat}
                 className="w-10 h-10 md:w-14 md:h-14 mx-auto rounded-full object-cover border-2 shadow"
                 style={{ borderColor: color }}
               />
@@ -155,9 +154,8 @@ export function GoldenBoot({ scorers }: Props) {
               <span className="text-xs font-bold text-gray-400 text-center">
                 {i + 4}
               </span>
-              <img
-                src={getFlagPath(s.player.nationality)}
-                alt=""
+              <Flag
+                team={s.player.nationality}
                 className="w-6 h-6 rounded-full object-cover border border-gray-100"
               />
               <div className="min-w-0">

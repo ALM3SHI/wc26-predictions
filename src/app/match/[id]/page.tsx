@@ -5,7 +5,11 @@ import Link from "next/link";
 import { ArrowLeft, CalendarDays, MapPin } from "lucide-react";
 import PredictionForm from "./PredictionForm";
 import GambleResult from "./GambleResult";
+import MatchPreview from "./MatchPreview";
 import { RichBadgesLoader } from "./RichBadgesLoader";
+import { LiveReactions } from "@/components/ui/LiveReactions";
+import { LiveViewers } from "@/components/ui/LiveViewers";
+import { Suspense as SuspenseAlias } from "react";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { CommunityConsensus } from "@/components/ui/CommunityConsensus";
@@ -35,6 +39,14 @@ export default async function MatchPage(props: {
   if (!user) {
     redirect("/login?next=/match/" + matchId);
   }
+
+  // Pull the viewer's profile once so live components can render
+  // presence + reactions with their tier + avatar.
+  const { data: viewerProfile } = await supabase
+    .from("profiles")
+    .select("display_name, avatar_url, current_tier")
+    .eq("id", user.id)
+    .single();
 
   // Match + user's prediction don't depend on each other.
   const [matchRes, predictionRes] = await Promise.all([
@@ -131,6 +143,23 @@ export default async function MatchPage(props: {
                 {match.venue}
               </div>
             )}
+
+            {/* Presence pill — only when the match is live so we don't
+                trigger a Realtime channel for scheduled matches nobody
+                is really "watching" together. */}
+            {isLive && (
+              <div className="flex justify-center">
+                <LiveViewers
+                  matchId={match.id}
+                  me={{
+                    user_id: user.id,
+                    display_name: viewerProfile?.display_name ?? "",
+                    avatar_url: viewerProfile?.avatar_url ?? null,
+                    tier: viewerProfile?.current_tier ?? 1,
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Scoreboard */}
@@ -206,6 +235,19 @@ export default async function MatchPage(props: {
             </div>
           </div>
 
+          {/* Scouting report — form + H2H + personal hit rate. Renders
+              only for unplayed matches; once kicked off, the result
+              itself and stats page tell the story. */}
+          {!isFinished && !isLive && (
+            <SuspenseAlias fallback={null}>
+              <MatchPreview
+                homeTeam={match.home_team}
+                awayTeam={match.away_team}
+                userId={user.id}
+              />
+            </SuspenseAlias>
+          )}
+
           <PredictionForm
             match={match}
             prediction={prediction || null}
@@ -239,11 +281,19 @@ export default async function MatchPage(props: {
                 userAway={prediction.away_prediction}
                 actualHome={match.home_score ?? 0}
                 actualAway={match.away_score ?? 0}
+                homeTeam={match.home_team}
+                awayTeam={match.away_team}
               />
             </div>
           )}
         </div>
       </div>
+
+      {/* Live emoji rain — appears only while the match is in progress.
+          Fixed positioning is handled inside the component. */}
+      {isLive && (
+        <LiveReactions matchId={match.id} userId={user.id} />
+      )}
     </div>
   );
 }

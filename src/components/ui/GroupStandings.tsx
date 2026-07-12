@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { LayoutGrid } from "lucide-react";
 import type { FDStandingGroup } from "@/lib/football-data";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
-import { getFlagPath } from "@/lib/utils";
+import { Flag } from "@/components/ui/Flag";
 import { useI18n } from "@/lib/i18n";
 import { localizeRound, localizeTeam } from "@/lib/i18n-data";
 
@@ -113,9 +113,8 @@ export function GroupStandings({ groups }: Props) {
                       </td>
                       <td className="py-2 px-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <img
-                            src={getFlagPath(row.team.name)}
-                            alt=""
+                          <Flag
+                            team={row.team.name}
                             className="w-5 h-5 rounded-full object-cover border border-gray-100 shrink-0"
                           />
                           <span className="font-bold text-gray-900 truncate">

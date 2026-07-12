@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Match, Profile } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { localizeTeam } from "@/lib/i18n-data";
+import { AdminDashboard } from "./AdminDashboard";
+import { AdminBroadcast } from "./AdminBroadcast";
+import { Search } from "lucide-react";
 
 const COUNTRIES = [
   "TBD",
@@ -41,13 +44,27 @@ export default function AdminClient({
   initialPredictions: any[];
 }) {
   const { t, lang, dir } = useI18n();
-  const [tab, setTab] = useState<"matches" | "users" | "predictions">("matches");
+  const [tab, setTab] = useState<
+    "dashboard" | "matches" | "users" | "predictions" | "broadcast"
+  >("dashboard");
   const [matches, setMatches] = useState<Match[]>(initialMatches);
   const [users, setUsers] = useState<Profile[]>(initialUsers);
   const [predictions, setPredictions] = useState<any[]>(initialPredictions);
   const [loading, setLoading] = useState(false);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string>("all");
+  const [userSearch, setUserSearch] = useState("");
+
+  const filteredUsers = useMemo(() => {
+    const q = userSearch.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter((u) => {
+      const name = (u.display_name ?? "").toLowerCase();
+      const email = ((u as unknown as { email?: string }).email ?? "").toLowerCase();
+      const id = u.id.toLowerCase();
+      return name.includes(q) || email.includes(q) || id.includes(q);
+    });
+  }, [users, userSearch]);
   
   const [newUser, setNewUser] = useState({ email: "", password: "", displayName: "" });
 
@@ -192,17 +209,22 @@ export default function AdminClient({
     }
   };
 
-  const tabLabels: Record<"matches" | "users" | "predictions", string> = {
+  const tabLabels: Record<
+    "dashboard" | "matches" | "users" | "predictions" | "broadcast",
+    string
+  > = {
+    dashboard: t("admin.tab.dashboard"),
     matches: t("admin.tab.matches"),
     users: t("admin.tab.users"),
     predictions: t("admin.tab.predictions"),
+    broadcast: t("admin.tab.broadcast"),
   };
 
   return (
     <div className="space-y-8" dir={dir}>
       {/* Tabs */}
       <div className="flex gap-4 mb-8 overflow-x-auto pb-4 no-scrollbar whitespace-nowrap max-w-full">
-        {(["matches", "users", "predictions"] as const).map((key) => (
+        {(["dashboard", "matches", "users", "predictions", "broadcast"] as const).map((key) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -214,6 +236,12 @@ export default function AdminClient({
           </button>
         ))}
       </div>
+
+      {/* DASHBOARD TAB */}
+      {tab === "dashboard" && <AdminDashboard />}
+
+      {/* BROADCAST TAB */}
+      {tab === "broadcast" && <AdminBroadcast />}
 
       {/* MATCHES TAB */}
       {tab === "matches" && (
@@ -399,35 +427,56 @@ export default function AdminClient({
             </form>
           </div>
 
+          <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+            <div className="relative">
+              <Search className={`absolute ${dir === "rtl" ? "right-3" : "left-3"} top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400`} />
+              <input
+                type="text"
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                placeholder={t("admin.users.search")}
+                className={`w-full ${dir === "rtl" ? "pr-10 pl-4" : "pl-10 pr-4"} py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none text-sm text-gray-900`}
+              />
+            </div>
+          </div>
+
           <div className="bg-white rounded-[2rem] border border-gray-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto w-full">
-              <table className="w-full text-start text-sm min-w-[500px]">
+              <table className="w-full text-start text-sm min-w-[600px]">
                 <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold text-xs border-b border-gray-200">
                   <tr>
-                    <th className="p-4 text-start">{t("admin.users.id")}</th>
                     <th className="p-4 text-start">{t("admin.users.displayname")}</th>
+                    <th className="p-4 text-start">{t("admin.users.emailCol")}</th>
                     <th className="p-4 text-start">{t("admin.users.legacy")}</th>
                     <th className="p-4 text-start">{t("admin.users.total")}</th>
                     <th className="p-4 text-start">{t("admin.users.admin")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {users.map(u => (
-                    <tr key={u.id} className="hover:bg-gray-50">
-                      <td className="p-4 font-mono text-xs text-gray-400" dir="ltr">{u.id.substring(0,8)}...</td>
-                      <td className="p-4 font-bold text-gray-900 whitespace-nowrap">{u.display_name}</td>
-                      <td className="p-4">
-                        <input
-                          type="number"
-                          className="w-20 bg-gray-50 border border-gray-200 rounded p-1 text-center text-wc-purple"
-                          value={u.legacy_points ?? 0}
-                          onChange={(e) => handleUpdateUser(u.id, { legacy_points: parseInt(e.target.value) || 0 })}
-                        />
-                      </td>
-                      <td className="p-4 font-bold text-gray-500" dir="ltr">{u.total_points}</td>
-                      <td className="p-4 text-gray-700">{u.is_admin ? t("admin.users.yes") : t("admin.users.no")}</td>
-                    </tr>
-                  ))}
+                  {filteredUsers.map(u => {
+                    const email = (u as unknown as { email?: string }).email;
+                    return (
+                      <tr key={u.id} className="hover:bg-gray-50">
+                        <td className="p-4">
+                          <div className="font-bold text-gray-900 whitespace-nowrap">{u.display_name}</div>
+                          <div className="font-mono text-[10px] text-gray-400 mt-0.5" dir="ltr">{u.id.substring(0,8)}...</div>
+                        </td>
+                        <td className="p-4 text-gray-700 text-xs whitespace-nowrap" dir="ltr">
+                          {email || "—"}
+                        </td>
+                        <td className="p-4">
+                          <input
+                            type="number"
+                            className="w-20 bg-gray-50 border border-gray-200 rounded p-1 text-center text-wc-purple"
+                            value={u.legacy_points ?? 0}
+                            onChange={(e) => handleUpdateUser(u.id, { legacy_points: parseInt(e.target.value) || 0 })}
+                          />
+                        </td>
+                        <td className="p-4 font-bold text-gray-500" dir="ltr">{u.total_points}</td>
+                        <td className="p-4 text-gray-700">{u.is_admin ? t("admin.users.yes") : t("admin.users.no")}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -493,13 +542,29 @@ export default function AdminClient({
                         />
                       </td>
                         <td className="p-4">
-                          <input
-                            type="number"
-                            className="w-16 bg-gray-50 border border-gray-200 rounded p-1 text-center text-gray-900"
-                            value={p.points_earned ?? ""}
-                            placeholder="null"
-                            onChange={(e) => handleUpdatePrediction(p.id, p.match_id, p.user_id, { points_earned: e.target.value === "" ? null : parseInt(e.target.value) })}
-                          />
+                          <div className="flex items-center gap-2">
+                            <span
+                              aria-hidden
+                              className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{
+                                background:
+                                  p.points_earned === null || p.points_earned === undefined
+                                    ? "#D1D5DB"
+                                    : p.points_earned >= 3
+                                      ? "#10B981" // exact
+                                      : p.points_earned >= 1
+                                        ? "#8B5CF6" // outcome
+                                        : "#EF4444", // wrong / negative
+                              }}
+                            />
+                            <input
+                              type="number"
+                              className="w-16 bg-gray-50 border border-gray-200 rounded p-1 text-center text-gray-900"
+                              value={p.points_earned ?? ""}
+                              placeholder="null"
+                              onChange={(e) => handleUpdatePrediction(p.id, p.match_id, p.user_id, { points_earned: e.target.value === "" ? null : parseInt(e.target.value) })}
+                            />
+                          </div>
                         </td>
                       </tr>
                     )

@@ -15,6 +15,10 @@ import { createClient } from "@/lib/supabase/server";
 import { Ticker } from "@/components/ui/Ticker";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { CountdownDigits } from "@/components/ui/CountdownDigits";
+import { ChampionPickCard } from "@/components/ui/ChampionPickCard";
+import { StreakCard } from "@/components/ui/StreakCard";
+import { MetaPredictionsHub } from "@/components/ui/MetaPredictionsHub";
+import { BattlePassCard } from "@/components/ui/BattlePassCard";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import { getServerT } from "@/lib/i18n-server";
 import { localizeTeam } from "@/lib/i18n-data";
@@ -289,6 +293,25 @@ export default async function HomePage() {
             </div>
           </div>
         )}
+
+        {/* Battle Pass progress ring — pulls xp_total from the profile
+            and shows the ladder to the next tier. Also handles the
+            local level-up detection so celebrations pop on any page. */}
+        <BattlePassCard />
+
+        {/* Current streak — flame counter that survives device swaps by
+            reading from cloud-backed predictions. Hidden until the user
+            is signed in. */}
+        <StreakCard />
+
+        {/* Meta prediction — champion pick teaser. Silently hides if the
+            meta_predictions migration hasn't been applied yet. */}
+        <ChampionPickCard />
+
+        {/* Tournament-wide predictions hub — 2×2 tiles pointing at the
+            four big-picture picker screens (champion / golden boot /
+            groups / bracket). */}
+        {user && <MetaPredictionsHub />}
 
         {/* Legends CTA */}
         <Link

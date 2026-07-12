@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, XCircle, TrendingUp, TrendingDown } from "lucide-react";
+import { Trophy, XCircle, TrendingUp, TrendingDown, Share2 } from "lucide-react";
 import {
   computeGambleScore,
   getStake,
   getStakeById,
 } from "@/lib/gamble";
 import { Confetti } from "@/components/ui/Confetti";
+import { ShareResultCard } from "@/components/ui/ShareResultCard";
 import { useI18n } from "@/lib/i18n";
+import { createClient } from "@/lib/supabase/client";
 
 interface Props {
   matchId: string;
@@ -19,6 +21,8 @@ interface Props {
   userAway: number;
   actualHome: number;
   actualAway: number;
+  homeTeam: string;
+  awayTeam: string;
 }
 
 export default function GambleResult({
@@ -29,9 +33,13 @@ export default function GambleResult({
   userAway,
   actualHome,
   actualAway,
+  homeTeam,
+  awayTeam,
 }: Props) {
   const [stake, setStake] = useState(getStakeById("safe"));
   const [confetti, setConfetti] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [displayName, setDisplayName] = useState("");
   const { t } = useI18n();
 
   useEffect(() => {
@@ -42,6 +50,21 @@ export default function GambleResult({
       return () => clearTimeout(timer);
     }
   }, [matchId, pointsEarned, scored]);
+
+  useEffect(() => {
+    // Only need the display name if the user might open the share
+    // sheet — pull it lazily the first render.
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", data.user.id)
+        .single();
+      if (profile?.display_name) setDisplayName(profile.display_name as string);
+    });
+  }, []);
 
   const gambleScore = computeGambleScore(pointsEarned, scored, stake.mult);
   const isWin = (gambleScore ?? 0) > 0;
@@ -126,8 +149,33 @@ export default function GambleResult({
             {t("result.mult")}: <span className="font-bold">{stake.mult}x</span>
           </p>
         )}
+
+        {isWin && scored && (
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            className="mt-5 inline-flex items-center gap-2 rounded-full bg-gray-900 text-white text-xs font-bold py-2 px-4 active:scale-95"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            {t("share.title")}
+          </button>
+        )}
       </motion.div>
       <Confetti active={confetti} />
+
+      <ShareResultCard
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        homeTeam={homeTeam}
+        awayTeam={awayTeam}
+        userHome={userHome}
+        userAway={userAway}
+        actualHome={actualHome}
+        actualAway={actualAway}
+        pointsAwarded={gambleScore ?? pointsEarned}
+        stakeMultiplier={stake.mult}
+        displayName={displayName}
+      />
     </>
   );
 }

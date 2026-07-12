@@ -5,6 +5,8 @@ import { NextResponse, type NextRequest } from "next/server";
 const PUBLIC_PATH_EXACT = new Set<string>([
   "/login",
   "/signup",
+  "/forgot-password",
+  "/reset-password",
   "/manifest.webmanifest",
   "/sw.js",
   "/favicon.ico",

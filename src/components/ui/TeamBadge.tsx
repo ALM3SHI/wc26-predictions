@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { getFlagPath } from "@/lib/utils";
+import { Flag } from "@/components/ui/Flag";
 
 interface Props {
   team: string;
@@ -44,9 +44,8 @@ export function TeamBadge({
       transition={{ type: "spring", stiffness: 200, damping: 18, delay }}
       className={`flex items-center gap-3 flag-wave-hover ${className}`}
     >
-      <img
-        src={getFlagPath(team)}
-        alt={team}
+      <Flag
+        team={team}
         className={`${s.flag} rounded-full object-cover shadow-md border border-gray-100`}
       />
       {showName && (

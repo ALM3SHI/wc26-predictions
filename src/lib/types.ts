@@ -8,8 +8,80 @@ export interface Profile {
   is_admin?: boolean;
   push_subscription: PushSubscriptionJSON | null;
   email_notifications: boolean;
+  // Onboarding — first-run flow captures a team allegiance and marks
+  // the profile as bootstrapped so we don't re-prompt.
+  favorite_team?: string | null;
+  onboarding_completed?: boolean;
   created_at: string;
   updated_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// Meta predictions — tournament-wide picks that resolve at competition end
+// ---------------------------------------------------------------------------
+
+export type MetaPredictionType =
+  | "champion"
+  | "golden_boot"
+  | "group_standings"
+  | "bracket";
+
+export interface ChampionPayload {
+  team: string;
+}
+
+export interface GoldenBootPayload {
+  player_id: number;
+  player_name: string;
+  team: string;
+}
+
+// group_standings: { A: ["Mexico","Canada","USA","..."], ... }
+export type GroupStandingsPayload = Record<string, string[]>;
+
+// bracket: winner picks keyed by match id per round
+export interface BracketPayload {
+  r16?: Record<string, string>;
+  qf?: Record<string, string>;
+  sf?: Record<string, string>;
+  final?: string;
+}
+
+export type MetaPredictionPayload =
+  | ChampionPayload
+  | GoldenBootPayload
+  | GroupStandingsPayload
+  | BracketPayload;
+
+export interface MetaPrediction {
+  id: string;
+  user_id: string;
+  type: MetaPredictionType;
+  payload: MetaPredictionPayload;
+  points_earned: number | null;
+  scored: boolean;
+  locked_at: string | null;
+  // Nullable until migration 007 has been applied — falls back to
+  // WC26 seed on the server side.
+  tournament_id?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// Tournaments — foundation for post-WC26 competitions
+// ---------------------------------------------------------------------------
+
+export interface Tournament {
+  id: string;
+  slug: string;
+  name: string;
+  short_name: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  active: boolean;
+  emoji: string | null;
+  created_at: string;
 }
 
 export interface Match {
@@ -38,6 +110,9 @@ export interface Prediction {
   away_prediction: number;
   points_earned: number;
   scored: boolean;
+  // Cloud-backed multiplier (1, 2, 3, or 5). Optional on legacy rows
+  // written before the stake column existed.
+  stake_multiplier?: number | null;
   created_at: string;
   updated_at: string;
 }

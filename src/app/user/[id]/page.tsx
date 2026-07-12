@@ -1,9 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, XCircle, Trophy } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, Trophy, Pencil } from "lucide-react";
 import GambleStats from "./GambleStats";
 import { Achievements } from "@/components/ui/Achievements";
+import { AvatarFrame } from "@/components/ui/AvatarFrame";
+import { Flag } from "@/components/ui/Flag";
+import { YouVsTournament } from "@/components/ui/YouVsTournament";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import { getServerT } from "@/lib/i18n-server";
@@ -40,6 +43,8 @@ export default async function UserProfilePage(props: {
         away_prediction,
         points_earned,
         scored,
+        stake_multiplier,
+        created_at,
         matches (
           id,
           home_team,
@@ -68,6 +73,8 @@ export default async function UserProfilePage(props: {
     match_id: p.match_id,
     points_earned: p.points_earned,
     scored: p.scored,
+    stake_multiplier: p.stake_multiplier ?? 1,
+    created_at: p.created_at,
   }));
 
   const isSelf = user.id === userId;
@@ -95,40 +102,62 @@ export default async function UserProfilePage(props: {
           </div>
 
           <div className="text-center mb-12 flex flex-col items-center">
-            <img
-              src={profile.avatar_url || "/images/default-avatar.png"}
+            <AvatarFrame
+              src={profile.avatar_url}
+              tier={(profile as { current_tier?: number }).current_tier ?? 1}
+              size={96}
               alt={profile.display_name}
-              className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md mb-6"
+              className="mb-6"
             />
             <h1 className="font-fifa text-5xl sm:text-7xl uppercase text-gray-900 mb-4">
               {profile.display_name}
             </h1>
+            {profile.favorite_team && (
+              <div className="inline-flex items-center gap-2 mb-4 text-gray-600">
+                <Flag
+                  team={profile.favorite_team}
+                  className="w-5 h-5 rounded-full object-cover shadow-sm"
+                />
+                <span className="text-sm font-bold">
+                  {localizeTeam(profile.favorite_team, lang)}
+                </span>
+              </div>
+            )}
             <div
               className="tri-underline mb-4"
               style={{ width: 180, background: HOST_TRI_GRADIENT }}
             />
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center gap-3">
               <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-wc-cyan/20 bg-wc-cyan/10 text-wc-cyan font-bold text-xl">
                 <Trophy className="w-5 h-5" />
                 <span dir="ltr">{profile.total_points}</span> {t("profile.pts")}
               </div>
               {profile.legacy_points && profile.legacy_points > 0 ? (
-                <p className="mt-3 text-sm font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
+                <p className="text-sm font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
                   {legacyLabel}
                 </p>
               ) : null}
+              {isSelf && (
+                <Link
+                  href="/settings/profile"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-wc-purple px-3 py-1.5 rounded-full border border-gray-200 bg-white active:scale-95"
+                >
+                  <Pencil className="w-3 h-3" />
+                  {t("profile.edit")}
+                </Link>
+              )}
             </div>
           </div>
 
           <GambleStats isSelf={isSelf} predictions={finishedPredictions} />
 
+          {/* You vs the tournament — cloud-derived accuracy + goal
+              comparison. Silently hides for other people's profiles. */}
+          <YouVsTournament userId={userId} isSelf={isSelf} />
+
           <Achievements
             isSelf={isSelf}
-            predictions={(predictions || []).map((p: any) => ({
-              match_id: p.match_id,
-              points_earned: p.points_earned,
-              scored: p.scored,
-            }))}
+            predictions={finishedPredictions}
           />
 
           <div className="space-y-4">

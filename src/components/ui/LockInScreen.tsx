@@ -108,6 +108,10 @@ export function LockInScreen({
                 }}
                 src={getFlagPath(homeTeam)}
                 alt={homeTeam}
+                onError={(e) => {
+                  const el = e.currentTarget as HTMLImageElement;
+                  if (!el.src.endsWith("/flags/tbd.png")) el.src = "/flags/tbd.png";
+                }}
                 className="w-14 h-14 sm:w-20 sm:h-20 md:w-32 md:h-32 rounded-full object-cover border-2 sm:border-4 border-white shadow-2xl shrink-0"
               />
               <motion.div
@@ -138,6 +142,10 @@ export function LockInScreen({
                 }}
                 src={getFlagPath(awayTeam)}
                 alt={awayTeam}
+                onError={(e) => {
+                  const el = e.currentTarget as HTMLImageElement;
+                  if (!el.src.endsWith("/flags/tbd.png")) el.src = "/flags/tbd.png";
+                }}
                 className="w-14 h-14 sm:w-20 sm:h-20 md:w-32 md:h-32 rounded-full object-cover border-2 sm:border-4 border-white shadow-2xl shrink-0"
               />
             </div>

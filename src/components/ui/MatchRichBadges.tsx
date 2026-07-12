@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Clock, Users, MapPin, Timer, Zap, Trophy } from "lucide-react";
 import type { FDMatch } from "@/lib/football-data";
-import { getFlagPath } from "@/lib/utils";
+import { Flag } from "@/components/ui/Flag";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -128,9 +128,8 @@ export function MatchRichBadges({ rich }: Props) {
               {s("rich.referee")}
             </div>
             <div className="flex items-center gap-2 min-w-0">
-              <img
-                src={getFlagPath(ref.nationality)}
-                alt={ref.nationality}
+              <Flag
+                team={ref.nationality}
                 className="w-5 h-5 rounded-full object-cover border border-gray-200 shrink-0"
               />
               <div className="min-w-0">

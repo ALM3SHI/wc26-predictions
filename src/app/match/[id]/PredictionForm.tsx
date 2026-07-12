@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Match, Prediction } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Loader2, CheckCircle2, AlertCircle, Lock } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, Lock, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
 import { ScoreDial } from "@/components/ui/ScoreDial";
 import { StakeSelector } from "@/components/ui/StakeSelector";
@@ -16,12 +16,16 @@ import {
   getStake,
   setStake,
   getStakeById,
+  getStakeByMult,
   SERVER_STAKE_ENABLED,
   type StakeId,
 } from "@/lib/gamble";
 import { HOST_RED, HOST_BLUE } from "@/lib/wc26-theme";
 import { useI18n } from "@/lib/i18n";
 import { localizeTeam } from "@/lib/i18n-data";
+
+const LIVE_STATUS = ["1H", "HT", "2H", "ET", "BT", "P"];
+const FINISHED_STATUS = ["FT", "AET", "PEN"];
 
 interface Props {
   match: Match;
@@ -51,8 +55,16 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
   const selectedStake = getStakeById(stakeId);
 
   useEffect(() => {
-    setStakeId(getStake(match.id));
-  }, [match.id]);
+    // Prefer the multiplier saved on the prediction row in Supabase —
+    // that's the cross-device source of truth. Fall back to whatever the
+    // local cache remembers only if the server has no value.
+    const serverMult = prediction?.stake_multiplier;
+    if (typeof serverMult === "number") {
+      setStakeId(getStakeByMult(serverMult).id);
+    } else {
+      setStakeId(getStake(match.id));
+    }
+  }, [match.id, prediction]);
 
   useEffect(() => {
     setIsLocked(new Date(match.start_time).getTime() <= Date.now());
@@ -119,21 +131,44 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
     router.refresh();
   };
 
+  const isLive = LIVE_STATUS.includes(match.status);
+  const isFinished = FINISHED_STATUS.includes(match.status);
+  // Show the ticking countdown ONLY while the match hasn't kicked off.
+  // Once kickoff time has passed, the LIVE / FT badge on the scoreboard
+  // above tells the whole story — a running clock is misleading.
+  const showCountdown = !isLocked && !isLive && !isFinished;
+
   return (
     <>
       <div className="mt-4 relative overflow-hidden">
-        <div className="mb-8 flex flex-col items-center gap-2">
-          <CountdownDigits
-            target={match.start_time}
-            label={t("match.countdown")}
-            accentColor={isLocked ? "#EF4444" : "#06B6D4"}
-            onLock={() => setIsLocked(true)}
-          />
-          <div className="tri-underline w-40 mt-3" />
-        </div>
+        {showCountdown && (
+          <div className="mb-8 flex flex-col items-center gap-2">
+            <CountdownDigits
+              target={match.start_time}
+              label={t("match.countdown")}
+              accentColor="#06B6D4"
+              onLock={() => setIsLocked(true)}
+            />
+            <div className="tri-underline w-40 mt-3" />
+          </div>
+        )}
 
-        <p className="text-gray-500 mb-8 font-semibold text-center px-2">
-          {isLocked ? t("match.locked") : t("match.dial")}
+        <p className="text-gray-500 mb-8 font-semibold text-center px-2 inline-flex items-center justify-center gap-2 w-full">
+          {isFinished ? (
+            <span className="inline-flex items-center gap-2 text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full text-sm">
+              <Trophy className="w-4 h-4" /> {t("match.fulltime")}
+            </span>
+          ) : isLive ? (
+            <span className="inline-flex items-center gap-2 text-red-600 bg-red-50 px-3 py-1.5 rounded-full text-sm">
+              <span className="live-dot" /> {t("match.live")}
+            </span>
+          ) : isLocked ? (
+            <span className="inline-flex items-center gap-2 text-gray-700 bg-gray-100 px-3 py-1.5 rounded-full text-sm">
+              <Lock className="w-3.5 h-3.5" /> {t("match.locked")}
+            </span>
+          ) : (
+            t("match.dial")
+          )}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-8">

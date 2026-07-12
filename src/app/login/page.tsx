@@ -1,16 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
-import { Suspense } from "react";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  Loader2,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Languages,
+} from "lucide-react";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n";
+import { OAuthButtons, OrDivider } from "@/components/ui/OAuthButtons";
 
 function LoginContent() {
+  const { t, lang, setLang, dir } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -45,13 +57,27 @@ function LoginContent() {
     router.refresh();
   };
 
-
+  const iconPos = dir === "rtl" ? "right-3" : "left-3";
+  const inputPad = dir === "rtl" ? "pr-11 pl-4" : "pl-11 pr-4";
+  const eyePos = dir === "rtl" ? "left-3" : "right-3";
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-white relative overflow-hidden">
-      {/* Background decorative elements */}
+    <div
+      className="min-h-screen flex items-center justify-center px-4 bg-white relative overflow-hidden"
+      dir={dir}
+    >
       <div className="absolute top-0 right-0 w-96 h-96 bg-wc-green/5 rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-wc-purple/5 rounded-full blur-[120px] -translate-x-1/2 translate-y-1/2" />
+
+      {/* Language toggle — top corner */}
+      <button
+        type="button"
+        onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+        className="absolute top-4 end-4 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white/80 backdrop-blur hover:bg-gray-50 text-xs font-bold text-gray-700 shadow-sm"
+      >
+        <Languages className="w-3.5 h-3.5" />
+        {lang === "ar" ? "English" : "العربية"}
+      </button>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -66,7 +92,7 @@ function LoginContent() {
               WC26
             </span>
           </h1>
-          <p className="text-gray-500 mt-2">Sign in to your account</p>
+          <p className="text-gray-500 mt-2">{t("auth.login.sub")}</p>
         </div>
 
         {/* Callback error */}
@@ -77,40 +103,56 @@ function LoginContent() {
             className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 mb-6"
           >
             <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
-            <p className="text-red-500 text-sm">
-              Authentication failed. Please try again.
-            </p>
+            <p className="text-red-500 text-sm">{t("auth.callbackError")}</p>
           </motion.div>
         )}
+
+        {/* Social sign-in — big-friction reducer, primary path for most
+            new signups going forward. */}
+        <OAuthButtons next={next} onError={(msg) => setError(msg)} />
+
+        <OrDivider label={t("auth.or")} />
 
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           {/* Email */}
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Mail className={`absolute ${iconPos} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400`} />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
+              placeholder={t("auth.email")}
               required
               autoComplete="username"
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
+              dir="ltr"
+              className={`w-full ${inputPad} py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900 text-${dir === "rtl" ? "end" : "start"}`}
+              style={{ textAlign: dir === "rtl" ? "right" : "left" }}
             />
           </div>
 
           {/* Password */}
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Lock className={`absolute ${iconPos} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400`} />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
+              placeholder={t("auth.password")}
               required
               autoComplete="current-password"
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900"
+              dir="ltr"
+              className={`w-full ${inputPad} py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900`}
+              style={{ textAlign: dir === "rtl" ? "right" : "left" }}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+              className={`absolute ${eyePos} top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1`}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
 
           {/* Error */}
@@ -134,21 +176,31 @@ function LoginContent() {
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                Sign In
-                <ArrowRight className="w-5 h-5" />
+                {t("auth.signIn")}
+                <ArrowRight className="w-5 h-5 rtl-flip-auto" />
               </>
             )}
           </button>
         </form>
 
+        {/* Forgot password */}
+        <p className="text-center mt-4 text-sm">
+          <Link
+            href="/forgot-password"
+            className="text-gray-500 hover:text-wc-purple transition-colors font-medium"
+          >
+            {t("auth.forgot")}
+          </Link>
+        </p>
+
         {/* Signup Link */}
-        <p className="text-center text-gray-500 mt-6 text-sm">
-          Don&apos;t have an account?{" "}
+        <p className="text-center text-gray-500 mt-4 text-sm">
+          {t("auth.noAccount")}{" "}
           <Link
             href="/signup"
             className="text-wc-purple hover:text-wc-purple-light transition-colors font-medium"
           >
-            Sign up
+            {t("auth.signUpCta")}
           </Link>
         </p>
       </motion.div>

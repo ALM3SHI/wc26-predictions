@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
-import { getFlagPath } from "@/lib/utils";
+import { Flag } from "@/components/ui/Flag";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import { Confetti } from "@/components/ui/Confetti";
 import { useI18n } from "@/lib/i18n";
@@ -108,8 +108,8 @@ export function LegendCard(props: Props) {
         className="flex items-center justify-center gap-4 py-4 rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 hover:shadow-md transition"
       >
         <div className="flex items-center gap-2">
-          <img
-            src={getFlagPath(props.homeTeam)}
+          <Flag
+            team={props.homeTeam}
             alt=""
             className="w-8 h-8 rounded-full object-cover border border-gray-200"
           />
@@ -127,8 +127,8 @@ export function LegendCard(props: Props) {
           <span className="font-fifa text-xl text-gray-800 uppercase truncate max-w-[90px]">
             {localizeTeam(props.awayTeam, lang)}
           </span>
-          <img
-            src={getFlagPath(props.awayTeam)}
+          <Flag
+            team={props.awayTeam}
             alt=""
             className="w-8 h-8 rounded-full object-cover border border-gray-200"
           />

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Flame, TrendingUp, TrendingDown, Trophy } from "lucide-react";
-import { computeGambleScore, getAllStakes, getStakeById } from "@/lib/gamble";
+import { computeGambleScore } from "@/lib/gamble";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import { useI18n } from "@/lib/i18n";
 
@@ -11,6 +11,8 @@ interface FinishedPrediction {
   match_id: string;
   points_earned: number;
   scored: boolean;
+  // Multiplier as stored on the predictions row in Supabase (cloud-backed).
+  stake_multiplier?: number | null;
 }
 
 interface Props {
@@ -34,7 +36,6 @@ export default function GambleStats({ isSelf, predictions }: Props) {
       setReady(true);
       return;
     }
-    const stakes = getAllStakes();
     let total = 0;
     let biggestWin = 0;
     let biggestLoss = 0;
@@ -42,9 +43,11 @@ export default function GambleStats({ isSelf, predictions }: Props) {
     let exactHits = 0;
 
     predictions.forEach((p) => {
-      const stake = getStakeById(stakes[p.match_id]);
-      if (stake.mult > 1) gambles += 1;
-      const score = computeGambleScore(p.points_earned, p.scored, stake.mult);
+      // Read the multiplier from the prediction row — survives device
+      // swaps, browser wipes, and works from any of the user's devices.
+      const mult = p.stake_multiplier ?? 1;
+      if (mult > 1) gambles += 1;
+      const score = computeGambleScore(p.points_earned, p.scored, mult);
       if (score === null) return;
       total += score;
       if (score > biggestWin) biggestWin = score;
@@ -75,9 +78,6 @@ export default function GambleStats({ isSelf, predictions }: Props) {
         <h3 className="font-fifa text-2xl uppercase text-gray-900">
           {t("ledger.title")}
         </h3>
-        <span className="ms-2 text-[10px] uppercase tracking-widest text-gray-400">
-          {t("ledger.device")}
-        </span>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -127,8 +127,6 @@ export default function GambleStats({ isSelf, predictions }: Props) {
           </div>
         </div>
       </div>
-
-      <p className="mt-4 text-xs text-gray-500">{t("ledger.foot")}</p>
     </motion.div>
   );
 }

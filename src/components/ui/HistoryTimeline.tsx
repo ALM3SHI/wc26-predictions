@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { History } from "lucide-react";
 import type { FDSeason } from "@/lib/football-data";
 import { HOST_TRI_GRADIENT, HOST_GOLD } from "@/lib/wc26-theme";
-import { getFlagPath } from "@/lib/utils";
+import { Flag } from "@/components/ui/Flag";
 import { useI18n } from "@/lib/i18n";
 import { localizeTeam } from "@/lib/i18n-data";
 
@@ -71,9 +71,8 @@ export function HistoryTimeline({ history }: Props) {
                   }}
                 />
                 <div className="flex flex-col items-center bg-gradient-to-br from-yellow-50 to-white border border-yellow-100 rounded-2xl p-3 min-w-[110px]">
-                  <img
-                    src={getFlagPath(w.name)}
-                    alt={w.name}
+                  <Flag
+                    team={w.name}
                     className="w-10 h-10 rounded-full object-cover border-2 border-yellow-400 shadow"
                   />
                   <div className="text-[10px] uppercase tracking-widest text-gray-500 mt-2">

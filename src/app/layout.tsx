@@ -5,7 +5,10 @@ import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { Navigation } from "@/components/Navigation";
 import { SplashScreen } from "@/components/SplashScreen";
 import { IOSInstallGate } from "@/components/IOSInstallGate";
+import { PushOptInBanner } from "@/components/PushOptInBanner";
+import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { I18nProvider } from "@/lib/i18n";
+import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
 import Image from "next/image";
 import "./globals.css";
 
@@ -71,6 +74,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} ${inter.variable} ${fifa.variable}`}>
       <head>
+        {/* Apply the persisted theme before hydration so users don't see
+            a light flash before the dark theme kicks in. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         {/* Warm up the Supabase TLS handshake in parallel with the HTML
@@ -88,15 +94,23 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-gradient-to-b from-[#F9FAFB]/50 to-[#F9FAFB]" />
         </div>
         <I18nProvider>
+          <ThemeProvider>
           {/* iOS Add-to-Home-Screen gate wraps the whole app; it renders
               children when the visitor isn't on iOS or is already in
               standalone mode, and a blocking tutorial otherwise. */}
           <IOSInstallGate>
             <Navigation />
             {children}
+            {/* First-run soft prompt to enable push. Self-hides once the
+                user answers or after a 7-day cooldown on "later". */}
+            <PushOptInBanner />
+            {/* First-run onboarding — pick a team + learn the multiplier.
+                Renders nothing once profiles.onboarding_completed = true. */}
+            <OnboardingGate />
           </IOSInstallGate>
           {/* Splash sits above everything but auto-dismisses after ~1.4s. */}
           <SplashScreen />
+          </ThemeProvider>
         </I18nProvider>
         <ServiceWorkerRegistrar />
       </body>

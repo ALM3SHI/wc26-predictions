@@ -14,6 +14,9 @@ import {
   LogOut,
   Gauge,
   ChevronRight,
+  Sun,
+  Moon,
+  Laptop,
 } from "lucide-react";
 import {
   isPushSupported,
@@ -22,6 +25,7 @@ import {
 } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/client";
 import { useI18n, type Lang } from "@/lib/i18n";
+import { useTheme, type ThemePref } from "@/lib/theme";
 import { sfx } from "@/components/ui/SoundFX";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
@@ -102,6 +106,7 @@ function Toggle({
 
 export default function SettingsPage() {
   const { t, lang, setLang } = useI18n();
+  const { pref: themePref, setPref: setThemePref } = useTheme();
   const supabase = createClient();
 
   // Push
@@ -256,6 +261,51 @@ export default function SettingsPage() {
             />
           </div>
         </div>
+
+        {/* Appearance — light / dark / auto */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl bg-white border border-gray-200 shadow-sm mb-6 overflow-hidden"
+        >
+          <div className="p-4 border-b border-gray-100 flex items-center gap-3">
+            <Sun className="w-5 h-5 text-gray-700" />
+            <h2 className="font-bold text-gray-900">{t("theme.title")}</h2>
+          </div>
+          <div className="grid grid-cols-3 gap-2 p-3">
+            {(
+              [
+                { id: "light" as ThemePref, icon: Sun, label: t("theme.light") },
+                { id: "dark" as ThemePref, icon: Moon, label: t("theme.dark") },
+                { id: "auto" as ThemePref, icon: Laptop, label: t("theme.auto") },
+              ]
+            ).map((opt) => {
+              const Icon = opt.icon;
+              const active = themePref === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    setThemePref(opt.id);
+                    sfx.chip();
+                  }}
+                  className={`relative rounded-xl p-3 border-2 flex flex-col items-center gap-1 transition-all ${
+                    active
+                      ? "border-wc-purple bg-purple-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <Icon className="w-5 h-5 text-gray-700" />
+                  <div className="font-bold text-xs">{opt.label}</div>
+                  {active && (
+                    <div className="absolute top-1 end-1 w-2 h-2 rounded-full bg-wc-purple" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </motion.section>
 
         {/* Language card */}
         <motion.section
