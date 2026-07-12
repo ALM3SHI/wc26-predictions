@@ -18,11 +18,15 @@ import { Ticker } from "@/components/ui/Ticker";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { CountdownDigits } from "@/components/ui/CountdownDigits";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
+import { getServerT } from "@/lib/i18n-server";
+import { localizeTeam } from "@/lib/i18n-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const supabase = await createClient();
+  const { t, lang, dir } = await getServerT();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -45,7 +49,6 @@ export default async function HomePage() {
     }
   }
 
-  // Next match — for hero countdown
   const nowIso = new Date().toISOString();
   const { data: nextMatchArr } = await supabase
     .from("matches")
@@ -57,7 +60,6 @@ export default async function HomePage() {
     .limit(1);
   const nextMatch = nextMatchArr?.[0] ?? null;
 
-  // Ticker matches
   const { data: tickerMatches } = await supabase
     .from("matches")
     .select("id,home_team,away_team,home_score,away_score,start_time,status")
@@ -67,42 +69,42 @@ export default async function HomePage() {
 
   const quickAccess = [
     {
-      label: "Matches",
+      label: t("home.qa.matches"),
       icon: LayoutGrid,
       image: "/images/qa-matches.jpg",
       color: "bg-blue-500",
       href: "/bracket",
     },
     {
-      label: "Legends",
+      label: t("home.qa.legends"),
       icon: Sparkles,
       image: "/images/qa-info.jpg",
       color: "bg-red-500",
       href: "/legends",
     },
     {
-      label: "Insights",
+      label: t("home.qa.insights"),
       icon: TrendingUp,
       image: "/images/qa-leaderboard.jpg",
       color: "bg-blue-800",
       href: "/insights",
     },
     {
-      label: "Leaderboard",
+      label: t("home.qa.leaderboard"),
       icon: Trophy,
       image: "/images/qa-leaderboard.jpg",
       color: "bg-yellow-500",
       href: "/leaderboard",
     },
     {
-      label: "My Profile",
+      label: t("home.qa.profile"),
       icon: User,
       image: "/images/qa-profile.jpg",
       color: "bg-pink-500",
       href: user ? `/user/${user.id}` : "/login",
     },
     {
-      label: "Settings",
+      label: t("home.qa.settings"),
       icon: Settings,
       image: "/images/qa-settings.jpg",
       color: "bg-gray-700",
@@ -111,7 +113,7 @@ export default async function HomePage() {
     ...(userProfile?.is_admin
       ? [
           {
-            label: "Admin Panel",
+            label: t("home.qa.admin"),
             icon: Shield,
             image: "/images/qa-admin.jpg",
             color: "bg-red-500",
@@ -120,7 +122,7 @@ export default async function HomePage() {
         ]
       : []),
     {
-      label: "How to Play",
+      label: t("home.qa.howtoplay"),
       icon: Info,
       image: "/images/qa-info.jpg",
       color: "bg-teal-400",
@@ -128,8 +130,12 @@ export default async function HomePage() {
     },
   ];
 
+  const nextMatchup = nextMatch
+    ? `${localizeTeam(nextMatch.home_team, lang)} ${lang === "ar" ? "×" : "vs"} ${localizeTeam(nextMatch.away_team, lang)}`
+    : "";
+
   return (
-    <div className="min-h-screen pb-6">
+    <div className="min-h-screen pb-6" dir={dir}>
       {/* Top Header */}
       <header className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur border-b border-gray-100">
         <Link
@@ -167,10 +173,7 @@ export default async function HomePage() {
 
       <div className="max-w-4xl mx-auto px-4 mt-4 space-y-6">
         {/* Ticker */}
-        <Ticker
-          matches={tickerMatches || []}
-          emptyText="No matches within 6h — bracket updates soon"
-        />
+        <Ticker matches={tickerMatches || []} emptyText={t("empty.matches")} />
 
         {/* Predictions Hero */}
         <Link
@@ -203,19 +206,19 @@ export default async function HomePage() {
             </span>
           </div>
 
-          <div className="absolute bottom-6 left-6 right-6 z-10 text-white flex justify-between items-end gap-4">
-            <div>
-              <h2 className="font-fifa text-4xl md:text-5xl mb-2 drop-shadow-lg uppercase leading-none">
-                Predict &amp; Gamble
+          <div className="absolute bottom-6 inset-x-6 z-10 text-white flex justify-between items-end gap-4">
+            <div className="min-w-0 flex-1">
+              <h2 className="font-fifa text-2xl sm:text-3xl md:text-5xl mb-2 drop-shadow-lg uppercase leading-none whitespace-nowrap truncate">
+                {t("home.hero.title")}
               </h2>
-              <p className="text-white/80 text-sm font-medium">
-                Dial your score, stake a chip, top the world.
+              <p className="text-white/80 text-xs sm:text-sm font-medium">
+                {t("home.hero.sub")}
               </p>
             </div>
             {nextMatch && (
-              <div className="hidden md:block text-right">
+              <div className="hidden md:block text-end shrink-0">
                 <div className="text-[10px] uppercase tracking-widest text-white/70 mb-1">
-                  Next kickoff
+                  {t("home.next")}
                 </div>
                 <div className="rounded-lg bg-black/40 backdrop-blur px-3 py-2 border border-white/20">
                   <CountdownDigits
@@ -224,8 +227,11 @@ export default async function HomePage() {
                     compact
                   />
                 </div>
-                <div className="text-xs text-white/80 mt-1 font-bold uppercase tracking-widest">
-                  {nextMatch.home_team} vs {nextMatch.away_team}
+                <div
+                  className="text-xs text-white/80 mt-1 font-bold uppercase tracking-widest truncate max-w-[220px]"
+                  dir="auto"
+                >
+                  {nextMatchup}
                 </div>
               </div>
             )}
@@ -234,20 +240,25 @@ export default async function HomePage() {
 
         {/* Mobile next-kickoff */}
         {nextMatch && (
-          <div className="md:hidden rounded-2xl border border-gray-200 bg-white p-4 flex items-center justify-between">
-            <div>
+          <div className="md:hidden rounded-2xl border border-gray-200 bg-white p-4 flex items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
               <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">
-                Next kickoff
+                {t("home.next")}
               </div>
-              <div className="text-xs font-bold text-gray-800 mt-1">
-                {nextMatch.home_team} vs {nextMatch.away_team}
+              <div
+                className="text-xs font-bold text-gray-800 mt-1 truncate"
+                dir="auto"
+              >
+                {nextMatchup}
               </div>
             </div>
-            <CountdownDigits
-              target={nextMatch.start_time}
-              accentColor="#C8102E"
-              compact
-            />
+            <div className="shrink-0" dir="ltr">
+              <CountdownDigits
+                target={nextMatch.start_time}
+                accentColor="#C8102E"
+                compact
+              />
+            </div>
           </div>
         )}
 
@@ -260,9 +271,9 @@ export default async function HomePage() {
                 style={{ background: HOST_TRI_GRADIENT }}
               />
               <span className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">
-                Your Points
+                {t("home.points")}
               </span>
-              <span className="font-fifa text-4xl text-gray-900">
+              <span className="font-fifa text-4xl text-gray-900" dir="ltr">
                 {userProfile.total_points || 0}
               </span>
             </div>
@@ -272,9 +283,9 @@ export default async function HomePage() {
                 style={{ background: HOST_TRI_GRADIENT }}
               />
               <span className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">
-                Global Rank
+                {t("home.rank")}
               </span>
-              <span className="font-fifa text-4xl text-blue-600">
+              <span className="font-fifa text-4xl text-blue-600" dir="ltr">
                 #{userRank}
               </span>
             </div>
@@ -289,22 +300,25 @@ export default async function HomePage() {
             background: "linear-gradient(135deg, #C8102E, #002868 60%, #006847)",
           }}
         >
-          <div className="absolute -right-6 -top-6 opacity-30 host-seal">
+          <div className="absolute -end-6 -top-6 opacity-30 host-seal">
             <Sparkles className="w-24 h-24" />
           </div>
           <div className="relative flex items-center justify-between gap-4">
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-white/80 mb-1">
-                <Flame className="w-3 h-3" /> Gamble Mode Unlocked
+                <Flame className="w-3 h-3" /> {t("home.legends.flag")}
               </div>
               <h3 className="font-fifa text-2xl md:text-3xl uppercase leading-tight">
-                Ride 5x. Or fold.
+                {t("home.legends.title")}
               </h3>
               <p className="text-white/80 text-sm mt-1">
-                Stake a chip. Nail the score. Land in the Hall of Fame.
+                {t("home.legends.sub")}
               </p>
             </div>
-            <div className="font-fifa text-3xl md:text-4xl bg-white/15 backdrop-blur px-4 py-2 rounded-xl">
+            <div
+              className="font-fifa text-3xl md:text-4xl bg-white/15 backdrop-blur px-4 py-2 rounded-xl shrink-0"
+              dir="ltr"
+            >
               5x
             </div>
           </div>
@@ -312,7 +326,9 @@ export default async function HomePage() {
 
         {/* Quick Access */}
         <div>
-          <h3 className="font-bold text-gray-900 text-lg mb-4">Quick access</h3>
+          <h3 className="font-bold text-gray-900 text-lg mb-4">
+            {t("home.quick")}
+          </h3>
           <div className="grid grid-cols-3 gap-3">
             {quickAccess.map((item) => (
               <Link
@@ -331,9 +347,9 @@ export default async function HomePage() {
                     sizes="(max-width: 768px) 33vw, 250px"
                   />
                   <item.icon className="w-8 h-8 md:w-12 md:h-12 relative z-10 drop-shadow-md" />
-                  <div className="absolute bottom-0 left-0 right-0 h-2 host-gradient z-10" />
+                  <div className="absolute bottom-0 inset-x-0 h-2 host-gradient z-10" />
                 </div>
-                <span className="text-xs md:text-sm font-medium text-gray-700">
+                <span className="text-xs md:text-sm font-medium text-gray-700 text-center">
                   {item.label}
                 </span>
               </Link>
@@ -345,23 +361,21 @@ export default async function HomePage() {
         {!user && (
           <div className="mt-8 bg-white p-6 rounded-[2rem] text-center border border-gray-100 shadow-sm">
             <h2 className="font-bold text-xl mb-2 text-gray-900">
-              Join the Predictions
+              {t("home.join.title")}
             </h2>
-            <p className="text-gray-500 text-sm mb-4">
-              Log in or create an account to start predicting matches.
-            </p>
+            <p className="text-gray-500 text-sm mb-4">{t("home.join.sub")}</p>
             <div className="flex gap-4 justify-center">
               <Link
                 href="/login"
                 className="px-6 py-2 bg-gray-100 text-gray-900 font-bold rounded-xl hover:bg-gray-200"
               >
-                Log In
+                {t("home.login")}
               </Link>
               <Link
                 href="/signup"
                 className="px-6 py-2 bg-wc-purple text-white font-bold rounded-xl hover:bg-wc-purple-light"
               >
-                Sign Up
+                {t("home.signup")}
               </Link>
             </div>
           </div>

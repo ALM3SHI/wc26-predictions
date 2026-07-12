@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Users } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { localizeTeam } from "@/lib/i18n-data";
 import { HOST_RED, HOST_BLUE, HOST_GREEN } from "@/lib/wc26-theme";
 
 interface Props {
@@ -20,7 +21,7 @@ export function CommunityConsensus({
   homeTeam,
   awayTeam,
 }: Props) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const total = home + draw + away;
 
   if (total === 0) {
@@ -91,9 +92,9 @@ export function CommunityConsensus({
             style={{ background: HOST_RED }}
           />
           <span className="text-gray-500 truncate max-w-full text-center">
-            {homeTeam}
+            {localizeTeam(homeTeam, lang)}
           </span>
-          <span className="font-bold text-gray-900">{hPct}%</span>
+          <span className="font-bold text-gray-900" dir="ltr">{hPct}%</span>
         </div>
         <div className="flex flex-col items-center">
           <span
@@ -101,7 +102,7 @@ export function CommunityConsensus({
             style={{ background: HOST_GREEN }}
           />
           <span className="text-gray-500">{t("match.consensus.draw")}</span>
-          <span className="font-bold text-gray-900">{dPct}%</span>
+          <span className="font-bold text-gray-900" dir="ltr">{dPct}%</span>
         </div>
         <div className="flex flex-col items-center">
           <span
@@ -109,9 +110,9 @@ export function CommunityConsensus({
             style={{ background: HOST_BLUE }}
           />
           <span className="text-gray-500 truncate max-w-full text-center">
-            {awayTeam}
+            {localizeTeam(awayTeam, lang)}
           </span>
-          <span className="font-bold text-gray-900">{aPct}%</span>
+          <span className="font-bold text-gray-900" dir="ltr">{aPct}%</span>
         </div>
       </div>
     </motion.div>

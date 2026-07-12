@@ -311,7 +311,7 @@ export default function SettingsPage() {
             desc={
               pushSupported
                 ? t("settings.push.desc")
-                : "Not supported on this device."
+                : t("settings.push.unsupported")
             }
             action={
               pushLoading ? (
@@ -406,7 +406,7 @@ export default function SettingsPage() {
         </motion.section>
 
         <div className="text-center text-[10px] uppercase tracking-widest text-gray-400 mt-8">
-          Built for USA · Canada · Mexico
+          {t("settings.footer")}
         </div>
       </div>
     </div>

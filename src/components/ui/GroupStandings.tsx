@@ -5,16 +5,39 @@ import { LayoutGrid } from "lucide-react";
 import type { FDStandingGroup } from "@/lib/football-data";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import { getFlagPath } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
+import { localizeRound, localizeTeam } from "@/lib/i18n-data";
+
+const S: Record<string, { en: string; ar: string }> = {
+  empty: {
+    en: "Group standings not published yet.",
+    ar: "لم تُنشر ترتيبات المجموعات بعد.",
+  },
+  title: { en: "Group Standings", ar: "ترتيب المجموعات" },
+  teams: { en: "teams", ar: "منتخبات" },
+  colTeam: { en: "Team", ar: "المنتخب" },
+  colP: { en: "P", ar: "لعب" },
+  colW: { en: "W", ar: "فوز" },
+  colD: { en: "D", ar: "تعادل" },
+  colL: { en: "L", ar: "خسارة" },
+  colGD: { en: "GD", ar: "الفارق" },
+  colPts: { en: "Pts", ar: "نقاط" },
+  legendFirst: { en: "1st", ar: "الأول" },
+  legendQualifies: { en: "Qualifies", ar: "مؤهَّل" },
+};
 
 interface Props {
   groups: FDStandingGroup[];
 }
 
 export function GroupStandings({ groups }: Props) {
+  const { lang } = useI18n();
+  const tx = (k: string) => S[k]?.[lang] ?? S[k]?.en ?? k;
+
   if (!groups.length) {
     return (
       <div className="rounded-3xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">
-        Group standings not published yet.
+        {tx("empty")}
       </div>
     );
   }
@@ -29,7 +52,7 @@ export function GroupStandings({ groups }: Props) {
       <div className="flex items-center gap-3 mb-6">
         <LayoutGrid className="w-5 h-5 text-gray-700" />
         <h3 className="font-fifa text-2xl md:text-3xl uppercase text-gray-900">
-          Group Standings
+          {tx("title")}
         </h3>
       </div>
 
@@ -45,23 +68,23 @@ export function GroupStandings({ groups }: Props) {
           >
             <div className="px-3 py-2 bg-gradient-to-r from-gray-900 to-gray-700 text-white flex items-center justify-between">
               <span className="font-fifa text-lg uppercase tracking-wider">
-                {g.group}
+                {localizeRound(g.group, lang)}
               </span>
               <span className="text-[10px] uppercase tracking-widest text-white/70">
-                {g.table.length} teams
+                <span dir="ltr">{g.table.length}</span> {tx("teams")}
               </span>
             </div>
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-[9px] uppercase text-gray-500 border-b border-gray-100">
-                  <th className="py-2 px-2 text-left">#</th>
-                  <th className="py-2 px-2 text-left">Team</th>
-                  <th className="py-2 text-center">P</th>
-                  <th className="py-2 text-center">W</th>
-                  <th className="py-2 text-center">D</th>
-                  <th className="py-2 text-center">L</th>
-                  <th className="py-2 text-center">GD</th>
-                  <th className="py-2 pr-2 text-center">Pts</th>
+                  <th className="py-2 px-2 text-start">#</th>
+                  <th className="py-2 px-2 text-start">{tx("colTeam")}</th>
+                  <th className="py-2 text-center">{tx("colP")}</th>
+                  <th className="py-2 text-center">{tx("colW")}</th>
+                  <th className="py-2 text-center">{tx("colD")}</th>
+                  <th className="py-2 text-center">{tx("colL")}</th>
+                  <th className="py-2 text-center">{tx("colGD")}</th>
+                  <th className="py-2 pe-2 text-center">{tx("colPts")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -83,6 +106,7 @@ export function GroupStandings({ groups }: Props) {
                                 ? "bg-emerald-500"
                                 : "bg-gray-300"
                           }`}
+                          dir="ltr"
                         >
                           {row.position}
                         </span>
@@ -95,28 +119,34 @@ export function GroupStandings({ groups }: Props) {
                             className="w-5 h-5 rounded-full object-cover border border-gray-100 shrink-0"
                           />
                           <span className="font-bold text-gray-900 truncate">
-                            {row.team.shortName}
+                            {localizeTeam(row.team.shortName, lang)}
                           </span>
                         </div>
                       </td>
-                      <td className="py-2 text-center text-gray-700">
+                      <td className="py-2 text-center text-gray-700" dir="ltr">
                         {row.playedGames}
                       </td>
-                      <td className="py-2 text-center text-emerald-600 font-bold">
+                      <td
+                        className="py-2 text-center text-emerald-600 font-bold"
+                        dir="ltr"
+                      >
                         {row.won}
                       </td>
-                      <td className="py-2 text-center text-gray-500">
+                      <td className="py-2 text-center text-gray-500" dir="ltr">
                         {row.draw}
                       </td>
-                      <td className="py-2 text-center text-red-500">
+                      <td className="py-2 text-center text-red-500" dir="ltr">
                         {row.lost}
                       </td>
-                      <td className="py-2 text-center text-gray-700">
+                      <td className="py-2 text-center text-gray-700" dir="ltr">
                         {row.goalDifference > 0
                           ? `+${row.goalDifference}`
                           : row.goalDifference}
                       </td>
-                      <td className="py-2 pr-2 text-center font-fifa text-base text-gray-900">
+                      <td
+                        className="py-2 pe-2 text-center font-fifa text-base text-gray-900"
+                        dir="ltr"
+                      >
                         {row.points}
                       </td>
                     </tr>
@@ -130,11 +160,12 @@ export function GroupStandings({ groups }: Props) {
 
       <div className="mt-4 flex items-center gap-4 text-[10px] uppercase tracking-widest text-gray-500">
         <span className="flex items-center gap-1">
-          <span className="inline-block w-2 h-2 rounded-full bg-amber-400" /> 1st
+          <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />{" "}
+          {tx("legendFirst")}
         </span>
         <span className="flex items-center gap-1">
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
-          Qualifies
+          {tx("legendQualifies")}
         </span>
       </div>
     </div>

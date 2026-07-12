@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Flame, TrendingUp, TrendingDown, Trophy } from "lucide-react";
 import { computeGambleScore, getAllStakes, getStakeById } from "@/lib/gamble";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
+import { useI18n } from "@/lib/i18n";
 
 interface FinishedPrediction {
   match_id: string;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function GambleStats({ isSelf, predictions }: Props) {
+  const { t } = useI18n();
   const [ready, setReady] = useState(false);
   const [totals, setTotals] = useState({
     total: 0,
@@ -71,17 +73,17 @@ export default function GambleStats({ isSelf, predictions }: Props) {
       <div className="flex items-center gap-2 mb-4">
         <Flame className="w-5 h-5 text-red-500" />
         <h3 className="font-fifa text-2xl uppercase text-gray-900">
-          Your Gamble Ledger
+          {t("ledger.title")}
         </h3>
-        <span className="ml-2 text-[10px] uppercase tracking-widest text-gray-400">
-          on-device
+        <span className="ms-2 text-[10px] uppercase tracking-widest text-gray-400">
+          {t("ledger.device")}
         </span>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white p-4">
           <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2">
-            Net gamble
+            {t("ledger.net")}
           </div>
           <div
             className={`font-fifa text-3xl ${
@@ -91,6 +93,7 @@ export default function GambleStats({ isSelf, predictions }: Props) {
                   ? "text-red-500"
                   : "text-gray-500"
             }`}
+            dir="ltr"
           >
             {totals.total > 0 ? "+" : ""}
             {totals.total}
@@ -99,36 +102,33 @@ export default function GambleStats({ isSelf, predictions }: Props) {
 
         <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-emerald-50 to-white p-4">
           <div className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-2 flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" /> Biggest win
+            <TrendingUp className="w-3 h-3" /> {t("ledger.biggestwin")}
           </div>
-          <div className="font-fifa text-3xl text-emerald-600">
+          <div className="font-fifa text-3xl text-emerald-600" dir="ltr">
             +{totals.biggestWin}
           </div>
         </div>
 
         <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-red-50 to-white p-4">
           <div className="text-[10px] uppercase tracking-widest text-red-700 font-bold mb-2 flex items-center gap-1">
-            <TrendingDown className="w-3 h-3" /> Biggest loss
+            <TrendingDown className="w-3 h-3" /> {t("ledger.biggestloss")}
           </div>
-          <div className="font-fifa text-3xl text-red-500">
+          <div className="font-fifa text-3xl text-red-500" dir="ltr">
             {totals.biggestLoss}
           </div>
         </div>
 
         <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-yellow-50 to-white p-4">
           <div className="text-[10px] uppercase tracking-widest text-yellow-700 font-bold mb-2 flex items-center gap-1">
-            <Trophy className="w-3 h-3" /> Exact hits
+            <Trophy className="w-3 h-3" /> {t("ledger.exact")}
           </div>
-          <div className="font-fifa text-3xl text-yellow-600">
+          <div className="font-fifa text-3xl text-yellow-600" dir="ltr">
             {totals.exactHits}
           </div>
         </div>
       </div>
 
-      <p className="mt-4 text-xs text-gray-500">
-        Gamble numbers live on this device. Your global points on the
-        leaderboard use base scoring.
-      </p>
+      <p className="mt-4 text-xs text-gray-500">{t("ledger.foot")}</p>
     </motion.div>
   );
 }

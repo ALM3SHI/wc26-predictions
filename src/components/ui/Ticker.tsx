@@ -2,6 +2,8 @@
 
 import { getFlagPath } from "@/lib/utils";
 import type { Match } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
+import { formatMatchTimeShort, localizeTeam } from "@/lib/i18n-data";
 
 interface Props {
   matches: Pick<
@@ -14,18 +16,8 @@ interface Props {
 const LIVE = ["1H", "HT", "2H", "ET", "BT", "P"];
 const FINISHED = ["FT", "AET", "PEN"];
 
-function formatShort(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
 export function Ticker({ matches, emptyText = "No matches scheduled" }: Props) {
+  const { t, lang } = useI18n();
   const items = matches.slice(0, 30);
   const isEmpty = items.length === 0;
 
@@ -42,31 +34,31 @@ export function Ticker({ matches, emptyText = "No matches scheduled" }: Props) {
           alt=""
           className="w-5 h-5 rounded-full object-cover border border-white/20"
         />
-        <span>{m.home_team}</span>
+        <span>{localizeTeam(m.home_team, lang)}</span>
         {isLive || isFinished ? (
-          <span className="font-fifa text-base">
+          <span className="font-fifa text-base" dir="ltr">
             {m.home_score ?? 0}–{m.away_score ?? 0}
           </span>
         ) : (
-          <span className="text-white/50">vs</span>
+          <span className="text-white/50">
+            {lang === "ar" ? "×" : "vs"}
+          </span>
         )}
-        <span>{m.away_team}</span>
+        <span>{localizeTeam(m.away_team, lang)}</span>
         <img
           src={getFlagPath(m.away_team)}
           alt=""
           className="w-5 h-5 rounded-full object-cover border border-white/20"
         />
         {isLive && (
-          <span className="ml-2 inline-flex items-center gap-1 text-red-400">
-            <span className="live-dot" /> LIVE
+          <span className="ms-2 inline-flex items-center gap-1 text-red-400">
+            <span className="live-dot" /> {t("bracket.live.label")}
           </span>
         )}
-        {isFinished && (
-          <span className="ml-2 text-emerald-400">FT</span>
-        )}
+        {isFinished && <span className="ms-2 text-emerald-400">{t("match.fulltime")}</span>}
         {!isLive && !isFinished && (
-          <span className="ml-2 text-sky-300/80 font-normal normal-case">
-            {formatShort(m.start_time)}
+          <span className="ms-2 text-sky-300/80 font-normal normal-case">
+            {formatMatchTimeShort(m.start_time, lang)}
           </span>
         )}
         <span className="mx-3 text-white/30">·</span>
@@ -81,6 +73,7 @@ export function Ticker({ matches, emptyText = "No matches scheduled" }: Props) {
         background:
           "linear-gradient(90deg, #002868 0%, #0a1330 40%, #300a10 60%, #C8102E 100%)",
       }}
+      dir="ltr"
     >
       {/* edge fades */}
       <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#002868] to-transparent z-10" />

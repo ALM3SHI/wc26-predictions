@@ -7,24 +7,15 @@ import { Ticker } from "@/components/ui/Ticker";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { StakeBadge } from "@/components/ui/StakeBadge";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
-
-function formatMatchTime(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
+import { getServerT } from "@/lib/i18n-server";
+import { formatMatchDateShort, localizeTeam } from "@/lib/i18n-data";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function BracketPage() {
   const supabase = await createClient();
+  const { t, lang, dir } = await getServerT();
 
   const {
     data: { user },
@@ -77,25 +68,31 @@ export default async function BracketPage() {
 
   const dynamicGroups = [
     {
-      title: "Live Now",
+      key: "live",
+      title: t("bracket.live"),
+      window: null,
       icon: Flame,
       matches: liveMatches,
-      color: "text-wc-green",
-      line: "from-wc-green/40",
+      accent: "#DC2626",
+      soft: "bg-red-50 text-red-600 border-red-100",
     },
     {
-      title: "Upcoming (Next 24h)",
+      key: "upcoming",
+      title: t("bracket.upcoming"),
+      window: t("bracket.upcoming.window"),
       icon: Sparkles,
       matches: upcomingMatches,
-      color: "text-wc-cyan",
-      line: "from-wc-cyan/40",
+      accent: "#0891B2",
+      soft: "bg-cyan-50 text-cyan-700 border-cyan-100",
     },
     {
-      title: "Previous (Last 24h)",
+      key: "previous",
+      title: t("bracket.previous"),
+      window: t("bracket.previous.window"),
       icon: Trophy,
       matches: previousMatches,
-      color: "text-gray-500",
-      line: "from-gray-200",
+      accent: "#6B7280",
+      soft: "bg-gray-50 text-gray-600 border-gray-200",
     },
   ];
 
@@ -111,10 +108,10 @@ export default async function BracketPage() {
   ].slice(0, 30);
 
   return (
-    <div className="min-h-screen pt-6 pb-6 px-4 sm:px-6">
+    <div className="min-h-screen pt-6 pb-6 px-4 sm:px-6" dir={dir}>
       {/* Background Glows */}
-      <div className="fixed top-[-100px] left-[-100px] w-[400px] h-[400px] bg-wc-purple/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-[-100px] right-[-100px] w-[400px] h-[400px] bg-wc-cyan/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed top-[-100px] start-[-100px] w-[400px] h-[400px] bg-wc-purple/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-[-100px] end-[-100px] w-[400px] h-[400px] bg-wc-cyan/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
@@ -123,38 +120,56 @@ export default async function BracketPage() {
             <HostSeal size={64} />
             <div>
               <h1 className="font-fifa text-4xl md:text-5xl uppercase text-gray-900 tracking-tight">
-                Knockout Bracket
+                {t("bracket.title")}
               </h1>
-              <div className="tri-underline w-32 mt-2" style={{ background: HOST_TRI_GRADIENT }} />
+              <div
+                className="tri-underline w-32 mt-2"
+                style={{ background: HOST_TRI_GRADIENT }}
+              />
             </div>
           </div>
         </div>
 
         {/* Ticker */}
         <div className="mb-10">
-          <Ticker
-            matches={tickerMatches}
-            emptyText="Bracket loads soon — sync fixtures in the admin panel"
-          />
+          <Ticker matches={tickerMatches} emptyText={t("bracket.empty")} />
         </div>
 
-        <div className="space-y-16">
+        <div className="space-y-10">
           {dynamicGroups.map((group) => {
             if (group.matches.length === 0) return null;
             const Icon = group.icon;
 
             return (
-              <section key={group.title} className="w-full">
-                <div className="flex items-center gap-4 mb-8">
-                  <Icon className={`w-6 h-6 ${group.color}`} />
-                  <h2
-                    className={`font-fifa text-3xl uppercase tracking-wide ${group.color} drop-shadow-[0_0_10px_currentColor]`}
-                  >
-                    {group.title}
-                  </h2>
+              <section key={group.key} className="w-full">
+                {/* Modern section header — single-line pill w/ icon & count */}
+                <div className="flex items-center gap-3 mb-4">
                   <div
-                    className={`h-px flex-1 bg-gradient-to-r ${group.line} to-transparent`}
-                  />
+                    className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 border bg-white shadow-sm shrink-0"
+                    style={{ borderColor: `${group.accent}33` }}
+                  >
+                    <Icon className="w-4 h-4" style={{ color: group.accent }} />
+                    <span
+                      className="font-bold text-sm tracking-wide whitespace-nowrap"
+                      style={{ color: group.accent }}
+                    >
+                      {group.title}
+                    </span>
+                  </div>
+                  {group.window && (
+                    <span
+                      className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-md border whitespace-nowrap ${group.soft}`}
+                    >
+                      {group.window}
+                    </span>
+                  )}
+                  <span
+                    className="text-[10px] font-bold text-gray-400 whitespace-nowrap"
+                    dir="ltr"
+                  >
+                    {group.matches.length}
+                  </span>
+                  <div className="h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -162,7 +177,9 @@ export default async function BracketPage() {
                     const isLive = ["1H", "HT", "2H", "ET", "BT", "P"].includes(
                       match.status,
                     );
-                    const isFinished = ["FT", "AET", "PEN"].includes(match.status);
+                    const isFinished = ["FT", "AET", "PEN"].includes(
+                      match.status,
+                    );
                     const isLocked =
                       new Date(match.start_time).getTime() < Date.now();
 
@@ -183,10 +200,12 @@ export default async function BracketPage() {
                               : "border-gray-200"
                           }`}
                         >
-                          {/* Tri-color top stripe */}
                           <div
                             className="absolute inset-x-0 top-0 h-1 rounded-t-[1.4rem]"
-                            style={{ background: HOST_TRI_GRADIENT, opacity: 0.9 }}
+                            style={{
+                              background: HOST_TRI_GRADIENT,
+                              opacity: 0.9,
+                            }}
                           />
 
                           {/* Match Header */}
@@ -195,12 +214,13 @@ export default async function BracketPage() {
                               <Clock className="w-3.5 h-3.5" />
                               {isLive ? (
                                 <span className="text-red-500 inline-flex items-center gap-1">
-                                  <span className="live-dot" /> LIVE
+                                  <span className="live-dot" />{" "}
+                                  {t("bracket.live.label")}
                                 </span>
                               ) : isFinished ? (
-                                "FULL TIME"
+                                t("bracket.fulltime")
                               ) : (
-                                formatMatchTime(match.start_time)
+                                formatMatchDateShort(match.start_time, lang)
                               )}
                             </span>
                             <div className="flex items-center gap-1">
@@ -208,15 +228,15 @@ export default async function BracketPage() {
                               {match.prediction ? (
                                 <span className="text-wc-purple flex items-center gap-1 bg-purple-50 px-2 py-1 rounded-md">
                                   <Trophy className="w-3.5 h-3.5" />
-                                  PICKED
+                                  {t("bracket.picked")}
                                 </span>
                               ) : !isLocked ? (
                                 <span className="text-wc-cyan bg-cyan-50 px-2 py-1 rounded-md">
-                                  PREDICT
+                                  {t("bracket.predict")}
                                 </span>
                               ) : (
                                 <span className="text-gray-400 bg-gray-100 px-2 py-1 rounded-md">
-                                  LOCKED
+                                  {t("bracket.locked")}
                                 </span>
                               )}
                             </div>
@@ -232,11 +252,16 @@ export default async function BracketPage() {
                                   className="w-8 h-8 object-cover rounded-full shadow-sm border border-gray-100"
                                 />
                                 <span className="font-bold text-gray-900 truncate max-w-[120px]">
-                                  {match.home_team}
+                                  {localizeTeam(match.home_team, lang)}
                                 </span>
                               </div>
-                              <span className="font-fifa text-xl text-gray-900">
-                                {match.home_score !== null ? match.home_score : "-"}
+                              <span
+                                className="font-fifa text-xl text-gray-900"
+                                dir="ltr"
+                              >
+                                {match.home_score !== null
+                                  ? match.home_score
+                                  : "-"}
                               </span>
                             </div>
 
@@ -248,11 +273,16 @@ export default async function BracketPage() {
                                   className="w-8 h-8 object-cover rounded-full shadow-sm border border-gray-100"
                                 />
                                 <span className="font-bold text-gray-900 truncate max-w-[120px]">
-                                  {match.away_team}
+                                  {localizeTeam(match.away_team, lang)}
                                 </span>
                               </div>
-                              <span className="font-fifa text-xl text-gray-900">
-                                {match.away_score !== null ? match.away_score : "-"}
+                              <span
+                                className="font-fifa text-xl text-gray-900"
+                                dir="ltr"
+                              >
+                                {match.away_score !== null
+                                  ? match.away_score
+                                  : "-"}
                               </span>
                             </div>
                           </div>
@@ -261,9 +291,12 @@ export default async function BracketPage() {
                           {match.prediction && (
                             <div className="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
                               <span className="text-gray-400 text-sm font-bold uppercase tracking-wider">
-                                Your Pick
+                                {t("bracket.yourpick")}
                               </span>
-                              <span className="font-fifa text-2xl text-wc-purple">
+                              <span
+                                className="font-fifa text-2xl text-wc-purple"
+                                dir="ltr"
+                              >
                                 {match.prediction.home_prediction} -{" "}
                                 {match.prediction.away_prediction}
                               </span>

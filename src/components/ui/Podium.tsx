@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Crown, Medal } from "lucide-react";
 import type { LeaderboardEntry } from "@/lib/types";
 import { HOST_RED, HOST_BLUE, HOST_GREEN, HOST_GOLD } from "@/lib/wc26-theme";
+import { useI18n } from "@/lib/i18n";
 
 interface Props {
   top: LeaderboardEntry[];
@@ -18,6 +19,7 @@ const STEPS = [
 ];
 
 export function Podium({ top, currentUserId }: Props) {
+  const { t } = useI18n();
   const byRank = new Map(top.map((e) => [e.rank, e]));
 
   return (
@@ -32,10 +34,10 @@ export function Podium({ top, currentUserId }: Props) {
       <div className="relative">
         <div className="text-center mb-8">
           <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">
-            Podium — Top Predictors
+            {t("leaderboard.podium")}
           </div>
           <h2 className="font-fifa text-3xl md:text-5xl text-gray-900 uppercase">
-            The Big Three
+            {t("leaderboard.big3")}
           </h2>
         </div>
 
@@ -97,8 +99,8 @@ export function Podium({ top, currentUserId }: Props) {
                       style={{ borderColor: step.color }}
                     />
                     {isMe && (
-                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[8px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 rounded-full bg-white border border-gray-200 whitespace-nowrap">
-                        YOU
+                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[8px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 rounded-full bg-white border border-gray-200 whitespace-nowrap uppercase">
+                        {t("leaderboard.you")}
                       </span>
                     )}
                   </div>
@@ -109,6 +111,7 @@ export function Podium({ top, currentUserId }: Props) {
                     <div
                       className="font-fifa text-xl md:text-3xl leading-none mt-1"
                       style={{ color: step.color }}
+                      dir="ltr"
                     >
                       {entry.total_points}
                     </div>

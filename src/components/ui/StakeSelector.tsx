@@ -28,7 +28,7 @@ export function StakeSelector({ value, onChange, disabled }: Props) {
     <div className="w-full">
       <div className="flex items-center justify-between mb-3 gap-2">
         <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-500 leading-tight">
-          {t("gamble.title")}
+          {t("stake.picker.title")}
         </span>
         <span
           className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full whitespace-nowrap"

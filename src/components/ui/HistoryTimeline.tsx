@@ -5,12 +5,22 @@ import { History } from "lucide-react";
 import type { FDSeason } from "@/lib/football-data";
 import { HOST_TRI_GRADIENT, HOST_GOLD } from "@/lib/wc26-theme";
 import { getFlagPath } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
+import { localizeTeam } from "@/lib/i18n-data";
+
+const S: Record<string, { en: string; ar: string }> = {
+  title: { en: "Every WC Winner", ar: "أبطال كأس العالم" },
+  champion: { en: "Champion", ar: "البطل" },
+};
 
 interface Props {
   history: Array<{ year: number; season: FDSeason }>;
 }
 
 export function HistoryTimeline({ history }: Props) {
+  const { lang } = useI18n();
+  const tx = (k: string) => S[k]?.[lang] ?? S[k]?.en ?? k;
+
   if (!history.length) return null;
 
   return (
@@ -24,17 +34,15 @@ export function HistoryTimeline({ history }: Props) {
         <History className="w-5 h-5 text-gray-700" />
         <div>
           <h3 className="font-fifa text-2xl md:text-3xl uppercase text-gray-900 leading-none">
-            Every WC Winner
+            {tx("title")}
           </h3>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 mt-1" dir="ltr">
             {history[history.length - 1].year} — {history[0].year}
           </p>
         </div>
       </div>
 
-      {/* Horizontal scrollable timeline */}
-      <div className="relative overflow-x-auto pb-4">
-        {/* Track */}
+      <div className="relative overflow-x-auto pb-4" dir="ltr">
         <div
           className="absolute top-1/2 left-4 right-4 h-1 -translate-y-1/2 rounded-full"
           style={{
@@ -69,10 +77,10 @@ export function HistoryTimeline({ history }: Props) {
                     className="w-10 h-10 rounded-full object-cover border-2 border-yellow-400 shadow"
                   />
                   <div className="text-[10px] uppercase tracking-widest text-gray-500 mt-2">
-                    Champion
+                    {tx("champion")}
                   </div>
                   <div className="font-fifa text-sm text-gray-900 text-center truncate max-w-[100px]">
-                    {w.shortName || w.name}
+                    {localizeTeam(w.shortName || w.name, lang)}
                   </div>
                 </div>
               </motion.div>

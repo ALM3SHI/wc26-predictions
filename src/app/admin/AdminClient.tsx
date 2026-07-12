@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Match, Profile } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
+import { useI18n } from "@/lib/i18n";
+import { localizeTeam } from "@/lib/i18n-data";
 
 const COUNTRIES = [
   "TBD",
@@ -38,6 +40,7 @@ export default function AdminClient({
   initialUsers: Profile[];
   initialPredictions: any[];
 }) {
+  const { t, lang, dir } = useI18n();
   const [tab, setTab] = useState<"matches" | "users" | "predictions">("matches");
   const [matches, setMatches] = useState<Match[]>(initialMatches);
   const [users, setUsers] = useState<Profile[]>(initialUsers);
@@ -189,19 +192,25 @@ export default function AdminClient({
     }
   };
 
+  const tabLabels: Record<"matches" | "users" | "predictions", string> = {
+    matches: t("admin.tab.matches"),
+    users: t("admin.tab.users"),
+    predictions: t("admin.tab.predictions"),
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" dir={dir}>
       {/* Tabs */}
       <div className="flex gap-4 mb-8 overflow-x-auto pb-4 no-scrollbar whitespace-nowrap max-w-full">
-        {["matches", "users", "predictions"].map((t) => (
+        {(["matches", "users", "predictions"] as const).map((key) => (
           <button
-            key={t}
-            onClick={() => setTab(t as any)}
+            key={key}
+            onClick={() => setTab(key)}
             className={`px-6 py-3 rounded-full font-bold uppercase tracking-widest flex-shrink-0 ${
-              tab === t ? "bg-wc-purple text-white shadow-md" : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50"
+              tab === key ? "bg-wc-purple text-white shadow-md" : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50"
             }`}
           >
-            {t}
+            {tabLabels[key]}
           </button>
         ))}
       </div>
@@ -211,8 +220,8 @@ export default function AdminClient({
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm gap-4">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Matches & Scoring</h2>
-              <p className="text-gray-500 text-sm">Create matches, edit scores, and calculate points.</p>
+              <h2 className="text-xl font-bold text-gray-900">{t("admin.matches.title")}</h2>
+              <p className="text-gray-500 text-sm">{t("admin.matches.sub")}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               <button
@@ -220,14 +229,14 @@ export default function AdminClient({
                 disabled={loading}
                 className="flex-1 md:flex-none px-6 py-3 bg-wc-cyan/20 text-wc-cyan border border-wc-cyan/50 font-bold rounded-xl hover:bg-wc-cyan hover:text-black transition-colors disabled:opacity-50"
               >
-                + Add Match
+                {t("admin.matches.add")}
               </button>
               <button
                 onClick={triggerScoring}
                 disabled={loading}
                 className="flex-1 md:flex-none px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 disabled:opacity-50 shadow-sm"
               >
-                {loading ? "Calculating..." : "Force Calculate Points"}
+                {loading ? t("admin.matches.calc.loading") : t("admin.matches.calc")}
               </button>
             </div>
           </div>
@@ -244,15 +253,21 @@ export default function AdminClient({
                       value={match.home_team}
                       onChange={(e) => handleUpdateMatch(match.id, { home_team: e.target.value })}
                     >
-                      {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      {COUNTRIES.map(c => (
+                        <option key={c} value={c}>{localizeTeam(c, lang)}</option>
+                      ))}
                     </select>
-                    <span className="text-gray-400 text-xs font-bold">VS</span>
+                    <span className="text-gray-400 text-xs font-bold">
+                      {lang === "ar" ? "×" : "VS"}
+                    </span>
                     <select
                       className="bg-white border border-gray-200 rounded-lg p-2 flex-1 sm:w-[140px] font-medium text-gray-900 text-sm"
                       value={match.away_team}
                       onChange={(e) => handleUpdateMatch(match.id, { away_team: e.target.value })}
                     >
-                      {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      {COUNTRIES.map(c => (
+                        <option key={c} value={c}>{localizeTeam(c, lang)}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -302,18 +317,18 @@ export default function AdminClient({
 
                 {/* Manage Predictions Toggle Button */}
                 <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end">
-                  <button 
+                  <button
                     onClick={() => setActiveMatchId(activeMatchId === match.id ? null : match.id)}
                     className="text-sm font-bold text-wc-purple hover:text-wc-purple-light"
                   >
-                    {activeMatchId === match.id ? "Hide Predictions" : "Manage Predictions"}
+                    {activeMatchId === match.id ? t("admin.matches.hidepreds") : t("admin.matches.managepreds")}
                   </button>
                 </div>
 
                 {/* Manage Predictions Panel */}
                 {activeMatchId === match.id && (
                   <div className="mt-4 bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-3">
-                    <h3 className="font-bold text-gray-900 mb-2">User Predictions</h3>
+                    <h3 className="font-bold text-gray-900 mb-2">{t("admin.matches.userpreds")}</h3>
                     {users.map(u => {
                       const userPred = predictions.find(p => p.match_id === match.id && p.user_id === u.id);
                       return (
@@ -361,45 +376,45 @@ export default function AdminClient({
       {tab === "users" && (
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Create Magic Account</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">{t("admin.users.create")}</h2>
             <form onSubmit={handleCreateUser} className="flex flex-col sm:flex-row gap-4">
-              <input 
-                type="text" placeholder="Display Name" required
+              <input
+                type="text" placeholder={t("admin.users.displayname")} required
                 value={newUser.displayName} onChange={e => setNewUser({...newUser, displayName: e.target.value})}
                 className="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-900"
               />
-              <input 
-                type="email" placeholder="Email" required
+              <input
+                type="email" placeholder={t("admin.users.email")} required
                 value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})}
                 className="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-900"
               />
-              <input 
-                type="text" placeholder="Password" required
+              <input
+                type="text" placeholder={t("admin.users.password")} required
                 value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})}
                 className="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-900"
               />
               <button type="submit" disabled={loading} className="px-6 py-3 bg-wc-purple text-white font-bold rounded-xl shadow-sm">
-                Create User
+                {t("admin.users.submit")}
               </button>
             </form>
           </div>
 
           <div className="bg-white rounded-[2rem] border border-gray-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto w-full">
-              <table className="w-full text-left text-sm min-w-[500px]">
+              <table className="w-full text-start text-sm min-w-[500px]">
                 <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold text-xs border-b border-gray-200">
                   <tr>
-                    <th className="p-4">ID</th>
-                    <th className="p-4">Display Name</th>
-                    <th className="p-4">Legacy Pts</th>
-                    <th className="p-4">Total Pts</th>
-                    <th className="p-4">Is Admin</th>
+                    <th className="p-4 text-start">{t("admin.users.id")}</th>
+                    <th className="p-4 text-start">{t("admin.users.displayname")}</th>
+                    <th className="p-4 text-start">{t("admin.users.legacy")}</th>
+                    <th className="p-4 text-start">{t("admin.users.total")}</th>
+                    <th className="p-4 text-start">{t("admin.users.admin")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {users.map(u => (
                     <tr key={u.id} className="hover:bg-gray-50">
-                      <td className="p-4 font-mono text-xs text-gray-400">{u.id.substring(0,8)}...</td>
+                      <td className="p-4 font-mono text-xs text-gray-400" dir="ltr">{u.id.substring(0,8)}...</td>
                       <td className="p-4 font-bold text-gray-900 whitespace-nowrap">{u.display_name}</td>
                       <td className="p-4">
                         <input
@@ -409,8 +424,8 @@ export default function AdminClient({
                           onChange={(e) => handleUpdateUser(u.id, { legacy_points: parseInt(e.target.value) || 0 })}
                         />
                       </td>
-                      <td className="p-4 font-bold text-gray-500">{u.total_points}</td>
-                      <td className="p-4 text-gray-700">{u.is_admin ? "YES" : "NO"}</td>
+                      <td className="p-4 font-bold text-gray-500" dir="ltr">{u.total_points}</td>
+                      <td className="p-4 text-gray-700">{u.is_admin ? t("admin.users.yes") : t("admin.users.no")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -424,13 +439,13 @@ export default function AdminClient({
       {tab === "predictions" && (
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h2 className="text-xl font-bold text-gray-900">Manage Predictions</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t("admin.preds.title")}</h2>
             <select
               className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-900 font-bold w-full sm:w-64"
               value={selectedUserId}
               onChange={(e) => setSelectedUserId(e.target.value)}
             >
-              <option value="all">All Users</option>
+              <option value="all">{t("admin.preds.all")}</option>
               {users.map(u => (
                 <option key={u.id} value={u.id}>{u.display_name}</option>
               ))}
@@ -439,13 +454,13 @@ export default function AdminClient({
 
           <div className="bg-white rounded-[2rem] border border-gray-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto w-full">
-              <table className="w-full text-left text-sm min-w-[600px]">
+              <table className="w-full text-start text-sm min-w-[600px]">
                 <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold text-xs border-b border-gray-200">
                   <tr>
-                    <th className="p-4">User</th>
-                    <th className="p-4">Match</th>
-                    <th className="p-4">Predicted Score</th>
-                    <th className="p-4">Points Earned</th>
+                    <th className="p-4 text-start">{t("admin.preds.user")}</th>
+                    <th className="p-4 text-start">{t("admin.preds.match")}</th>
+                    <th className="p-4 text-start">{t("admin.preds.score")}</th>
+                    <th className="p-4 text-start">{t("admin.preds.pts")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -457,9 +472,11 @@ export default function AdminClient({
                     <tr key={p.id} className="hover:bg-gray-50">
                       <td className="p-4">
                         <div className="font-bold text-gray-900">{u?.display_name || "Unknown"}</div>
-                        <div className="text-xs text-gray-400 font-mono">{p.user_id.substring(0,8)}...</div>
+                        <div className="text-xs text-gray-400 font-mono" dir="ltr">{p.user_id.substring(0,8)}...</div>
                       </td>
-                      <td className="p-4 text-gray-700 font-medium">{p.matches?.home_team} vs {p.matches?.away_team}</td>
+                      <td className="p-4 text-gray-700 font-medium">
+                        {localizeTeam(p.matches?.home_team, lang)} {lang === "ar" ? "×" : "vs"} {localizeTeam(p.matches?.away_team, lang)}
+                      </td>
                       <td className="p-4 flex items-center gap-2">
                         <input
                           type="number"

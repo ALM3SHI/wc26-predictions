@@ -9,6 +9,7 @@ import {
   getStakeById,
 } from "@/lib/gamble";
 import { Confetti } from "@/components/ui/Confetti";
+import { useI18n } from "@/lib/i18n";
 
 interface Props {
   matchId: string;
@@ -31,13 +32,14 @@ export default function GambleResult({
 }: Props) {
   const [stake, setStake] = useState(getStakeById("safe"));
   const [confetti, setConfetti] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     const s = getStakeById(getStake(matchId));
     setStake(s);
     if (scored && pointsEarned > 0 && s.mult >= 3) {
-      const t = setTimeout(() => setConfetti(true), 500);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setConfetti(true), 500);
+      return () => clearTimeout(timer);
     }
   }, [matchId, pointsEarned, scored]);
 
@@ -63,24 +65,24 @@ export default function GambleResult({
         }}
       >
         <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
-          Gamble Result — {stake.label} ({stake.mult}x)
+          {t("result.title")} — {t(`stake.${stake.id}`)} ({stake.mult}x)
         </div>
 
         <div className="flex items-center justify-center gap-6 mb-4">
           <div className="text-center">
             <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
-              Your pick
+              {t("result.pick")}
             </div>
-            <div className="font-fifa text-3xl text-gray-700">
+            <div className="font-fifa text-3xl text-gray-700" dir="ltr">
               {userHome}–{userAway}
             </div>
           </div>
           <div className="w-px h-12 bg-gray-200" />
           <div className="text-center">
             <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
-              Actual
+              {t("result.actual")}
             </div>
-            <div className="font-fifa text-3xl text-gray-900">
+            <div className="font-fifa text-3xl text-gray-900" dir="ltr">
               {actualHome}–{actualAway}
             </div>
           </div>
@@ -104,21 +106,24 @@ export default function GambleResult({
           ) : (
             <XCircle className="w-7 h-7" />
           )}
-          {gambleScore === null
-            ? "PENDING"
-            : `${gambleScore > 0 ? "+" : ""}${gambleScore}`}
+          <span dir="ltr">
+            {gambleScore === null
+              ? t("result.pending")
+              : `${gambleScore > 0 ? "+" : ""}${gambleScore}`}
+          </span>
         </div>
 
         {isExact && (
           <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-100 text-yellow-800 font-bold text-xs uppercase tracking-widest">
-            <Trophy className="w-4 h-4" /> Exact-score Legend
+            <Trophy className="w-4 h-4" /> {t("result.exact")}
           </div>
         )}
 
         {stake.mult > 1 && (
           <p className="mt-4 text-xs text-gray-500">
-            Base points: <span className="font-bold">{pointsEarned}</span>
-            {" · "}Multiplier: <span className="font-bold">{stake.mult}x</span>
+            {t("result.base")}: <span className="font-bold">{pointsEarned}</span>
+            {" · "}
+            {t("result.mult")}: <span className="font-bold">{stake.mult}x</span>
           </p>
         )}
       </motion.div>

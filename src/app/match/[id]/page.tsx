@@ -10,8 +10,13 @@ import { CommunityConsensus } from "@/components/ui/CommunityConsensus";
 import { MatchRichBadges } from "@/components/ui/MatchRichBadges";
 import { getMatchByApiId } from "@/lib/football-data";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
+import { getServerT } from "@/lib/i18n-server";
+import {
+  formatMatchDate,
+  localizeRound,
+  localizeTeam,
+} from "@/lib/i18n-data";
 
-// Force dynamic since it relies on user session and real-time DB data
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -21,6 +26,7 @@ export default async function MatchPage(props: {
   const params = await props.params;
   const matchId = params.id;
   const supabase = await createClient();
+  const { t, lang, dir } = await getServerT();
 
   const {
     data: { user },
@@ -30,7 +36,6 @@ export default async function MatchPage(props: {
     redirect("/login?next=/match/" + matchId);
   }
 
-  // Fetch match details
   const { data: match, error: matchError } = await supabase
     .from("matches")
     .select("*")
@@ -41,7 +46,6 @@ export default async function MatchPage(props: {
     notFound();
   }
 
-  // Fetch existing prediction
   const { data: prediction } = await supabase
     .from("predictions")
     .select("*")
@@ -49,12 +53,10 @@ export default async function MatchPage(props: {
     .eq("user_id", user.id)
     .single();
 
-  // Rich context from football-data.org (halftime, referee, group, etc.)
   const richMatch = match.api_fixture_id
     ? await getMatchByApiId(match.api_fixture_id)
     : null;
 
-  // Community consensus — only readable after kickoff per RLS
   const isKicked = new Date(match.start_time).getTime() <= Date.now();
   const consensus = { home: 0, draw: 0, away: 0 };
   if (isKicked) {
@@ -71,21 +73,17 @@ export default async function MatchPage(props: {
     );
   }
 
-  const date = new Date(match.start_time);
-  const formattedDate = date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
-
+  const formattedDate = formatMatchDate(match.start_time, lang);
   const isLive = ["1H", "HT", "2H", "ET", "BT", "P"].includes(match.status);
   const isFinished = ["FT", "AET", "PEN"].includes(match.status);
 
   return (
-    <div className="min-h-screen pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden">
-      {/* Background Decorators */}
-      <div className="absolute top-0 right-[-20%] w-[600px] h-[600px] bg-wc-green/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 left-[-20%] w-[600px] h-[600px] bg-wc-purple/5 rounded-full blur-[150px] pointer-events-none" />
+    <div
+      className="min-h-screen pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden"
+      dir={dir}
+    >
+      <div className="absolute top-0 end-[-20%] w-[600px] h-[600px] bg-wc-green/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 start-[-20%] w-[600px] h-[600px] bg-wc-purple/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-4xl mx-auto relative z-10 wc-border-gradient p-1 bg-white rounded-[2rem] shadow-sm">
         <div className="p-6 sm:p-12 relative z-10">
@@ -94,16 +92,15 @@ export default async function MatchPage(props: {
               href="/bracket"
               className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Bracket
+              <ArrowLeft className="w-4 h-4 rtl-flip-auto" />
+              {t("match.back")}
             </Link>
             <HostSeal size={56} />
           </div>
 
-          {/* Header */}
           <div className="text-center mb-10">
             <h1 className="font-fifa text-5xl sm:text-7xl tracking-tighter mb-4 uppercase text-gray-900">
-              MATCH DAY
+              {t("match.matchday")}
             </h1>
             <div
               className="mx-auto tri-underline"
@@ -115,12 +112,14 @@ export default async function MatchPage(props: {
                 <CalendarDays className="w-4 h-4" /> {formattedDate}
               </span>
               <span className="text-gray-300">|</span>
-              <span className="text-wc-purple">{match.round}</span>
+              <span className="text-wc-purple">
+                {localizeRound(match.round, lang)}
+              </span>
               {isLive && (
                 <>
                   <span className="text-gray-300">|</span>
                   <span className="inline-flex items-center gap-2 text-red-500">
-                    <span className="live-dot" /> LIVE
+                    <span className="live-dot" /> {t("bracket.live.label")}
                   </span>
                 </>
               )}
@@ -154,21 +153,27 @@ export default async function MatchPage(props: {
                   }}
                 >
                   {isLive || isFinished ? (
-                    <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl">
+                    <div
+                      className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl"
+                      dir="ltr"
+                    >
                       <span>{match.home_score ?? 0}</span>
                       <div className="flex flex-col items-center justify-center w-10 h-14 rounded-lg bg-white/10 border border-white/20">
                         <span className="text-[0.55rem] font-bold tracking-widest text-white/60">
-                          {isLive ? "LIVE" : match.status}
+                          {isLive ? t("bracket.live.label") : match.status}
                         </span>
                       </div>
                       <span>{match.away_score ?? 0}</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl text-white/70">
+                    <div
+                      className="flex items-center gap-4 font-fifa text-5xl sm:text-6xl text-white/70"
+                      dir="ltr"
+                    >
                       <span>-</span>
                       <div className="flex flex-col items-center justify-center w-10 h-14 rounded-lg bg-white/10 border border-white/20">
                         <span className="text-[0.55rem] font-bold tracking-widest text-white/50">
-                          VS
+                          {lang === "ar" ? "×" : "VS"}
                         </span>
                       </div>
                       <span>-</span>
@@ -190,25 +195,25 @@ export default async function MatchPage(props: {
               />
             </div>
 
-            {/* Team Names Below */}
             <div className="flex justify-between w-full max-w-md mt-6 font-fifa text-xl md:text-2xl text-gray-700 uppercase">
               <span className="flex-1 text-center truncate px-2">
-                {match.home_team}
+                {localizeTeam(match.home_team, lang)}
               </span>
               <span className="w-12" />
               <span className="flex-1 text-center truncate px-2">
-                {match.away_team}
+                {localizeTeam(match.away_team, lang)}
               </span>
             </div>
           </div>
 
-          {/* Form */}
-          <PredictionForm match={match} prediction={prediction || null} userId={user.id} />
+          <PredictionForm
+            match={match}
+            prediction={prediction || null}
+            userId={user.id}
+          />
 
-          {/* Rich API context — halftime, referee, group, duration */}
           <MatchRichBadges rich={richMatch} />
 
-          {/* Community consensus — only visible after kickoff */}
           {isKicked && (
             <CommunityConsensus
               home={consensus.home}
@@ -219,7 +224,6 @@ export default async function MatchPage(props: {
             />
           )}
 
-          {/* Post-match result view */}
           {isFinished && prediction && (
             <div className="mt-10">
               <GambleResult

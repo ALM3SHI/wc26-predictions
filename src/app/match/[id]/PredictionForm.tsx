@@ -21,6 +21,7 @@ import {
 } from "@/lib/gamble";
 import { HOST_RED, HOST_BLUE } from "@/lib/wc26-theme";
 import { useI18n } from "@/lib/i18n";
+import { localizeTeam } from "@/lib/i18n-data";
 
 interface Props {
   match: Match;
@@ -29,7 +30,7 @@ interface Props {
 }
 
 export default function PredictionForm({ match, prediction, userId }: Props) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [homeScore, setHomeScore] = useState<number>(
     prediction ? prediction.home_prediction : 1,
   );
@@ -149,7 +150,7 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
                 onChange={bumpHome}
                 disabled={isLocked || loading}
                 accentColor={HOST_RED}
-                label={match.home_team}
+                label={localizeTeam(match.home_team, lang)}
               />
               <div className="flex flex-col items-center pt-4">
                 <span className="font-fifa text-3xl md:text-5xl text-gray-300 leading-none">
@@ -164,7 +165,7 @@ export default function PredictionForm({ match, prediction, userId }: Props) {
                 onChange={bumpAway}
                 disabled={isLocked || loading}
                 accentColor={HOST_BLUE}
-                label={match.away_team}
+                label={localizeTeam(match.away_team, lang)}
               />
             </div>
           </div>

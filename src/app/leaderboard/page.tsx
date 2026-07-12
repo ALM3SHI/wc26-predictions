@@ -7,11 +7,14 @@ import { Ticker } from "@/components/ui/Ticker";
 import { Podium } from "@/components/ui/Podium";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
+import { getServerT } from "@/lib/i18n-server";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function LeaderboardPage() {
   const supabase = await createClient();
+  const { t, dir } = await getServerT();
 
   const { data: leaderboard, error } = await supabase
     .from("leaderboard")
@@ -25,7 +28,9 @@ export default async function LeaderboardPage() {
 
   if (error) {
     return (
-      <div className="p-8 text-wc-red text-center">Error loading leaderboard.</div>
+      <div className="p-8 text-wc-red text-center">
+        Error loading leaderboard.
+      </div>
     );
   }
 
@@ -33,7 +38,6 @@ export default async function LeaderboardPage() {
   const top3 = entries.slice(0, 3);
   const rest = entries.slice(3);
 
-  // Pull upcoming/live for the ticker
   const { data: tickerMatches } = await supabase
     .from("matches")
     .select("id,home_team,away_team,home_score,away_score,start_time,status")
@@ -42,10 +46,12 @@ export default async function LeaderboardPage() {
     .limit(20);
 
   return (
-    <div className="min-h-screen bg-white pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden">
-      {/* Background Decorators */}
-      <div className="absolute top-0 right-[20%] w-[500px] h-[500px] bg-wc-gold/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[20%] left-[-10%] w-[600px] h-[600px] bg-wc-purple/5 rounded-full blur-[150px] pointer-events-none" />
+    <div
+      className="min-h-screen bg-white pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden"
+      dir={dir}
+    >
+      <div className="absolute top-0 end-[20%] w-[500px] h-[500px] bg-wc-gold/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[20%] start-[-10%] w-[600px] h-[600px] bg-wc-purple/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-4xl mx-auto relative z-10">
         <header className="mb-8 text-center">
@@ -56,48 +62,46 @@ export default async function LeaderboardPage() {
             </div>
           </div>
           <h1 className="font-fifa font-black text-4xl sm:text-6xl tracking-tight mb-3 text-gray-900 uppercase">
-            Global Leaderboard
+            {t("leaderboard.title")}
           </h1>
           <div
             className="mx-auto tri-underline mb-4"
             style={{ width: 220, background: HOST_TRI_GRADIENT }}
           />
-          <p className="text-gray-500">
-            The best football oracles at WC26. Top 100 rankings, live.
-          </p>
+          <p className="text-gray-500">{t("leaderboard.sub")}</p>
         </header>
 
-        {/* Ticker */}
         <div className="mb-10">
           <Ticker
             matches={tickerMatches || []}
-            emptyText="No matches within 6h — check the bracket"
+            emptyText={t("leaderboard.ticker.empty")}
           />
         </div>
 
-        {/* Podium */}
-        {top3.length > 0 && <Podium top={top3} currentUserId={user?.id ?? null} />}
+        {top3.length > 0 && (
+          <Podium top={top3} currentUserId={user?.id ?? null} />
+        )}
 
         {/* Legend */}
         <div className="flex flex-wrap items-center justify-center gap-6 mb-6 text-sm text-gray-500">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-wc-green" />
-            Exact Score (3 pts)
+            {t("leaderboard.exact")}
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-wc-purple" />
-            Correct Outcome (1 pt)
+            {t("leaderboard.outcome")}
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-400" />
-            Wrong (0 pts)
+            {t("leaderboard.wrong")}
           </div>
         </div>
 
         <div className="space-y-4">
           {entries.length === 0 ? (
             <GlassCard className="p-12 text-center text-gray-500 bg-white border border-gray-200">
-              No predictions have been scored yet. Check back after the first match!
+              {t("leaderboard.empty")}
             </GlassCard>
           ) : (
             rest.map((entry) => {
@@ -110,7 +114,9 @@ export default async function LeaderboardPage() {
                 ) : entry.rank === 3 ? (
                   <Medal className="w-6 h-6 text-amber-700" />
                 ) : (
-                  <span className="text-gray-400 font-bold">{entry.rank}</span>
+                  <span className="text-gray-400 font-bold" dir="ltr">
+                    {entry.rank}
+                  </span>
                 );
 
               return (
@@ -146,45 +152,61 @@ export default async function LeaderboardPage() {
                             {entry.display_name}
                             {isCurrentUser && (
                               <span className="text-[10px] uppercase tracking-wider bg-purple-100 text-wc-purple px-2 py-0.5 rounded-full">
-                                You
+                                {t("leaderboard.you")}
                               </span>
                             )}
                           </div>
                           <div className="text-xs text-gray-500">
-                            {entry.total_predictions} match
-                            {entry.total_predictions !== 1 && "es"} predicted
+                            <span dir="ltr">{entry.total_predictions}</span>{" "}
+                            {entry.total_predictions === 1
+                              ? t("leaderboard.match")
+                              : t("leaderboard.matches")}{" "}
+                            {t("leaderboard.predicted")}
                           </div>
                         </div>
                       </div>
 
-                      <div className="hidden md:flex items-center gap-8 mr-8">
+                      <div className="hidden md:flex items-center gap-8 me-8">
                         <div className="text-center">
-                          <div className="text-xs text-gray-400 mb-1">Exact</div>
-                          <div className="font-bold text-wc-green">
+                          <div className="text-xs text-gray-400 mb-1">
+                            {t("leaderboard.exact.short")}
+                          </div>
+                          <div
+                            className="font-bold text-wc-green"
+                            dir="ltr"
+                          >
                             {entry.exact_scores}
                           </div>
                         </div>
                         <div className="text-center">
                           <div className="text-xs text-gray-400 mb-1">
-                            Outcome
+                            {t("leaderboard.outcome.short")}
                           </div>
-                          <div className="font-bold text-wc-purple">
+                          <div
+                            className="font-bold text-wc-purple"
+                            dir="ltr"
+                          >
                             {entry.correct_outcomes}
                           </div>
                         </div>
                         <div className="text-center">
-                          <div className="text-xs text-gray-400 mb-1">Wrong</div>
-                          <div className="font-bold text-red-500">
+                          <div className="text-xs text-gray-400 mb-1">
+                            {t("leaderboard.wrong.short")}
+                          </div>
+                          <div className="font-bold text-red-500" dir="ltr">
                             {entry.wrong_predictions}
                           </div>
                         </div>
                       </div>
 
-                      <div className="text-right pl-4 border-l border-gray-200">
+                      <div className="text-end ps-4 border-s border-gray-200">
                         <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider font-semibold">
-                          Points
+                          {t("leaderboard.points")}
                         </div>
-                        <div className="font-display font-black text-2xl sm:text-3xl text-gradient gradient-purple-cyan">
+                        <div
+                          className="font-display font-black text-2xl sm:text-3xl text-gradient gradient-purple-cyan"
+                          dir="ltr"
+                        >
                           {entry.total_points}
                         </div>
                       </div>

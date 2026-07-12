@@ -6,6 +6,8 @@ import GambleStats from "./GambleStats";
 import { Achievements } from "@/components/ui/Achievements";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
+import { getServerT } from "@/lib/i18n-server";
+import { localizeTeam } from "@/lib/i18n-data";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,7 @@ export default async function UserProfilePage(props: {
   const params = await props.params;
   const userId = params.id;
   const supabase = await createClient();
+  const { t, lang, dir } = await getServerT();
 
   const {
     data: { user },
@@ -67,9 +70,16 @@ export default async function UserProfilePage(props: {
   }));
 
   const isSelf = user.id === userId;
+  const legacyLabel = t("profile.legacy").replace(
+    "{n}",
+    String(profile.legacy_points ?? 0),
+  );
 
   return (
-    <div className="min-h-screen pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden">
+    <div
+      className="min-h-screen pt-8 pb-6 px-4 sm:px-6 relative overflow-hidden"
+      dir={dir}
+    >
       <div className="max-w-4xl mx-auto relative z-10 wc-border-gradient p-1 bg-white rounded-[2rem] shadow-sm">
         <div className="p-6 sm:p-12">
           <div className="flex items-center justify-between mb-12">
@@ -77,8 +87,8 @@ export default async function UserProfilePage(props: {
               href="/leaderboard"
               className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Leaderboard
+              <ArrowLeft className="w-4 h-4 rtl-flip-auto" />
+              {t("profile.back")}
             </Link>
             <HostSeal size={56} />
           </div>
@@ -99,11 +109,11 @@ export default async function UserProfilePage(props: {
             <div className="flex flex-col items-center">
               <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-wc-cyan/20 bg-wc-cyan/10 text-wc-cyan font-bold text-xl">
                 <Trophy className="w-5 h-5" />
-                {profile.total_points} PTS
+                <span dir="ltr">{profile.total_points}</span> {t("profile.pts")}
               </div>
               {profile.legacy_points && profile.legacy_points > 0 ? (
                 <p className="mt-3 text-sm font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
-                  Includes {profile.legacy_points} Legacy Points
+                  {legacyLabel}
                 </p>
               ) : null}
             </div>
@@ -122,12 +132,12 @@ export default async function UserProfilePage(props: {
 
           <div className="space-y-4">
             <h2 className="font-fifa text-3xl text-gray-900 uppercase tracking-widest mb-6">
-              Match History
+              {t("profile.history")}
             </h2>
 
             {!predictions || predictions.length === 0 ? (
               <p className="text-gray-400 text-center py-8">
-                No finished predictions yet.
+                {t("profile.history.empty")}
               </p>
             ) : (
               <div className="grid gap-4">
@@ -135,25 +145,31 @@ export default async function UserProfilePage(props: {
                   const match = pred.matches;
                   if (!match) return null;
 
+                  const isFT =
+                    match.status === "FT" ||
+                    match.status === "AET" ||
+                    match.status === "PEN";
+
                   return (
                     <div
                       key={pred.id}
                       className="bg-gray-50 border border-gray-200 p-4 sm:p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm"
                     >
                       <div className="w-full flex-1 flex flex-col sm:flex-row items-center justify-between font-fifa text-xl sm:text-2xl uppercase text-gray-900 gap-1 sm:gap-0">
-                        <span className="w-full sm:flex-1 text-center sm:text-right truncate px-2">
-                          {match.home_team}
+                        <span className="w-full sm:flex-1 text-center sm:text-end truncate px-2">
+                          {localizeTeam(match.home_team, lang)}
                         </span>
                         <div className="px-2 sm:px-6 flex flex-col items-center flex-shrink-0">
-                          {match.status === "FT" ||
-                          match.status === "AET" ||
-                          match.status === "PEN" ? (
+                          {isFT ? (
                             <>
-                              <span className="text-wc-cyan text-2xl sm:text-3xl">
+                              <span
+                                className="text-wc-cyan text-2xl sm:text-3xl"
+                                dir="ltr"
+                              >
                                 {match.home_score} - {match.away_score}
                               </span>
                               <span className="text-gray-400 text-[10px] sm:text-sm tracking-widest mt-1">
-                                ACTUAL
+                                {t("profile.actual")}
                               </span>
                             </>
                           ) : (
@@ -162,39 +178,46 @@ export default async function UserProfilePage(props: {
                                 -
                               </span>
                               <span className="text-gray-400 text-[10px] sm:text-sm tracking-widest mt-1">
-                                {match.status === "NS" ? "UPCOMING" : "LIVE"}
+                                {match.status === "NS"
+                                  ? t("profile.upcoming")
+                                  : t("profile.live")}
                               </span>
                             </>
                           )}
                         </div>
-                        <span className="w-full sm:flex-1 text-center sm:text-left truncate px-2">
-                          {match.away_team}
+                        <span className="w-full sm:flex-1 text-center sm:text-start truncate px-2">
+                          {localizeTeam(match.away_team, lang)}
                         </span>
                       </div>
 
-                      <div className="flex flex-col items-center md:items-end min-w-[150px] border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
+                      <div className="flex flex-col items-center md:items-end min-w-[150px] border-t md:border-t-0 md:border-s border-gray-200 pt-4 md:pt-0 md:ps-6">
                         <div className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">
-                          Their Pick
+                          {t("profile.theirpick")}
                         </div>
-                        <div className="font-fifa text-2xl mb-3 text-gray-900">
+                        <div
+                          className="font-fifa text-2xl mb-3 text-gray-900"
+                          dir="ltr"
+                        >
                           {pred.home_prediction} - {pred.away_prediction}
                         </div>
 
                         {!pred.scored ? (
                           <div className="flex items-center gap-1.5 text-gray-500 bg-gray-100 px-3 py-1 rounded-md text-sm font-bold">
-                            PENDING
+                            {t("profile.pending")}
                           </div>
                         ) : pred.points_earned === 3 ? (
                           <div className="flex items-center gap-1.5 text-wc-green bg-wc-green/10 px-3 py-1 rounded-md text-sm font-bold">
-                            <CheckCircle2 className="w-4 h-4" /> EXACT (+3)
+                            <CheckCircle2 className="w-4 h-4" />{" "}
+                            {t("profile.exact")}
                           </div>
                         ) : pred.points_earned === 1 ? (
                           <div className="flex items-center gap-1.5 text-wc-cyan bg-wc-cyan/10 px-3 py-1 rounded-md text-sm font-bold">
-                            <CheckCircle2 className="w-4 h-4" /> OUTCOME (+1)
+                            <CheckCircle2 className="w-4 h-4" />{" "}
+                            {t("profile.outcome")}
                           </div>
                         ) : (
                           <div className="flex items-center gap-1.5 text-wc-red bg-wc-red/10 px-3 py-1 rounded-md text-sm font-bold">
-                            <XCircle className="w-4 h-4" /> FAILED (0)
+                            <XCircle className="w-4 h-4" /> {t("profile.failed")}
                           </div>
                         )}
                       </div>
