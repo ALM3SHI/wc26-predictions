@@ -3,6 +3,8 @@ import { Outfit, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { Navigation } from "@/components/Navigation";
+import { SplashScreen } from "@/components/SplashScreen";
+import { IOSInstallGate } from "@/components/IOSInstallGate";
 import { I18nProvider } from "@/lib/i18n";
 import Image from "next/image";
 import "./globals.css";
@@ -36,11 +38,20 @@ export const metadata: Metadata = {
     "Predict World Cup 2026 knockout stage scores and compete on the global leaderboard. Make your picks before each match kicks off!",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "WC26",
+    // Splash images can be added here once designed — Safari falls back to
+    // the theme color otherwise.
+  },
+  icons: {
+    icon: "/icons/icon-192x192.png",
+    apple: "/icons/icon-192x192.png",
   },
   other: {
     "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": "WC26",
   },
 };
 
@@ -48,7 +59,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#FFFFFF",
+  themeColor: "#0A0A0F",
 };
 
 /* ── Root Layout ──────────────────────────────────────── */
@@ -61,6 +72,7 @@ export default function RootLayout({
     <html lang="en" className={`${outfit.variable} ${inter.variable} ${fifa.variable}`}>
       <head>
         <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className="font-body text-gray-900 antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0 pt-[env(safe-area-inset-top)] relative">
         <div className="fixed inset-0 -z-50 bg-[#F9FAFB]">
@@ -68,8 +80,15 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-gradient-to-b from-[#F9FAFB]/50 to-[#F9FAFB]" />
         </div>
         <I18nProvider>
-          <Navigation />
-          {children}
+          {/* iOS Add-to-Home-Screen gate wraps the whole app; it renders
+              children when the visitor isn't on iOS or is already in
+              standalone mode, and a blocking tutorial otherwise. */}
+          <IOSInstallGate>
+            <Navigation />
+            {children}
+          </IOSInstallGate>
+          {/* Splash sits above everything but auto-dismisses after ~1.4s. */}
+          <SplashScreen />
         </I18nProvider>
         <ServiceWorkerRegistrar />
       </body>

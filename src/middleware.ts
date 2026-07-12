@@ -1,6 +1,33 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Paths that stay reachable without a session. Everything else redirects to /login.
+const PUBLIC_PATH_EXACT = new Set<string>([
+  "/login",
+  "/signup",
+  "/manifest.webmanifest",
+  "/sw.js",
+  "/favicon.ico",
+  "/robots.txt",
+]);
+
+const PUBLIC_PATH_PREFIX = [
+  "/api/auth", // OAuth callback + auth helpers
+  "/api/cron", // header-authenticated cron routes
+  "/icons/",
+  "/flags/",
+  "/images/",
+  "/fonts/",
+];
+
+function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_PATH_EXACT.has(pathname)) return true;
+  for (const p of PUBLIC_PATH_PREFIX) {
+    if (pathname.startsWith(p)) return true;
+  }
+  return false;
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request: {
@@ -17,10 +44,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          // This updates the request object
           request.cookies.set({ name, value, ...options });
-          
-          // This updates the response object to set the cookie in the browser
           supabaseResponse = NextResponse.next({
             request: { headers: request.headers },
           });
@@ -34,11 +58,36 @@ export async function middleware(request: NextRequest) {
           supabaseResponse.cookies.set({ name, value: "", ...options });
         },
       },
-    }
+    },
   );
 
-  // IMPORTANT: This call triggers the refresh of the auth token if needed
-  await supabase.auth.getUser();
+  // Refresh the session cookie if needed and read the user.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname, search } = request.nextUrl;
+
+  // Not logged in → bounce to /login for every non-public path.
+  if (!user && !isPublicPath(pathname)) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
+    // Preserve the intended destination so login can redirect back.
+    const next = pathname + (search || "");
+    if (next && next !== "/") {
+      loginUrl.searchParams.set("next", next);
+    }
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Already logged in and visiting /login or /signup → send them home.
+  if (user && (pathname === "/login" || pathname === "/signup")) {
+    const homeUrl = request.nextUrl.clone();
+    homeUrl.pathname = "/";
+    homeUrl.search = "";
+    return NextResponse.redirect(homeUrl);
+  }
 
   return supabaseResponse;
 }
@@ -46,12 +95,9 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * Match every path except static/next assets and image files.
+     * The middleware body then decides whether it's public or gated.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|json)$).*)",
   ],
 };

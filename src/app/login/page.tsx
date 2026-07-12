@@ -18,6 +18,7 @@ function LoginContent() {
   const supabase = createClient();
 
   const callbackError = searchParams.get("error");
+  const next = searchParams.get("next");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +36,12 @@ function LoginContent() {
       return;
     }
 
-    router.push("/");
+    // Only follow `next` if it looks like an internal path — never trust an
+    // arbitrary URL from the querystring.
+    const safeNext = next && next.startsWith("/") && !next.startsWith("//")
+      ? next
+      : "/";
+    router.push(safeNext);
     router.refresh();
   };
 

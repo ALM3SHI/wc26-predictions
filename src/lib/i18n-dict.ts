@@ -240,6 +240,26 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "admin.preds.match": "Match",
     "admin.preds.score": "Predicted Score",
     "admin.preds.pts": "Points Earned",
+
+    // ── Splash ───────────────────────────────────────────
+    "splash.tagline": "Predict · Compete · Reign",
+
+    // ── iOS install gate ─────────────────────────────────
+    "ios.title": "Add WC26 to your Home Screen",
+    "ios.sub":
+      "To keep playing, install the app first. It only takes 10 seconds.",
+    "ios.step1": "Tap the Share button in Safari",
+    "ios.step1sub": "The square with an arrow, at the bottom of the screen",
+    "ios.step2": "Scroll and choose ‘Add to Home Screen’",
+    "ios.step2sub": "You'll find it in the actions list",
+    "ios.step3": "Tap ‘Add’, then open WC26 from your Home Screen",
+    "ios.step3sub": "This screen will disappear the moment you open the app icon",
+    "ios.hint": "Waiting for you to open the app from the WC26 icon…",
+    "ios.notsafari":
+      "Please open this link in Safari — Add to Home Screen only works there.",
+
+    // ── Loading ──────────────────────────────────────────
+    "loading.title": "Loading",
   },
 
   ar: {
@@ -480,5 +500,24 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "admin.preds.match": "المباراة",
     "admin.preds.score": "النتيجة المتوقّعة",
     "admin.preds.pts": "النقاط",
+
+    // ── شاشة البداية ─────────────────────────────────
+    "splash.tagline": "توقّع · نافس · تصدَّر",
+
+    // ── بوابة تثبيت iOS ──────────────────────────────
+    "ios.title": "أضف WC26 إلى الشاشة الرئيسية",
+    "ios.sub": "لمواصلة اللعب، ثبّت التطبيق أولاً. لا يستغرق سوى ١٠ ثوانٍ.",
+    "ios.step1": "اضغط زر «مشاركة» في Safari",
+    "ios.step1sub": "المربّع الذي يخرج منه سهم في أسفل الشاشة",
+    "ios.step2": "مرّر واختر «إضافة إلى الشاشة الرئيسية»",
+    "ios.step2sub": "ستجدها في قائمة الإجراءات",
+    "ios.step3": "اضغط «إضافة»، ثم افتح WC26 من الشاشة الرئيسية",
+    "ios.step3sub": "ستختفي هذه الشاشة فور فتح التطبيق من الأيقونة",
+    "ios.hint": "بانتظار فتحك للتطبيق من أيقونة WC26…",
+    "ios.notsafari":
+      "الرجاء فتح الرابط في Safari — الإضافة إلى الشاشة الرئيسية تعمل فقط من هناك.",
+
+    // ── التحميل ──────────────────────────────────────
+    "loading.title": "جارٍ التحميل",
   },
 };
