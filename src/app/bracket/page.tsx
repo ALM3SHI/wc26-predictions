@@ -14,32 +14,29 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function BracketPage() {
-  const supabase = await createClient();
-  const { t, lang, dir } = await getServerT();
+  const [supabase, i18n] = await Promise.all([createClient(), getServerT()]);
+  const { t, lang, dir } = i18n;
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: matchesData, error: matchesError } = await supabase
-    .from("matches")
-    .select("*")
-    .order("start_time", { ascending: true });
+  // Matches list + the current user's predictions are independent — fetch
+  // them in parallel to save a full Supabase round trip.
+  const [matchesRes, predsRes] = await Promise.all([
+    supabase.from("matches").select("*").order("start_time", { ascending: true }),
+    user
+      ? supabase.from("predictions").select("*").eq("user_id", user.id)
+      : Promise.resolve({ data: [] as Prediction[], error: null }),
+  ]);
+
+  const { data: matchesData, error: matchesError } = matchesRes;
 
   if (matchesError) {
     return <div className="p-8 text-wc-red">Error loading matches.</div>;
   }
 
-  let predictions: Prediction[] = [];
-  if (user) {
-    const { data: userPredictions } = await supabase
-      .from("predictions")
-      .select("*")
-      .eq("user_id", user.id);
-    if (userPredictions) {
-      predictions = userPredictions;
-    }
-  }
+  const predictions: Prediction[] = predsRes.data || [];
 
   const matches: MatchWithPrediction[] = (matchesData || []).map((match) => ({
     ...match,

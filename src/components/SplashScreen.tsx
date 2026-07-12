@@ -7,8 +7,9 @@ import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import { useI18n } from "@/lib/i18n";
 
 const SEEN_FLAG = "wc26.splash.seen";
-const MIN_DURATION_MS = 1400;
-const MAX_DURATION_MS = 2400;
+// Just enough for the seal + tagline to land — no artificial waiting.
+const MIN_DURATION_MS = 550;
+const MAX_DURATION_MS = 1400;
 
 export function SplashScreen() {
   const { t } = useI18n();
@@ -50,17 +51,20 @@ export function SplashScreen() {
       window.setTimeout(finish, remaining);
     };
 
-    // Dismiss once critical resources are ready — or after MAX_DURATION as a floor.
+    // Dismiss once the DOM is parsed (much earlier than `load`, which also
+    // waits on images/iframes). Fall back to MAX_DURATION as an upper bound.
     const maxTimer = window.setTimeout(finish, MAX_DURATION_MS);
-    if (document.readyState === "complete") {
+    if (document.readyState !== "loading") {
       scheduleFinish();
     } else {
-      window.addEventListener("load", scheduleFinish, { once: true });
+      document.addEventListener("DOMContentLoaded", scheduleFinish, {
+        once: true,
+      });
     }
 
     return () => {
       window.clearTimeout(maxTimer);
-      window.removeEventListener("load", scheduleFinish);
+      document.removeEventListener("DOMContentLoaded", scheduleFinish);
     };
   }, []);
 

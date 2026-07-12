@@ -16,8 +16,8 @@ export default async function UserProfilePage(props: {
 }) {
   const params = await props.params;
   const userId = params.id;
-  const supabase = await createClient();
-  const { t, lang, dir } = await getServerT();
+  const [supabase, i18n] = await Promise.all([createClient(), getServerT()]);
+  const { t, lang, dir } = i18n;
 
   const {
     data: { user },
@@ -27,41 +27,42 @@ export default async function UserProfilePage(props: {
     redirect("/login");
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
+  // Profile + prediction history are independent — batch them.
+  const [profileRes, predsRes] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", userId).single(),
+    supabase
+      .from("predictions")
+      .select(
+        `
+        id,
+        match_id,
+        home_prediction,
+        away_prediction,
+        points_earned,
+        scored,
+        matches (
+          id,
+          home_team,
+          away_team,
+          home_team_logo,
+          away_team_logo,
+          home_score,
+          away_score,
+          start_time,
+          status
+        )
+      `,
+      )
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false }),
+  ]);
+
+  const { data: profile, error: profileError } = profileRes;
+  const predictions = predsRes.data;
 
   if (profileError || !profile) {
     notFound();
   }
-
-  const { data: predictions } = await supabase
-    .from("predictions")
-    .select(
-      `
-      id,
-      match_id,
-      home_prediction,
-      away_prediction,
-      points_earned,
-      scored,
-      matches (
-        id,
-        home_team,
-        away_team,
-        home_team_logo,
-        away_team_logo,
-        home_score,
-        away_score,
-        start_time,
-        status
-      )
-    `,
-    )
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false });
 
   const finishedPredictions = (predictions || []).map((p: any) => ({
     match_id: p.match_id,

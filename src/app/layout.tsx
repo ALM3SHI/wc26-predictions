@@ -73,6 +73,14 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        {/* Warm up the Supabase TLS handshake in parallel with the HTML
+            download — saves ~150-300ms on the first DB query. */}
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <>
+            <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+          </>
+        )}
       </head>
       <body className="font-body text-gray-900 antialiased min-h-screen pb-[calc(env(safe-area-inset-bottom)+70px)] md:pb-0 pt-[env(safe-area-inset-top)] relative">
         <div className="fixed inset-0 -z-50 bg-[#F9FAFB]">

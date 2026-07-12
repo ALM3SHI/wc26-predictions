@@ -29,6 +29,20 @@ function isPublicPath(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Fast path: for public routes we don't need to refresh a session or hit
+  // Supabase. Skip the client entirely and let the request through.
+  // Only /login and /signup want the "already logged in? redirect home"
+  // behavior, so let those fall through to the full check.
+  if (
+    pathname !== "/login" &&
+    pathname !== "/signup" &&
+    isPublicPath(pathname)
+  ) {
+    return NextResponse.next({ request: { headers: request.headers } });
+  }
+
   let supabaseResponse = NextResponse.next({
     request: {
       headers: request.headers,
@@ -66,7 +80,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname, search } = request.nextUrl;
+  const { search } = request.nextUrl;
 
   // Not logged in → bounce to /login for every non-public path.
   if (!user && !isPublicPath(pathname)) {

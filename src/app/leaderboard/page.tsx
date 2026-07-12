@@ -13,18 +13,29 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function LeaderboardPage() {
-  const supabase = await createClient();
-  const { t, dir } = await getServerT();
+  const [supabase, i18n] = await Promise.all([createClient(), getServerT()]);
+  const { t, dir } = i18n;
 
-  const { data: leaderboard, error } = await supabase
-    .from("leaderboard")
-    .select("*")
-    .order("rank", { ascending: true })
-    .limit(100);
+  const sixHoursAgoIso = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Leaderboard, current user, and the ticker window are all independent.
+  const [leaderboardRes, userRes, tickerRes] = await Promise.all([
+    supabase
+      .from("leaderboard")
+      .select("*")
+      .order("rank", { ascending: true })
+      .limit(100),
+    supabase.auth.getUser(),
+    supabase
+      .from("matches")
+      .select("id,home_team,away_team,home_score,away_score,start_time,status")
+      .gte("start_time", sixHoursAgoIso)
+      .order("start_time", { ascending: true })
+      .limit(20),
+  ]);
+
+  const { data: leaderboard, error } = leaderboardRes;
+  const user = userRes.data.user;
 
   if (error) {
     return (
@@ -37,13 +48,7 @@ export default async function LeaderboardPage() {
   const entries: LeaderboardEntry[] = leaderboard || [];
   const top3 = entries.slice(0, 3);
   const rest = entries.slice(3);
-
-  const { data: tickerMatches } = await supabase
-    .from("matches")
-    .select("id,home_team,away_team,home_score,away_score,start_time,status")
-    .gte("start_time", new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
-    .order("start_time", { ascending: true })
-    .limit(20);
+  const tickerMatches = tickerRes.data;
 
   return (
     <div

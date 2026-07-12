@@ -24,48 +24,55 @@ import { localizeTeam } from "@/lib/i18n-data";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const supabase = await createClient();
-  const { t, lang, dir } = await getServerT();
+  const [supabase, i18n] = await Promise.all([createClient(), getServerT()]);
+  const { t, lang, dir } = i18n;
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let userProfile = null;
+  const nowIso = new Date().toISOString();
+  const sixHoursAgoIso = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+
+  // Fire every remaining query in parallel — profile, next kickoff, and the
+  // ticker window don't depend on each other. Cuts ~3 sequential round trips
+  // to 1 concurrent burst.
+  const [profileRes, nextMatchRes, tickerRes] = await Promise.all([
+    user
+      ? supabase
+          .from("profiles")
+          .select("total_points, display_name, avatar_url, is_admin")
+          .eq("id", user.id)
+          .single()
+      : Promise.resolve({ data: null, error: null }),
+    supabase
+      .from("matches")
+      .select(
+        "id,home_team,away_team,home_score,away_score,start_time,status,round,venue",
+      )
+      .gt("start_time", nowIso)
+      .order("start_time", { ascending: true })
+      .limit(1),
+    supabase
+      .from("matches")
+      .select("id,home_team,away_team,home_score,away_score,start_time,status")
+      .gte("start_time", sixHoursAgoIso)
+      .order("start_time", { ascending: true })
+      .limit(20),
+  ]);
+
+  const userProfile = profileRes.data;
   let userRank = 0;
-  if (user) {
-    const { data } = await supabase
+  if (user && userProfile) {
+    const { count } = await supabase
       .from("profiles")
-      .select("total_points, display_name, avatar_url, is_admin")
-      .eq("id", user.id)
-      .single();
-    userProfile = data;
-    if (data) {
-      const { count } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact" })
-        .gt("total_points", data.total_points || 0);
-      userRank = (count || 0) + 1;
-    }
+      .select("id", { count: "exact", head: true })
+      .gt("total_points", userProfile.total_points || 0);
+    userRank = (count || 0) + 1;
   }
 
-  const nowIso = new Date().toISOString();
-  const { data: nextMatchArr } = await supabase
-    .from("matches")
-    .select(
-      "id,home_team,away_team,home_score,away_score,start_time,status,round,venue",
-    )
-    .gt("start_time", nowIso)
-    .order("start_time", { ascending: true })
-    .limit(1);
-  const nextMatch = nextMatchArr?.[0] ?? null;
-
-  const { data: tickerMatches } = await supabase
-    .from("matches")
-    .select("id,home_team,away_team,home_score,away_score,start_time,status")
-    .gte("start_time", new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
-    .order("start_time", { ascending: true })
-    .limit(20);
+  const nextMatch = nextMatchRes.data?.[0] ?? null;
+  const tickerMatches = tickerRes.data;
 
   const quickAccess = [
     {

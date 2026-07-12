@@ -11,46 +11,52 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function LegendsPage() {
-  const supabase = await createClient();
-  const { t, dir } = await getServerT();
+  const [supabase, i18n] = await Promise.all([createClient(), getServerT()]);
+  const { t, dir } = i18n;
 
-  const { data: exacts } = await supabase
-    .from("predictions")
-    .select(
-      `
-      id,
-      user_id,
-      match_id,
-      home_prediction,
-      away_prediction,
-      points_earned,
-      created_at,
-      matches (
+  const sixHoursAgoIso = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+
+  const [exactsRes, tickerRes] = await Promise.all([
+    supabase
+      .from("predictions")
+      .select(
+        `
         id,
-        home_team,
-        away_team,
-        home_score,
-        away_score,
-        start_time,
-        round,
-        status
-      ),
-      profiles (
-        display_name,
-        avatar_url
+        user_id,
+        match_id,
+        home_prediction,
+        away_prediction,
+        points_earned,
+        created_at,
+        matches (
+          id,
+          home_team,
+          away_team,
+          home_score,
+          away_score,
+          start_time,
+          round,
+          status
+        ),
+        profiles (
+          display_name,
+          avatar_url
+        )
+      `,
       )
-    `,
-    )
-    .eq("points_earned", 3)
-    .order("created_at", { ascending: false })
-    .limit(50);
+      .eq("points_earned", 3)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase
+      .from("matches")
+      .select("id,home_team,away_team,home_score,away_score,start_time,status")
+      .gte("start_time", sixHoursAgoIso)
+      .order("start_time", { ascending: true })
+      .limit(20),
+  ]);
 
-  const { data: tickerMatches } = await supabase
-    .from("matches")
-    .select("id,home_team,away_team,home_score,away_score,start_time,status")
-    .gte("start_time", new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
-    .order("start_time", { ascending: true })
-    .limit(20);
+  const exacts = exactsRes.data;
+  const tickerMatches = tickerRes.data;
 
   const rows = (exacts || []).filter((e: any) => e.matches && e.profiles);
 

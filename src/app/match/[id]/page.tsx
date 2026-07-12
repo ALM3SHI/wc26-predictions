@@ -25,8 +25,8 @@ export default async function MatchPage(props: {
 }) {
   const params = await props.params;
   const matchId = params.id;
-  const supabase = await createClient();
-  const { t, lang, dir } = await getServerT();
+  const [supabase, i18n] = await Promise.all([createClient(), getServerT()]);
+  const { t, lang, dir } = i18n;
 
   const {
     data: { user },
@@ -36,42 +36,43 @@ export default async function MatchPage(props: {
     redirect("/login?next=/match/" + matchId);
   }
 
-  const { data: match, error: matchError } = await supabase
-    .from("matches")
-    .select("*")
-    .eq("id", matchId)
-    .single();
+  // Match + user's prediction don't depend on each other.
+  const [matchRes, predictionRes] = await Promise.all([
+    supabase.from("matches").select("*").eq("id", matchId).single(),
+    supabase
+      .from("predictions")
+      .select("*")
+      .eq("match_id", matchId)
+      .eq("user_id", user.id)
+      .single(),
+  ]);
+
+  const { data: match, error: matchError } = matchRes;
+  const prediction = predictionRes.data;
 
   if (matchError || !match) {
     notFound();
   }
 
-  const { data: prediction } = await supabase
-    .from("predictions")
-    .select("*")
-    .eq("match_id", matchId)
-    .eq("user_id", user.id)
-    .single();
-
-  const richMatch = match.api_fixture_id
-    ? await getMatchByApiId(match.api_fixture_id)
-    : null;
-
   const isKicked = new Date(match.start_time).getTime() <= Date.now();
+
+  // Rich API context + consensus are also independent — batch them.
+  const [richMatch, allPredsRes] = await Promise.all([
+    match.api_fixture_id ? getMatchByApiId(match.api_fixture_id) : Promise.resolve(null),
+    isKicked
+      ? supabase
+          .from("predictions")
+          .select("home_prediction, away_prediction")
+          .eq("match_id", matchId)
+      : Promise.resolve({ data: [] as { home_prediction: number; away_prediction: number }[] }),
+  ]);
+
   const consensus = { home: 0, draw: 0, away: 0 };
-  if (isKicked) {
-    const { data: allPreds } = await supabase
-      .from("predictions")
-      .select("home_prediction, away_prediction")
-      .eq("match_id", matchId);
-    (allPreds || []).forEach(
-      (p: { home_prediction: number; away_prediction: number }) => {
-        if (p.home_prediction > p.away_prediction) consensus.home += 1;
-        else if (p.home_prediction < p.away_prediction) consensus.away += 1;
-        else consensus.draw += 1;
-      },
-    );
-  }
+  (allPredsRes.data || []).forEach((p) => {
+    if (p.home_prediction > p.away_prediction) consensus.home += 1;
+    else if (p.home_prediction < p.away_prediction) consensus.away += 1;
+    else consensus.draw += 1;
+  });
 
   const formattedDate = formatMatchDate(match.start_time, lang);
   const isLive = ["1H", "HT", "2H", "ET", "BT", "P"].includes(match.status);
