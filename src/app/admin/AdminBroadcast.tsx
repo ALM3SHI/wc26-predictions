@@ -2,40 +2,74 @@
 
 // ─────────────────────────────────────────────────────────────
 // AdminBroadcast — form that fires a push notification to every
-// user with a saved subscription. The server API iterates the
-// subscriptions and streams counts back so we can show the exact
-// delivery number after the send.
+// user with a saved subscription. Now with:
+//   • URL field is truly optional; empty passes cleanly to the API
+//   • Explicit http/https validation only when the field is used
+//   • Confirmation modal before dispatching so a stray tap can't
+//     spam every device on the platform
 // ─────────────────────────────────────────────────────────────
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Loader2, AlertCircle, CheckCircle2, Megaphone } from "lucide-react";
+import {
+  Send,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Megaphone,
+  X,
+} from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
+
+type SendStatus =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "ok"; count: number }
+  | { kind: "err"; msg: string };
+
+function isValidHttpUrl(v: string): boolean {
+  if (!v) return true; // empty is fine
+  try {
+    const u = new URL(v);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 export function AdminBroadcast() {
   const { t } = useI18n();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
-  const [status, setStatus] = useState<
-    | { kind: "idle" }
-    | { kind: "sending" }
-    | { kind: "ok"; count: number }
-    | { kind: "err"; msg: string }
-  >({ kind: "idle" });
+  const [status, setStatus] = useState<SendStatus>({ kind: "idle" });
+  const [confirming, setConfirming] = useState(false);
+
+  const openConfirm = () => {
+    if (!title.trim() || !body.trim()) return;
+    if (!isValidHttpUrl(url.trim())) {
+      setStatus({ kind: "err", msg: t("admin.bc.invalidUrl") });
+      return;
+    }
+    setStatus({ kind: "idle" });
+    setConfirming(true);
+  };
 
   const send = async () => {
-    if (!title.trim() || !body.trim()) return;
+    setConfirming(false);
     setStatus({ kind: "sending" });
     try {
+      const cleanUrl = url.trim();
       const res = await fetch("/api/admin/broadcast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title.trim(),
           body: body.trim(),
-          url: url.trim() || undefined,
+          // Explicit null when empty — never send an invalid or
+          // half-typed URL through to web-push.
+          url: cleanUrl.length > 0 ? cleanUrl : null,
         }),
       });
       const data = await res.json();
@@ -100,13 +134,15 @@ export function AdminBroadcast() {
           <label className="text-[10px] uppercase tracking-widest text-gray-500 font-bold block mb-1">
             {t("admin.bc.url")}
           </label>
+          {/* Deliberately unmarked as required and no pattern attribute —
+              this field is truly optional. We validate the format only
+              on submit, and only when it has content. */}
           <input
-            type="url"
+            type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://..."
-            className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none text-sm text-gray-900"
-            dir="ltr"
+            placeholder="https://…"
+            className="ltr-input w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none text-sm text-gray-900"
           />
         </div>
 
@@ -133,7 +169,7 @@ export function AdminBroadcast() {
 
         <button
           type="button"
-          onClick={send}
+          onClick={openConfirm}
           disabled={
             status.kind === "sending" || !title.trim() || !body.trim()
           }
@@ -152,6 +188,76 @@ export function AdminBroadcast() {
           )}
         </button>
       </div>
+
+      {/* Confirmation modal — blast radius is every device, so an
+          extra tap here is worth the friction. */}
+      {confirming && (
+        <div
+          onClick={() => setConfirming(false)}
+          className="fixed inset-0 z-[95] bg-black/60 backdrop-blur flex items-center justify-center px-4"
+          role="dialog"
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-sm w-full rounded-3xl bg-white p-6 shadow-2xl"
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-gray-900 text-base leading-tight">
+                  {t("admin.bc.confirm.title")}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1 leading-snug">
+                  {t("admin.bc.confirm.sub")}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirming(false)}
+                className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Message preview */}
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 mb-4">
+              <div className="font-bold text-sm text-gray-900 truncate">
+                {title}
+              </div>
+              <div className="text-xs text-gray-600 mt-0.5 line-clamp-3">
+                {body}
+              </div>
+              {url && (
+                <div className="text-[10px] text-wc-purple mt-1 truncate" dir="ltr">
+                  → {url}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirming(false)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-bold active:scale-95"
+              >
+                {t("admin.bc.confirm.cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={send}
+                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold active:scale-95"
+              >
+                {t("admin.bc.confirm.go")}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

@@ -267,6 +267,11 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "admin.bc.sending": "Sending…",
     "admin.bc.sent": "Delivered to {n} devices",
     "admin.bc.err": "Send failed",
+    "admin.bc.confirm.title": "Send this broadcast?",
+    "admin.bc.confirm.sub": "Every user with notifications on will receive it.",
+    "admin.bc.confirm.cancel": "Cancel",
+    "admin.bc.confirm.go": "Send it",
+    "admin.bc.invalidUrl": "URL must start with http:// or https://",
 
     // ── Weekly summary ───────────────────────────────────
     "summary.title": "Your week",
@@ -292,6 +297,13 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "rx.viewers": "watching now",
     "rx.you": "You",
 
+    // ── Toasts + generic UI feedback ─────────────────────
+    "toast.saved": "Prediction saved",
+    "toast.saveFail": "Save failed — check your connection",
+    "toast.copied": "Copied",
+    "toast.loading": "Loading…",
+    "toast.retry": "Retry",
+
     // ── Splash ───────────────────────────────────────────
     "splash.tagline": "Predict · Compete · Reign",
 
@@ -300,7 +312,7 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "ios.sub":
       "To keep playing, install the app first. It only takes 10 seconds.",
     "ios.step1": "Tap the Share button in Safari",
-    "ios.step1sub": "The square with an arrow, at the bottom of the screen",
+    "ios.step1sub": "The square with an arrow at the bottom of the screen.",
     "ios.step2": "Scroll and choose ‘Add to Home Screen’",
     "ios.step2sub": "You'll find it in the actions list",
     "ios.step3": "Tap ‘Add’, then open WC26 from your Home Screen",
@@ -812,6 +824,11 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "admin.bc.sending": "جارٍ الإرسال…",
     "admin.bc.sent": "وصلت {n} جهاز",
     "admin.bc.err": "فشل الإرسال",
+    "admin.bc.confirm.title": "هل تريد بث هذا الإشعار لجميع المستخدمين؟",
+    "admin.bc.confirm.sub": "كل مستخدم فعّل الإشعارات سيتلقّاه فوراً.",
+    "admin.bc.confirm.cancel": "إلغاء",
+    "admin.bc.confirm.go": "أرسله",
+    "admin.bc.invalidUrl": "الرابط يجب أن يبدأ بـ http:// أو https://",
 
     // ── ملخّص الأسبوع ───────────────────────────────
     "summary.title": "أسبوعك",
@@ -836,6 +853,13 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "rx.slow": "خفّف السرعة 🙃",
     "rx.viewers": "يشاهد الآن",
     "rx.you": "أنت",
+
+    // ── إشعارات (توست) وردود UI ─────────────────────
+    "toast.saved": "تم حفظ توقّعك بنجاح",
+    "toast.saveFail": "فشل الحفظ — تحقّق من الاتّصال",
+    "toast.copied": "تم النسخ",
+    "toast.loading": "جارٍ التحميل…",
+    "toast.retry": "إعادة المحاولة",
 
     // ── شاشة البداية ─────────────────────────────────
     "splash.tagline": "توقّع · نافس · تصدَّر",
@@ -865,7 +889,7 @@ export const DICT: Record<Lang, Record<string, string>> = {
     "auth.email": "البريد الإلكتروني",
     "auth.password": "كلمة المرور",
     "auth.password.new": "كلمة المرور (٦ أحرف على الأقل)",
-    "auth.displayName": "الاسم الظاهر (في الترتيب)",
+    "auth.displayName": "الاسم الظاهر (للوحة الصدارة)",
     "auth.signIn": "تسجيل الدخول",
     "auth.createAccount": "إنشاء حساب",
     "auth.noAccount": "لا تملك حساباً؟",

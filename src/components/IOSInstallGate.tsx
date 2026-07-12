@@ -189,10 +189,14 @@ export function IOSInstallGate({ children }: { children: React.ReactNode }) {
         )}
       </div>
 
-      {/* Footer hint */}
-      <div className="relative z-10 text-[9px] uppercase tracking-[0.28em] text-white/50 text-center px-4">
+      {/* Footer hint — gentle pulse so users don't miss it. */}
+      <motion.div
+        animate={{ opacity: [0.55, 0.9, 0.55] }}
+        transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+        className="relative z-10 text-[12px] uppercase tracking-[0.18em] text-white/70 text-center px-4"
+      >
         {t("ios.hint")}
-      </div>
+      </motion.div>
     </div>
   );
 }

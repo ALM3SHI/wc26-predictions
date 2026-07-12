@@ -9,7 +9,6 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/lib/i18n";
@@ -100,10 +99,8 @@ export function StreakCard() {
     : "linear-gradient(135deg, #F3F4F6, white 70%)";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-3xl p-4 md:p-5 relative overflow-hidden border"
+    <div
+      className="rounded-3xl p-4 md:p-5 relative overflow-hidden border animate-fadeInUp"
       style={{
         background: bg,
         borderColor: hasStreak ? "transparent" : "#E5E7EB",
@@ -171,6 +168,6 @@ export function StreakCard() {
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

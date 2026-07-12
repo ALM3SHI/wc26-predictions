@@ -27,6 +27,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import { localizeNumber } from "@/lib/i18n-data";
+import { useToast } from "@/components/ui/Toast";
 import {
   createLeague,
   joinLeague,
@@ -42,11 +43,13 @@ export default function LeaguesClient({ userId, initialLeagues }: Props) {
   const { t, lang, dir } = useI18n();
   const router = useRouter();
   const supabase = createClient();
+  const toast = useToast();
   const [leagues] = useState<League[]>(initialLeagues);
 
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("");
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const [code, setCode] = useState("");
   const [joining, setJoining] = useState(false);
@@ -57,12 +60,24 @@ export default function LeaguesClient({ userId, initialLeagues }: Props) {
   const doCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim().length < 2 || creating) return;
+    setCreateError(null);
     setCreating(true);
-    const res = await createLeague(supabase, name.trim(), emoji.trim() || undefined);
+    const res = await createLeague(
+      supabase,
+      name.trim(),
+      emoji.trim() || undefined,
+    );
     setCreating(false);
     if (res.id) {
+      toast.success(t("toast.saved"));
       router.push(`/leagues/${res.id}`);
+      return;
     }
+    // Surface the exact error so a missing migration / RLS problem
+    // stops being an invisible 404.
+    const msg = res.error ?? t("toast.saveFail");
+    setCreateError(msg);
+    toast.error(msg);
   };
 
   const doJoin = async (e: React.FormEvent) => {
@@ -73,9 +88,12 @@ export default function LeaguesClient({ userId, initialLeagues }: Props) {
     const res = await joinLeague(supabase, code.trim().toUpperCase());
     setJoining(false);
     if (res.id) {
+      toast.success(t("toast.saved"));
       router.push(`/leagues/${res.id}`);
     } else {
-      setJoinError(t("leagues.notfound"));
+      const msg = res.error ?? t("leagues.notfound");
+      setJoinError(msg);
+      toast.error(msg);
     }
   };
 
@@ -202,6 +220,11 @@ export default function LeaguesClient({ userId, initialLeagues }: Props) {
               className="w-full mb-3 px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none text-sm text-gray-900"
               style={{ textAlign: dir === "rtl" ? "right" : "left" }}
             />
+            {createError && (
+              <p className="text-wc-red text-xs mb-2 leading-snug">
+                {createError}
+              </p>
+            )}
             <button
               type="submit"
               disabled={creating || name.trim().length < 2}

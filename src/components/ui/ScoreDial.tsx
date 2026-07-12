@@ -75,10 +75,11 @@ export function ScoreDial({
           type="button"
           onClick={() => bump(-1)}
           disabled={disabled || value <= min}
-          className="p-1 rounded-full hover:bg-gray-100 disabled:opacity-30 transition"
-          aria-label="Decrease score"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 disabled:opacity-30 transition"
+          style={{ color: accentColor }}
+          aria-label="Increase score"
         >
-          <ChevronUp className="w-5 h-5 text-gray-600" />
+          <ChevronUp className="w-6 h-6" strokeWidth={3} />
         </button>
 
         <div
@@ -142,10 +143,11 @@ export function ScoreDial({
           type="button"
           onClick={() => bump(1)}
           disabled={disabled || value >= max}
-          className="p-1 rounded-full hover:bg-gray-100 disabled:opacity-30 transition"
-          aria-label="Increase score"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 disabled:opacity-30 transition"
+          style={{ color: accentColor }}
+          aria-label="Decrease score"
         >
-          <ChevronDown className="w-5 h-5 text-gray-600" />
+          <ChevronDown className="w-6 h-6" strokeWidth={3} />
         </button>
       </div>
     </div>

@@ -3,12 +3,14 @@
 // ─────────────────────────────────────────────────────────────
 // Bracket picker
 //
-// One column per knockout round, each match is a two-button toggle
-// (home team ↔ away team). Winner picks are persisted per match id
-// so that when the fixture updates the pick keeps its meaning.
+// One column per knockout round. Matches whose teams are still
+// TBD render as empty placeholders (`— vs —`) so the QF/SF/Final
+// don't fabricate matchups that the tournament hasn't actually
+// produced yet. Real teams only appear once the DB row carries
+// them.
 //
 // Payload shape:
-//   { r32: { match_id: winner_team }, r16: {...}, qf: {...}, sf: {...}, final: winner_team }
+//   { r16: { match_id: winner_team }, qf: {...}, sf: {...}, final: winner_team }
 // ─────────────────────────────────────────────────────────────
 
 import { useEffect, useMemo, useState } from "react";
@@ -187,6 +189,33 @@ export default function BracketPicker({ userId, matches }: Props) {
                 <div className="space-y-3">
                   {col.matches.map((m) => {
                     const chosen = winnerFor(col.round, m.id);
+                    const homeResolved =
+                      m.home_team && m.home_team !== "TBD";
+                    const awayResolved =
+                      m.away_team && m.away_team !== "TBD";
+                    const isPlaceholder = !homeResolved || !awayResolved;
+
+                    if (isPlaceholder) {
+                      return (
+                        <div
+                          key={m.id}
+                          className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 overflow-hidden opacity-70"
+                        >
+                          {(["home", "away"] as const).map((slot) => (
+                            <div
+                              key={slot}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 border-b border-dashed border-gray-100 last:border-b-0 text-start"
+                            >
+                              <div className="w-6 h-6 rounded-full border border-dashed border-gray-300 shrink-0" />
+                              <span className="flex-1 text-sm font-bold text-gray-400 truncate uppercase tracking-widest">
+                                TBD
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+
                     return (
                       <div
                         key={m.id}
@@ -239,7 +268,7 @@ export default function BracketPicker({ userId, matches }: Props) {
         <motion.div
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+72px)] md:bottom-6 z-30 flex justify-center px-4"
+          className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+96px)] md:bottom-6 z-30 flex justify-center px-4"
         >
           <button
             type="button"

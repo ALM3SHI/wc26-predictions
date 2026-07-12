@@ -7,6 +7,7 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { IOSInstallGate } from "@/components/IOSInstallGate";
 import { PushOptInBanner } from "@/components/PushOptInBanner";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
+import { ToastProvider } from "@/components/ui/Toast";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
 import Image from "next/image";
@@ -95,6 +96,7 @@ export default function RootLayout({
         </div>
         <I18nProvider>
           <ThemeProvider>
+          <ToastProvider>
           {/* iOS Add-to-Home-Screen gate wraps the whole app; it renders
               children when the visitor isn't on iOS or is already in
               standalone mode, and a blocking tutorial otherwise. */}
@@ -110,6 +112,7 @@ export default function RootLayout({
           </IOSInstallGate>
           {/* Splash sits above everything but auto-dismisses after ~1.4s. */}
           <SplashScreen />
+          </ToastProvider>
           </ThemeProvider>
         </I18nProvider>
         <ServiceWorkerRegistrar />

@@ -46,7 +46,7 @@ export function TeamBadge({
     >
       <Flag
         team={team}
-        className={`${s.flag} rounded-full object-cover shadow-md border border-gray-100`}
+        className={`${s.flag} rounded-full object-cover shadow-md border border-gray-100 aspect-square`}
       />
       {showName && (
         <span className={`font-fifa uppercase text-gray-900 ${s.name}`}>

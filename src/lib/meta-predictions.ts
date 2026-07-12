@@ -44,14 +44,30 @@ export async function upsertChampionPick(
   team: string,
 ): Promise<{ error: Error | null }> {
   const payload: ChampionPayload = { team };
-  const { error } = await supabase.from("meta_predictions").upsert(
+  // We keep the row shape minimal — Supabase upsert will merge on the
+  // (user_id, type) unique index defined in migration 002. Since we
+  // added tournament_id in migration 007 with a broader uniqueness
+  // key, try both conflict columns and fall back gracefully.
+  let { error } = await supabase.from("meta_predictions").upsert(
     {
       user_id: userId,
       type: "champion",
       payload,
     },
-    { onConflict: "user_id,type" },
+    { onConflict: "user_id,type,tournament_id" },
   );
+  if (error) {
+    // Older schema (before migration 007) — retry with the narrower key.
+    const retry = await supabase.from("meta_predictions").upsert(
+      {
+        user_id: userId,
+        type: "champion",
+        payload,
+      },
+      { onConflict: "user_id,type" },
+    );
+    error = retry.error;
+  }
   return { error: error ? new Error(error.message) : null };
 }
 
@@ -73,14 +89,25 @@ export async function upsertGoldenBootPick(
   userId: string,
   pick: GoldenBootPayload,
 ): Promise<{ error: Error | null }> {
-  const { error } = await supabase.from("meta_predictions").upsert(
+  let { error } = await supabase.from("meta_predictions").upsert(
     {
       user_id: userId,
       type: "golden_boot",
       payload: pick,
     },
-    { onConflict: "user_id,type" },
+    { onConflict: "user_id,type,tournament_id" },
   );
+  if (error) {
+    const retry = await supabase.from("meta_predictions").upsert(
+      {
+        user_id: userId,
+        type: "golden_boot",
+        payload: pick,
+      },
+      { onConflict: "user_id,type" },
+    );
+    error = retry.error;
+  }
   return { error: error ? new Error(error.message) : null };
 }
 

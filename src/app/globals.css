@@ -77,9 +77,10 @@ body {
 }
 
 /* ─────────────────────────────────────────────────────────
-   Dark Mode — applies when the html element has the
-   data-theme="dark" attribute. Auto mode sets it based on
-   prefers-color-scheme; user override lives in localStorage.
+   Dark Mode — universal coverage
+   applies when the html element has the data-theme="dark"
+   attribute. Auto mode sets it based on prefers-color-scheme;
+   the user's explicit choice from Settings wins over that.
    ───────────────────────────────────────────────────────── */
 html[data-theme="dark"] {
   --color-wc-black: #0B1220;
@@ -89,22 +90,38 @@ html[data-theme="dark"] {
   --color-wc-surface-light: #0B1220;
   --color-wc-border: rgba(255, 255, 255, 0.10);
   --color-wc-border-light: rgba(255, 255, 255, 0.18);
+  color-scheme: dark;
 }
 
 html[data-theme="dark"] body {
-  color: #F9FAFB; /* near-white */
+  color: #F3F4F6;
+  background-color: #0B1220;
 }
 
-/* Blanket overrides so components that use Tailwind's grayscale
-   utilities read as a coherent dark palette without touching
-   every JSX file. Kept scoped to `html[data-theme="dark"]` so
-   the light mode is untouched. */
+/* Kill the light background pattern layer that lives behind
+   every screen — replace with a subtle dark radial glow. */
+html[data-theme="dark"] .fixed.inset-0.-z-50 { background-color: #0B1220 !important; }
+html[data-theme="dark"] .fixed.inset-0.-z-50 img { opacity: 0.06 !important; filter: invert(1) hue-rotate(180deg) !important; }
+html[data-theme="dark"] .fixed.inset-0.-z-50 .absolute.inset-0 {
+  background: linear-gradient(to bottom, rgba(11,18,32,0.3), #0B1220) !important;
+}
+
+/* Surface backgrounds — cards, nav, modals, splash */
 html[data-theme="dark"] .bg-white { background-color: #111827 !important; }
 html[data-theme="dark"] .bg-gray-50 { background-color: #0F172A !important; }
+html[data-theme="dark"] .bg-gray-50\/50,
+html[data-theme="dark"] .bg-gray-50\/40 { background-color: rgba(15, 23, 42, 0.6) !important; }
 html[data-theme="dark"] .bg-gray-100 { background-color: #1F2937 !important; }
 html[data-theme="dark"] .bg-gray-200 { background-color: #374151 !important; }
+html[data-theme="dark"] .bg-gray-300 { background-color: #4B5563 !important; }
 html[data-theme="dark"] .bg-gray-900 { background-color: #030712 !important; }
 
+/* Semi-transparent whites used on nav / IOS gate backgrounds */
+html[data-theme="dark"] .bg-white\/90,
+html[data-theme="dark"] .bg-white\/95 { background-color: rgba(17, 24, 39, 0.94) !important; }
+html[data-theme="dark"] .bg-white\/80 { background-color: rgba(17, 24, 39, 0.85) !important; }
+
+/* Text colors */
 html[data-theme="dark"] .text-gray-900,
 html[data-theme="dark"] .text-black { color: #F9FAFB !important; }
 html[data-theme="dark"] .text-gray-800 { color: #F3F4F6 !important; }
@@ -114,19 +131,60 @@ html[data-theme="dark"] .text-gray-500 { color: #9CA3AF !important; }
 html[data-theme="dark"] .text-gray-400 { color: #6B7280 !important; }
 html[data-theme="dark"] .text-gray-300 { color: #4B5563 !important; }
 
+/* Borders */
 html[data-theme="dark"] .border-gray-100,
 html[data-theme="dark"] .border-gray-200,
 html[data-theme="dark"] .border-gray-300 {
-  border-color: rgba(255, 255, 255, 0.10) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .divide-gray-100 > * + *,
+html[data-theme="dark"] .divide-gray-50 > * + * {
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* Utility surface backgrounds we use frequently. */
-html[data-theme="dark"] .bg-gradient-to-br.from-gray-50 { background-image: linear-gradient(to bottom right, #0F172A, transparent 60%) !important; }
+/* Accent tints — soften down against dark surfaces */
 html[data-theme="dark"] .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.10) !important; }
-html[data-theme="dark"] .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.12) !important; }
+html[data-theme="dark"] .bg-emerald-50,
+html[data-theme="dark"] .bg-emerald-50\/40 { background-color: rgba(16, 185, 129, 0.12) !important; }
 html[data-theme="dark"] .bg-red-50 { background-color: rgba(239, 68, 68, 0.12) !important; }
 html[data-theme="dark"] .bg-blue-50 { background-color: rgba(59, 130, 246, 0.12) !important; }
-html[data-theme="dark"] .bg-purple-50 { background-color: rgba(139, 92, 246, 0.14) !important; }
+html[data-theme="dark"] .bg-purple-50,
+html[data-theme="dark"] .bg-purple-50\/40 { background-color: rgba(139, 92, 246, 0.14) !important; }
+html[data-theme="dark"] .bg-green-50 { background-color: rgba(16, 185, 129, 0.10) !important; }
+html[data-theme="dark"] .bg-amber-50\/40 { background-color: rgba(245, 158, 11, 0.10) !important; }
+
+/* Borders for accent bands (yellow highlight cards etc.) */
+html[data-theme="dark"] .border-yellow-100,
+html[data-theme="dark"] .border-yellow-200,
+html[data-theme="dark"] .border-yellow-300 { border-color: rgba(234, 179, 8, 0.35) !important; }
+html[data-theme="dark"] .border-emerald-200,
+html[data-theme="dark"] .border-emerald-300 { border-color: rgba(16, 185, 129, 0.35) !important; }
+html[data-theme="dark"] .border-wc-purple\/20 { border-color: rgba(139, 92, 246, 0.35) !important; }
+html[data-theme="dark"] .border-wc-cyan\/20 { border-color: rgba(6, 182, 212, 0.35) !important; }
+
+/* Colored text-on-tint pills — bump the text a step toward pure hue */
+html[data-theme="dark"] .text-yellow-700,
+html[data-theme="dark"] .text-yellow-800 { color: #FBBF24 !important; }
+html[data-theme="dark"] .text-emerald-600,
+html[data-theme="dark"] .text-emerald-700 { color: #34D399 !important; }
+html[data-theme="dark"] .text-red-500,
+html[data-theme="dark"] .text-red-600,
+html[data-theme="dark"] .text-red-700 { color: #F87171 !important; }
+html[data-theme="dark"] .text-blue-600,
+html[data-theme="dark"] .text-blue-700 { color: #60A5FA !important; }
+html[data-theme="dark"] .text-purple-500,
+html[data-theme="dark"] .text-purple-700 { color: #A78BFA !important; }
+
+/* Ring / focus rings that assume light bg */
+html[data-theme="dark"] .ring-white { --tw-ring-color: rgba(17, 24, 39, 0.9) !important; }
+
+/* Gradient utilities used on stat cards — swap their light stops
+   so the tint doesn't wash out the text. */
+html[data-theme="dark"] .from-gray-50 { --tw-gradient-from: #0F172A !important; }
+html[data-theme="dark"] .from-yellow-50 { --tw-gradient-from: rgba(234, 179, 8, 0.15) !important; }
+html[data-theme="dark"] .from-emerald-50 { --tw-gradient-from: rgba(16, 185, 129, 0.15) !important; }
+html[data-theme="dark"] .from-red-50 { --tw-gradient-from: rgba(239, 68, 68, 0.15) !important; }
+html[data-theme="dark"] .from-blue-50 { --tw-gradient-from: rgba(59, 130, 246, 0.15) !important; }
 
 /* Neon accents pop harder against a dark surface. */
 html[data-theme="dark"] .neon-glow-purple {
@@ -145,6 +203,32 @@ html[data-theme="dark"] ::-webkit-scrollbar-track { background: #111827; }
 html[data-theme="dark"] * {
   scrollbar-color: #A78BFA #111827;
 }
+
+/* iOS install gate + splash both use radial gradients that read
+   OK in dark; nudge their nested "check your email" cards. */
+html[data-theme="dark"] .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.35) !important; }
+html[data-theme="dark"] .shadow-md { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.35) !important; }
+html[data-theme="dark"] .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.45) !important; }
+html[data-theme="dark"] .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.55) !important; }
+html[data-theme="dark"] .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7) !important; }
+
+/* Input fields need a legible dark palette */
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  color-scheme: dark;
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder { color: #6B7280 !important; }
+
+/* Confetti + host-seal — trim opacity so they don't drown text */
+html[data-theme="dark"] .host-seal { opacity: 0.55; }
+.host-seal { opacity: 0.75; }
+
+/* Wrapper of the wc26 "gradient border" — align the inner surface
+   with dark surfaces so the card stops feeling like a light burst
+   on a dark page. */
+html[data-theme="dark"] .wc-border-gradient { background: #0F172A !important; }
 
 
 /* ─────────────────────────────────────────────────────────
@@ -276,6 +360,14 @@ html[data-theme="dark"] * {
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+/* Static fade so RTL/LTR toggles don't retrigger a re-mount storm.
+   Used by StreakCard which was jittering on Arabic. */
+.animate-fadeInUp { animation: fadeInUp 0.4s ease-out both; }
 
 /* ─────────────────────────────────────────────────────────
    Keyframe Animations
@@ -559,7 +651,11 @@ html[data-theme="dark"] * {
   border-radius: 2px;
   animation: confettiFall linear forwards;
   will-change: transform, opacity;
+  /* Reduced opacity so background confetti no longer collides
+     with legendary card text — the animation still reads. */
+  opacity: 0.72;
 }
+html[data-theme="dark"] .confetti-piece { opacity: 0.55; }
 
 .tri-underline {
   height: 4px;
@@ -733,6 +829,34 @@ html[data-theme="dark"] * {
 
 [dir="rtl"] .rtl-flip-auto {
   transform: scaleX(-1);
+}
+
+/* ─────────────────────────────────────────────────────────
+   RTL-safe text truncation
+   Chromium truncates Arabic strings using text-overflow rules
+   that don't honor `direction` on `.truncate`. Result: first
+   name (the visible portion in RTL) gets cut off from the right.
+   Forcing the container's direction fixes it in both directions.
+   ───────────────────────────────────────────────────────── */
+[dir="rtl"] .truncate,
+[dir="rtl"] .truncate-rtl {
+  direction: rtl;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  unicode-bidi: plaintext;
+}
+
+/* An email / password style input that lives inside an RTL page
+   but always types LTR ASCII. `.ltr-input` keeps placeholder
+   alignment predictable and prevents the cursor from jumping. */
+.ltr-input {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: plaintext;
+}
+[dir="rtl"] .ltr-input::placeholder {
+  text-align: right; /* placeholder still reads naturally to Arabic users */
 }
 
 /* User-toggled reduced motion (Settings page) */

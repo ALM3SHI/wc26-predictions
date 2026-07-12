@@ -80,7 +80,10 @@ export function Ticker({ matches, emptyText = "No matches scheduled" }: Props) {
       <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#C8102E] to-transparent z-10" />
 
       {isEmpty ? (
-        <div className="text-center text-sm font-bold uppercase tracking-widest opacity-70">
+        // Neutral empty state — the outer "red-blue" gradient of the
+        // ticker still frames it, but we drop the alarming solid tint
+        // so the empty state doesn't look like an error banner.
+        <div className="mx-4 rounded-full bg-white/10 border border-white/15 py-1.5 text-center text-xs font-bold uppercase tracking-widest text-white/70">
           {emptyText}
         </div>
       ) : (

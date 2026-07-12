@@ -15,7 +15,6 @@ import { createClient } from "@/lib/supabase/server";
 import { Ticker } from "@/components/ui/Ticker";
 import { HostSeal } from "@/components/ui/HostSeal";
 import { CountdownDigits } from "@/components/ui/CountdownDigits";
-import { ChampionPickCard } from "@/components/ui/ChampionPickCard";
 import { StreakCard } from "@/components/ui/StreakCard";
 import { MetaPredictionsHub } from "@/components/ui/MetaPredictionsHub";
 import { BattlePassCard } from "@/components/ui/BattlePassCard";
@@ -174,8 +173,11 @@ export default async function HomePage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 mt-4 space-y-6">
-        {/* Ticker */}
-        <Ticker matches={tickerMatches || []} emptyText={t("empty.matches")} />
+        {/* Ticker — with breathing room below so it doesn't collide
+            with the hero card underneath. */}
+        <div className="mb-3 sm:mb-4">
+          <Ticker matches={tickerMatches || []} emptyText={t("empty.matches")} />
+        </div>
 
         {/* Predictions Hero */}
         <Link
@@ -304,13 +306,13 @@ export default async function HomePage() {
             is signed in. */}
         <StreakCard />
 
-        {/* Meta prediction — champion pick teaser. Silently hides if the
-            meta_predictions migration hasn't been applied yet. */}
-        <ChampionPickCard />
-
         {/* Tournament-wide predictions hub — 2×2 tiles pointing at the
             four big-picture picker screens (champion / golden boot /
-            groups / bracket). */}
+            groups / bracket). We keep only the hub on the home page —
+            the standalone champion teaser lived here previously and
+            was duplicating the champion tile.
+            The ChampionPickCard is still exported for future use on
+            other pages (profile, etc). */}
         {user && <MetaPredictionsHub />}
 
         {/* Legends CTA */}

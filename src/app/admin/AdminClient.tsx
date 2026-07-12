@@ -65,6 +65,23 @@ export default function AdminClient({
       return name.includes(q) || email.includes(q) || id.includes(q);
     });
   }, [users, userSearch]);
+
+  // Guard: we should never allow scoring while any match still lacks
+  // a valid final score. A match "counts" for scoring purposes when
+  // it's FT/AET/PEN AND both scores are numeric.
+  const scoringReadiness = useMemo(() => {
+    const finished = matches.filter((m) =>
+      ["FT", "AET", "PEN"].includes(m.status),
+    );
+    const badRows = finished.filter(
+      (m) => m.home_score === null || m.away_score === null,
+    );
+    return {
+      finishedCount: finished.length,
+      unfinishedFinalCount: badRows.length,
+      canScore: finished.length > 0 && badRows.length === 0,
+    };
+  }, [matches]);
   
   const [newUser, setNewUser] = useState({ email: "", password: "", displayName: "" });
 
@@ -261,8 +278,13 @@ export default function AdminClient({
               </button>
               <button
                 onClick={triggerScoring}
-                disabled={loading}
-                className="flex-1 md:flex-none px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 disabled:opacity-50 shadow-sm"
+                disabled={loading || !scoringReadiness.canScore}
+                title={
+                  !scoringReadiness.canScore
+                    ? `${scoringReadiness.unfinishedFinalCount} match(es) missing a final score`
+                    : undefined
+                }
+                className="flex-1 md:flex-none px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
               >
                 {loading ? t("admin.matches.calc.loading") : t("admin.matches.calc")}
               </button>

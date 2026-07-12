@@ -33,6 +33,10 @@ interface Props {
 const CARD_W = 1080;
 const CARD_H = 1350; // 4:5, ideal for IG / X
 
+// SVG font stack that carries Arabic + Latin glyphs on every OS
+// without requiring us to embed a base64-encoded webfont.
+const FONT = '"Noto Sans Arabic","Segoe UI","San Francisco","Roboto","Helvetica","Arial",sans-serif';
+
 function buildSvg({
   displayName,
   homeTeam,
@@ -45,9 +49,10 @@ function buildSvg({
   stakeMultiplier,
   tagline,
   labelExact,
-  labelPick,
   labelPoints,
+  labelPick,
   labelActual,
+  rtl,
 }: {
   displayName: string;
   homeTeam: string;
@@ -60,13 +65,22 @@ function buildSvg({
   stakeMultiplier: number;
   tagline: string;
   labelExact: string;
-  labelPick: string;
   labelPoints: string;
+  labelPick: string;
   labelActual: string;
+  rtl: boolean;
 }): string {
   const stake = getStakeByMult(stakeMultiplier);
   const exact = userHome === actualHome && userAway === actualAway;
   const heroColor = exact ? "#F59E0B" : stake.color;
+
+  // The whole card lays out LTR at the SVG level. Individual Arabic
+  // strings are wrapped in <text direction="rtl"> so their glyph
+  // shaping is preserved but they never bleed into the numeric score
+  // in the middle (that was the "collision" bug).
+  const arabicAttrs = rtl
+    ? 'direction="rtl" unicode-bidi="isolate"'
+    : "";
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CARD_W} ${CARD_H}" width="${CARD_W}" height="${CARD_H}">
@@ -92,56 +106,44 @@ function buildSvg({
   <rect width="100%" height="100%" fill="url(#bg)"/>
   <rect width="100%" height="100%" fill="url(#glow)"/>
 
-  <!-- Tri stripe -->
   <rect x="0" y="80" width="${CARD_W}" height="14" fill="url(#tri)"/>
 
-  <!-- Brand -->
-  <text x="80" y="60" font-family="system-ui,sans-serif" font-weight="900" font-size="42" fill="#ffffff" opacity="0.95">WC26</text>
-  <text x="${CARD_W - 80}" y="60" text-anchor="end" font-family="system-ui,sans-serif" font-weight="700" font-size="24" fill="#ffffff" opacity="0.6">${escapeXml(tagline)}</text>
+  <!-- Brand always LTR -->
+  <text x="80" y="60" font-family="${FONT}" font-weight="900" font-size="42" fill="#ffffff" opacity="0.95">WC26</text>
+  <text x="${CARD_W - 80}" y="60" text-anchor="end" font-family="${FONT}" font-weight="700" font-size="24" fill="#ffffff" opacity="0.6" ${arabicAttrs}>${escapeXml(tagline)}</text>
 
-  <!-- Result label -->
+  <!-- Result badge -->
   <g transform="translate(${CARD_W / 2}, 260)">
-    <rect x="-260" y="-46" width="520" height="92" rx="46" fill="${heroColor}" opacity="0.15"/>
-    <text text-anchor="middle" dominant-baseline="middle" font-family="system-ui,sans-serif" font-weight="900" font-size="46" fill="${heroColor}">
-      ${exact ? escapeXml(labelExact) : "+" + pointsAwarded + " " + escapeXml(labelPoints)}
+    <rect x="-300" y="-52" width="600" height="104" rx="52" fill="${heroColor}" opacity="0.18"/>
+    <text text-anchor="middle" dominant-baseline="middle" font-family="${FONT}" font-weight="900" font-size="42" fill="${heroColor}" ${arabicAttrs}>
+      ${exact ? escapeXml(labelExact) : escapeXml("+" + pointsAwarded + " · " + labelPoints)}
     </text>
   </g>
 
-  <!-- Teams block -->
-  <g transform="translate(${CARD_W / 2}, 620)">
-    <text text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="44" fill="#FFFFFF" opacity="0.9">
-      ${escapeXml(homeTeam)} · ${escapeXml(awayTeam)}
-    </text>
+  <!-- Team names — two isolated text elements so Arabic doesn't
+       reorder around the middle score. -->
+  <g transform="translate(${CARD_W / 2}, 500)">
+    <text x="-260" text-anchor="end" font-family="${FONT}" font-weight="800" font-size="52" fill="#FFFFFF" opacity="0.92" ${arabicAttrs}>${escapeXml(homeTeam)}</text>
+    <text x="260" text-anchor="start" font-family="${FONT}" font-weight="800" font-size="52" fill="#FFFFFF" opacity="0.92" ${arabicAttrs}>${escapeXml(awayTeam)}</text>
+    <text x="0" y="10" text-anchor="middle" font-family="${FONT}" font-weight="700" font-size="42" fill="#FFFFFF" opacity="0.6" direction="ltr">×</text>
+  </g>
 
-    <text text-anchor="middle" y="90" font-family="system-ui,sans-serif" font-weight="900" font-size="200" fill="#FFFFFF">
-      ${userHome}–${userAway}
-    </text>
+  <!-- Score column — LTR only. Two rows: user pick + actual. -->
+  <g transform="translate(${CARD_W / 2}, 750)">
+    <text text-anchor="middle" font-family="${FONT}" font-weight="700" font-size="30" fill="#FFFFFF" opacity="0.55" ${arabicAttrs}>${escapeXml(labelPick)}</text>
+    <text text-anchor="middle" y="150" font-family="${FONT}" font-weight="900" font-size="180" fill="#FFFFFF" direction="ltr">${userHome}–${userAway}</text>
 
-    <text text-anchor="middle" y="150" font-family="system-ui,sans-serif" font-weight="700" font-size="32" fill="#FFFFFF" opacity="0.6">
-      ${escapeXml(labelPick)}
-    </text>
-
-    <text text-anchor="middle" y="260" font-family="system-ui,sans-serif" font-weight="800" font-size="60" fill="${heroColor}">
-      ${actualHome}–${actualAway}
-    </text>
-    <text text-anchor="middle" y="300" font-family="system-ui,sans-serif" font-weight="700" font-size="26" fill="#FFFFFF" opacity="0.6">
-      ${escapeXml(labelActual)}
-    </text>
+    <text text-anchor="middle" y="230" font-family="${FONT}" font-weight="700" font-size="26" fill="#FFFFFF" opacity="0.55" ${arabicAttrs}>${escapeXml(labelActual)}</text>
+    <text text-anchor="middle" y="300" font-family="${FONT}" font-weight="800" font-size="70" fill="${heroColor}" direction="ltr">${actualHome}–${actualAway}</text>
   </g>
 
   <!-- Player + points strip -->
   <g transform="translate(0, ${CARD_H - 200})">
     <rect x="60" y="0" width="${CARD_W - 120}" height="140" rx="32" fill="#FFFFFF" opacity="0.06"/>
-    <text x="100" y="88" font-family="system-ui,sans-serif" font-weight="800" font-size="46" fill="#FFFFFF">
-      ${escapeXml(displayName)}
-    </text>
+    <text x="100" y="88" font-family="${FONT}" font-weight="800" font-size="46" fill="#FFFFFF" ${arabicAttrs}>${escapeXml(displayName)}</text>
     <g transform="translate(${CARD_W - 100}, 70)">
-      <text text-anchor="end" font-family="system-ui,sans-serif" font-weight="900" font-size="72" fill="${heroColor}">
-        +${pointsAwarded}
-      </text>
-      <text text-anchor="end" y="40" font-family="system-ui,sans-serif" font-weight="700" font-size="24" fill="#FFFFFF" opacity="0.6">
-        ${stakeMultiplier}x · ${escapeXml(labelPoints)}
-      </text>
+      <text text-anchor="end" font-family="${FONT}" font-weight="900" font-size="72" fill="${heroColor}" direction="ltr">+${pointsAwarded}</text>
+      <text text-anchor="end" y="40" font-family="${FONT}" font-weight="700" font-size="24" fill="#FFFFFF" opacity="0.6" direction="ltr">${stakeMultiplier}x</text>
     </g>
   </g>
 </svg>`;
@@ -206,6 +208,7 @@ export function ShareResultCard(props: Props) {
         labelPick: t("result.pick"),
         labelPoints: t("home.points"),
         labelActual: t("result.actual"),
+        rtl: lang === "ar",
       }),
     [props, t, lang],
   );
@@ -214,8 +217,13 @@ export function ShareResultCard(props: Props) {
     setBusy(kind);
     try {
       const blob = await svgToPngBlob(svg, CARD_W, CARD_H);
-      const filename = `wc26-${props.homeTeam}-${props.awayTeam}-${props.userHome}-${props.userAway}.png`;
+      // File name is ASCII-only so Safari's "Save Image" prompt
+      // doesn't refuse special characters.
+      const filename = `wc26-${props.userHome}-${props.userAway}.png`;
 
+      // Prefer the Web Share API when the OS advertises it AND we
+      // can attach files. Some Safari builds report `share` without
+      // `canShare({files})`, so we guard on both.
       if (
         kind === "share" &&
         typeof navigator !== "undefined" &&
@@ -227,19 +235,38 @@ export function ShareResultCard(props: Props) {
           share?: (data: { files: File[]; title?: string }) => Promise<void>;
         };
         if (nav.canShare?.({ files: [file] }) && nav.share) {
-          await nav.share({ files: [file], title: t("share.result.title") });
-          return;
+          try {
+            await nav.share({
+              files: [file],
+              title: t("share.result.title"),
+            });
+            return;
+          } catch (err) {
+            // User cancelled or share failed — fall through to download.
+            const name = (err as { name?: string }).name;
+            if (name === "AbortError") return;
+          }
         }
       }
 
+      // Download path — force the browser to trigger a save dialog
+      // instead of navigating to the blob URL (which "kicked users
+      // out of the app" on iOS Safari).
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = filename;
+      a.rel = "noopener";
+      // target="_self" ensures Safari treats this as an in-page
+      // download, not a navigation to a new tab.
+      a.target = "_self";
       document.body.appendChild(a);
       a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      // Give Safari a tick to start the download before we revoke.
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(url);
+      }, 500);
     } finally {
       setBusy(null);
     }

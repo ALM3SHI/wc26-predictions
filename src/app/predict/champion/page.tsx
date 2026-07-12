@@ -3,12 +3,12 @@
 // ─────────────────────────────────────────────────────────────
 // Champion prediction picker
 //
-// Grid of every WC26 team. Tap to select, save button writes to
-// meta_predictions with type='champion'. When locked_at is set,
-// the picker is read-only.
+// Auto-saves on tap. Re-hydrates from Supabase on mount AND when
+// the tab regains focus so an update made on another device
+// shows up when you come back. Toast feedback on every save.
 // ─────────────────────────────────────────────────────────────
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Trophy, Search, Check, Loader2, Lock, ArrowLeft } from "lucide-react";
@@ -18,6 +18,7 @@ import { useI18n } from "@/lib/i18n";
 import { WC26_TEAMS } from "@/lib/wc26-teams";
 import { localizeTeam } from "@/lib/i18n-data";
 import { Flag } from "@/components/ui/Flag";
+import { Skeleton, useToast } from "@/components/ui/Toast";
 import { HOST_GOLD, HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import {
   getChampionPick,
@@ -28,15 +29,31 @@ export default function ChampionPredictionPage() {
   const { t, lang, dir } = useI18n();
   const router = useRouter();
   const supabase = createClient();
+  const toast = useToast();
 
   const [userId, setUserId] = useState<string | null>(null);
   const [current, setCurrent] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
-  const [saving, setSaving] = useState(false);
+  // Optimistic UI — we set this immediately so the tap feels instant,
+  // and the save happens in the background.
+  const [pendingSave, setPendingSave] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState("");
 
+  const hydrate = useCallback(
+    async (uid: string) => {
+      const pick = await getChampionPick(supabase, uid);
+      if (pick) {
+        setCurrent(pick.payload.team);
+        setLocked(!!pick.locked_at);
+      } else {
+        setCurrent(null);
+      }
+    },
+    [supabase],
+  );
+
+  // Initial mount — auth + load.
   useEffect(() => {
     (async () => {
       const {
@@ -47,15 +64,26 @@ export default function ChampionPredictionPage() {
         return;
       }
       setUserId(user.id);
-      const pick = await getChampionPick(supabase, user.id);
-      if (pick) {
-        setCurrent(pick.payload.team);
-        setSelected(pick.payload.team);
-        setLocked(!!pick.locked_at);
-      }
+      await hydrate(user.id);
       setReady(true);
     })();
-  }, [supabase, router]);
+  }, [supabase, router, hydrate]);
+
+  // Re-hydrate whenever the tab regains focus — catches picks made
+  // on other devices while the user was away.
+  useEffect(() => {
+    if (!userId) return;
+    const onFocus = () => {
+      hydrate(userId);
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") hydrate(userId);
+    });
+    return () => {
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [userId, hydrate]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -67,15 +95,24 @@ export default function ChampionPredictionPage() {
     });
   }, [query]);
 
-  const save = async () => {
-    if (!userId || !selected) return;
-    setSaving(true);
-    await upsertChampionPick(supabase, userId, selected);
-    setCurrent(selected);
-    setSaving(false);
+  const pick = async (teamName: string) => {
+    if (!userId || locked) return;
+    if (teamName === current) return; // no-op — already saved
+    // Optimistic: flip both current and pending together so the UI
+    // never shows a stale team/flag pair.
+    setCurrent(teamName);
+    setPendingSave(teamName);
+    const { error } = await upsertChampionPick(supabase, userId, teamName);
+    setPendingSave(null);
+    if (error) {
+      toast.error(t("toast.saveFail"));
+      // Roll back to whatever the server says, so the UI never lies.
+      await hydrate(userId);
+      return;
+    }
+    toast.success(t("toast.saved"));
   };
 
-  const dirty = selected !== null && selected !== current;
   const iconPos = dir === "rtl" ? "right-3" : "left-3";
   const inputPad = dir === "rtl" ? "pr-10 pl-4" : "pl-10 pr-4";
 
@@ -93,7 +130,6 @@ export default function ChampionPredictionPage() {
           {t("nav.home")}
         </Link>
 
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <div
@@ -118,7 +154,7 @@ export default function ChampionPredictionPage() {
         </div>
 
         {/* Current pick card */}
-        {ready && (
+        {ready ? (
           <div className="rounded-3xl border border-gray-200 bg-white p-4 md:p-5 mb-6 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-yellow-50 border border-yellow-100 flex items-center justify-center shrink-0">
               {current ? (
@@ -140,15 +176,19 @@ export default function ChampionPredictionPage() {
                   : t("meta.champion.none")}
               </div>
             </div>
+            {pendingSave && (
+              <Loader2 className="w-4 h-4 animate-spin text-yellow-500 shrink-0" />
+            )}
             {locked && (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold">
                 <Lock className="w-3 h-3" /> {t("meta.locked")}
               </span>
             )}
           </div>
+        ) : (
+          <Skeleton className="h-24 mb-6 rounded-3xl" />
         )}
 
-        {/* Team grid — hidden if locked */}
         {ready && !locked && (
           <>
             <div className="relative mb-4">
@@ -164,15 +204,17 @@ export default function ChampionPredictionPage() {
               />
             </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 mb-6">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
               {filtered.map((tm) => {
-                const active = selected === tm.name;
+                const active = current === tm.name;
+                const saving = pendingSave === tm.name;
                 return (
                   <button
                     key={tm.name}
                     type="button"
-                    onClick={() => setSelected(tm.name)}
-                    className={`relative rounded-2xl border-2 p-3 flex flex-col items-center gap-2 transition-all active:scale-95 ${
+                    onClick={() => pick(tm.name)}
+                    disabled={saving}
+                    className={`relative rounded-2xl border-2 p-3 flex flex-col items-center gap-2 transition-all active:scale-95 disabled:opacity-70 ${
                       active
                         ? "border-yellow-400 bg-yellow-50"
                         : "border-gray-200 bg-white hover:border-gray-300"
@@ -191,7 +233,11 @@ export default function ChampionPredictionPage() {
                         animate={{ scale: 1 }}
                         className="absolute top-1 end-1 w-4 h-4 rounded-full bg-yellow-500 text-white flex items-center justify-center"
                       >
-                        <Check className="w-3 h-3" />
+                        {saving ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Check className="w-3 h-3" />
+                        )}
                       </motion.div>
                     )}
                   </button>
@@ -202,38 +248,13 @@ export default function ChampionPredictionPage() {
         )}
 
         {!ready && (
-          <div className="py-16 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <Skeleton key={i} className="h-24" />
+            ))}
           </div>
         )}
       </div>
-
-      {/* Sticky save bar */}
-      {ready && !locked && dirty && (
-        <motion.div
-          initial={{ y: 80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+72px)] md:bottom-6 z-30 flex justify-center px-4"
-        >
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-white shadow-xl disabled:opacity-60"
-            style={{
-              background: `linear-gradient(135deg, ${HOST_GOLD}, #F59E0B)`,
-              boxShadow: `0 12px 40px rgba(255,184,28,0.5)`,
-            }}
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Check className="w-4 h-4" />
-            )}
-            {t("meta.pick")}
-          </button>
-        </motion.div>
-      )}
     </div>
   );
 }

@@ -30,6 +30,9 @@ export default async function BracketPredictionPage() {
     redirect("/login?next=/predict/bracket");
   }
 
+  // Pull EVERY knockout fixture — resolved or not. The client
+  // decides which ones render as a real matchup versus a TBD
+  // placeholder based on team + status.
   const { data: matches } = await supabase
     .from("matches")
     .select("id, round, home_team, away_team, start_time, status")
@@ -39,15 +42,7 @@ export default async function BracketPredictionPage() {
   return (
     <BracketPicker
       userId={user.id}
-      matches={
-        (matches ?? []).filter(
-          (m) =>
-            m.home_team &&
-            m.away_team &&
-            m.home_team !== "TBD" &&
-            m.away_team !== "TBD",
-        )
-      }
+      matches={matches ?? []}
     />
   );
 }

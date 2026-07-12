@@ -127,17 +127,19 @@ export default async function LeaderboardPage() {
               return (
                 <div
                   key={entry.user_id}
-                  className={`relative p-[1px] rounded-2xl transition-transform ${
+                  className={`relative p-[2px] rounded-2xl transition-transform ${
                     isCurrentUser
-                      ? "bg-gradient-to-r from-wc-purple to-wc-cyan shadow-[0_0_20px_rgba(139,92,246,0.3)] scale-[1.02] z-10"
-                      : "bg-gray-200 hover:bg-gray-300"
+                      ? "bg-gradient-to-r from-wc-purple to-wc-cyan shadow-[0_0_28px_rgba(139,92,246,0.45)] scale-[1.03] z-10"
+                      : "bg-transparent"
                   }`}
                 >
                   <Link
                     href={`/user/${entry.user_id}`}
-                    className={`block bg-white rounded-2xl p-4 sm:p-6 transition-colors hover:bg-gray-50 border border-gray-200 shadow-sm ${
-                      isCurrentUser ? "opacity-95" : ""
-                    }`}
+                    className={`block rounded-2xl p-4 sm:p-6 transition-colors ${
+                      isCurrentUser
+                        ? "bg-gradient-to-br from-purple-50 to-white border-2 border-transparent"
+                        : "bg-white hover:bg-gray-50 border border-gray-200"
+                    } shadow-sm`}
                   >
                     <div className="flex items-center gap-4 sm:gap-6">
                       <div className="w-8 flex justify-center font-display text-xl">

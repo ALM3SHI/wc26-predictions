@@ -161,11 +161,9 @@ export function Achievements({ predictions, isSelf }: Props) {
             >
               <div className="flex items-start gap-3 mb-2">
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                    a.unlocked ? "" : "grayscale opacity-50"
-                  }`}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                   style={{
-                    background: a.unlocked ? a.color : "#E5E7EB",
+                    background: a.unlocked ? a.color : "#9CA3AF",
                     color: "white",
                     boxShadow: a.unlocked ? `0 0 20px ${a.color}55` : undefined,
                   }}
@@ -173,7 +171,7 @@ export function Achievements({ predictions, isSelf }: Props) {
                   {a.unlocked ? (
                     <Icon className="w-5 h-5" />
                   ) : (
-                    <Lock className="w-4 h-4" />
+                    <Lock className="w-4 h-4 text-white" />
                   )}
                 </div>
                 <div className="min-w-0 flex-1">

@@ -105,32 +105,32 @@ export function LegendCard(props: Props) {
 
       <Link
         href={`/match/${props.matchId}`}
-        className="flex items-center justify-center gap-4 py-4 rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 hover:shadow-md transition"
+        className="flex items-center justify-center gap-2 sm:gap-4 py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 hover:shadow-md transition flex-nowrap"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <Flag
             team={props.homeTeam}
             alt=""
-            className="w-8 h-8 rounded-full object-cover border border-gray-200"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-gray-200 shrink-0"
           />
-          <span className="font-fifa text-xl text-gray-800 uppercase truncate max-w-[90px]">
+          <span className={`font-fifa uppercase truncate ${lang === "ar" ? "text-base sm:text-lg" : "text-lg sm:text-xl"} text-gray-800 max-w-[70px] sm:max-w-[100px]`}>
             {localizeTeam(props.homeTeam, lang)}
           </span>
         </div>
         <span
-          className="font-fifa text-3xl md:text-4xl text-gray-900"
+          className="font-fifa text-2xl sm:text-3xl md:text-4xl text-gray-900 whitespace-nowrap shrink-0"
           dir="ltr"
         >
           {props.homeScore}–{props.awayScore}
         </span>
-        <div className="flex items-center gap-2">
-          <span className="font-fifa text-xl text-gray-800 uppercase truncate max-w-[90px]">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <span className={`font-fifa uppercase truncate ${lang === "ar" ? "text-base sm:text-lg" : "text-lg sm:text-xl"} text-gray-800 max-w-[70px] sm:max-w-[100px]`}>
             {localizeTeam(props.awayTeam, lang)}
           </span>
           <Flag
             team={props.awayTeam}
             alt=""
-            className="w-8 h-8 rounded-full object-cover border border-gray-200"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-gray-200 shrink-0"
           />
         </div>
       </Link>

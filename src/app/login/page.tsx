@@ -125,9 +125,7 @@ function LoginContent() {
               placeholder={t("auth.email")}
               required
               autoComplete="username"
-              dir="ltr"
-              className={`w-full ${inputPad} py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900 text-${dir === "rtl" ? "end" : "start"}`}
-              style={{ textAlign: dir === "rtl" ? "right" : "left" }}
+              className={`ltr-input w-full ${inputPad} py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900`}
             />
           </div>
 
@@ -141,15 +139,13 @@ function LoginContent() {
               placeholder={t("auth.password")}
               required
               autoComplete="current-password"
-              dir="ltr"
-              className={`w-full ${inputPad} py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900`}
-              style={{ textAlign: dir === "rtl" ? "right" : "left" }}
+              className={`ltr-input w-full ${inputPad} py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-wc-purple focus:outline-none focus:ring-1 focus:ring-wc-purple/50 placeholder:text-gray-400 transition-colors text-gray-900`}
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
-              className={`absolute ${eyePos} top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1`}
+              className={`absolute ${eyePos} top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] flex items-center justify-center`}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>

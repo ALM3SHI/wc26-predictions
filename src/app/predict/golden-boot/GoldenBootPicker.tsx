@@ -1,14 +1,12 @@
 "use client";
 
 // ─────────────────────────────────────────────────────────────
-// Golden Boot picker client component
-//
-// Searchable list of the top scorers currently returned by
-// football-data.org, tap-to-select then save. Same lock semantics
-// as the champion picker.
+// Golden Boot picker — same pattern as ChampionPredictionPage:
+// atomic state (whole player object), auto-save on tap, tab-focus
+// re-hydrate, toast feedback, roll-back on error.
 // ─────────────────────────────────────────────────────────────
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -23,6 +21,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { localizeTeam } from "@/lib/i18n-data";
 import { Flag } from "@/components/ui/Flag";
+import { Skeleton, useToast } from "@/components/ui/Toast";
 import { HOST_GOLD, HOST_TRI_GRADIENT } from "@/lib/wc26-theme";
 import type { FDScorer } from "@/lib/football-data";
 import {
@@ -39,25 +38,36 @@ interface Props {
 export default function GoldenBootPicker({ userId, scorers }: Props) {
   const { t, lang, dir } = useI18n();
   const supabase = createClient();
+  const toast = useToast();
 
   const [current, setCurrent] = useState<GoldenBootPayload | null>(null);
-  const [selected, setSelected] = useState<GoldenBootPayload | null>(null);
+  const [pendingId, setPendingId] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState("");
 
+  const hydrate = useCallback(async () => {
+    const pick = await getGoldenBootPick(supabase, userId);
+    if (pick) {
+      setCurrent(pick.payload);
+      setLocked(!!pick.locked_at);
+    } else {
+      setCurrent(null);
+    }
+  }, [supabase, userId]);
+
   useEffect(() => {
     (async () => {
-      const pick = await getGoldenBootPick(supabase, userId);
-      if (pick) {
-        setCurrent(pick.payload);
-        setSelected(pick.payload);
-        setLocked(!!pick.locked_at);
-      }
+      await hydrate();
       setReady(true);
     })();
-  }, [supabase, userId]);
+  }, [hydrate]);
+
+  useEffect(() => {
+    const onFocus = () => hydrate();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [hydrate]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -70,17 +80,29 @@ export default function GoldenBootPicker({ userId, scorers }: Props) {
     });
   }, [query, scorers]);
 
-  const save = async () => {
-    if (!selected) return;
-    setSaving(true);
-    await upsertGoldenBootPick(supabase, userId, selected);
-    setCurrent(selected);
-    setSaving(false);
-  };
+  const pick = async (s: FDScorer) => {
+    if (locked) return;
+    if (current?.player_id === s.player.id) return;
 
-  const dirty =
-    selected !== null &&
-    (current === null || selected.player_id !== current.player_id);
+    // Atomic — the whole payload changes together, so player name +
+    // team + flag can never desync.
+    const payload: GoldenBootPayload = {
+      player_id: s.player.id,
+      player_name: s.player.name,
+      team: s.team.name,
+    };
+    setCurrent(payload);
+    setPendingId(s.player.id);
+
+    const { error } = await upsertGoldenBootPick(supabase, userId, payload);
+    setPendingId(null);
+    if (error) {
+      toast.error(t("toast.saveFail"));
+      await hydrate();
+      return;
+    }
+    toast.success(t("toast.saved"));
+  };
 
   const iconPos = dir === "rtl" ? "right-3" : "left-3";
   const inputPad = dir === "rtl" ? "pr-10 pl-4" : "pl-10 pr-4";
@@ -99,7 +121,6 @@ export default function GoldenBootPicker({ userId, scorers }: Props) {
           {t("nav.home")}
         </Link>
 
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <div
@@ -124,7 +145,7 @@ export default function GoldenBootPicker({ userId, scorers }: Props) {
         </div>
 
         {/* Current pick card */}
-        {ready && (
+        {ready ? (
           <div className="rounded-3xl border border-gray-200 bg-white p-4 md:p-5 mb-6 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-yellow-50 border border-yellow-100 flex items-center justify-center shrink-0">
               {current ? (
@@ -149,12 +170,17 @@ export default function GoldenBootPicker({ userId, scorers }: Props) {
                 </div>
               )}
             </div>
+            {pendingId !== null && (
+              <Loader2 className="w-4 h-4 animate-spin text-yellow-500 shrink-0" />
+            )}
             {locked && (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold">
                 <Lock className="w-3 h-3" /> {t("meta.locked")}
               </span>
             )}
           </div>
+        ) : (
+          <Skeleton className="h-24 mb-6 rounded-3xl" />
         )}
 
         {ready && !locked && scorers.length > 0 && (
@@ -174,19 +200,15 @@ export default function GoldenBootPicker({ userId, scorers }: Props) {
 
             <div className="grid gap-2">
               {filtered.map((s) => {
-                const isSel = selected?.player_id === s.player.id;
+                const isSel = current?.player_id === s.player.id;
+                const saving = pendingId === s.player.id;
                 return (
                   <button
                     key={s.player.id}
                     type="button"
-                    onClick={() =>
-                      setSelected({
-                        player_id: s.player.id,
-                        player_name: s.player.name,
-                        team: s.team.name,
-                      })
-                    }
-                    className={`relative flex items-center gap-3 rounded-2xl p-3 border-2 text-start transition-all active:scale-[0.98] ${
+                    onClick={() => pick(s)}
+                    disabled={saving}
+                    className={`relative flex items-center gap-3 rounded-2xl p-3 border-2 text-start transition-all active:scale-[0.98] disabled:opacity-70 ${
                       isSel
                         ? "border-yellow-400 bg-yellow-50"
                         : "border-gray-200 bg-white hover:border-gray-300"
@@ -212,7 +234,11 @@ export default function GoldenBootPicker({ userId, scorers }: Props) {
                     </div>
                     {isSel && (
                       <div className="w-5 h-5 rounded-full bg-yellow-500 text-white flex items-center justify-center">
-                        <Check className="w-3 h-3" />
+                        {saving ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Check className="w-3 h-3" />
+                        )}
                       </div>
                     )}
                   </button>
@@ -229,38 +255,13 @@ export default function GoldenBootPicker({ userId, scorers }: Props) {
         )}
 
         {!ready && (
-          <div className="py-16 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          <div className="grid gap-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-16" />
+            ))}
           </div>
         )}
       </div>
-
-      {/* Sticky save bar */}
-      {ready && !locked && dirty && (
-        <motion.div
-          initial={{ y: 80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+72px)] md:bottom-6 z-30 flex justify-center px-4"
-        >
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-white shadow-xl disabled:opacity-60"
-            style={{
-              background: `linear-gradient(135deg, ${HOST_GOLD}, #F59E0B)`,
-              boxShadow: `0 12px 40px rgba(255,184,28,0.5)`,
-            }}
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Check className="w-4 h-4" />
-            )}
-            {t("meta.pick")}
-          </button>
-        </motion.div>
-      )}
     </div>
   );
 }

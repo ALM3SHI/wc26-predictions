@@ -35,15 +35,19 @@ import type { GroupStandingsPayload } from "@/lib/types";
 interface Props {
   userId: string;
   groups: Array<{ group: string; teams: string[] }>;
+  // Server-detected: once every group-stage match has kicked off,
+  // this flag flips to true and the picker enters read-only archive
+  // mode regardless of what's in meta_predictions.
+  forcedLock?: boolean;
 }
 
-export default function GroupsPicker({ userId, groups }: Props) {
+export default function GroupsPicker({ userId, groups, forcedLock }: Props) {
   const { t, lang, dir } = useI18n();
   const supabase = createClient();
 
   const [order, setOrder] = useState<Record<string, string[]>>({});
   const [current, setCurrent] = useState<GroupStandingsPayload | null>(null);
-  const [locked, setLocked] = useState(false);
+  const [locked, setLocked] = useState<boolean>(!!forcedLock);
   const [ready, setReady] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -63,7 +67,9 @@ export default function GroupsPicker({ userId, groups }: Props) {
       setOrder(initial);
       if (pick) {
         setCurrent(pick.payload);
-        setLocked(!!pick.locked_at);
+        // Lock if the DB row says so OR if the server-side flag
+        // told us the group stage is already resolved.
+        setLocked((prev) => prev || !!pick.locked_at);
       }
       setReady(true);
     })();
@@ -222,7 +228,7 @@ export default function GroupsPicker({ userId, groups }: Props) {
         <motion.div
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+72px)] md:bottom-6 z-30 flex justify-center px-4"
+          className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+96px)] md:bottom-6 z-30 flex justify-center px-4"
         >
           <button
             type="button"
